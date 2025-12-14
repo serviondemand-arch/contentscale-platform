@@ -133,7 +133,7 @@ async function performHybridScan(url) {
     
     // STEP 2: Parser (Deterministic)
     console.log('🔍 STEP 2: Parser analysis...');
-    const parserOutput = parseContent(fetchResult.html, url);
+    const parserOutput = parseContent(fetchResult.content, url);
     
     // Add fetched metadata to parser output
     parserOutput.counts.wordCount = fetchResult.wordCount;
