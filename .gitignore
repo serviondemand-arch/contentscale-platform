@@ -75,3 +75,6 @@ build/
 # Backup files
 *.bak
 *.backup
+ 
+"# Test files organization" 
+"test-*.js" 
