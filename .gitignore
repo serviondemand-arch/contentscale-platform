@@ -15,6 +15,7 @@ ADMIN_API_KEY=ContentScale+ContentScore2025.
 # Required: Anthropic API Key for Claude AI scoring
 ANTHROPIC_API_KEY=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
 
+
 # Optional: Server Port (default: 5000)
 PORT=5000
 
