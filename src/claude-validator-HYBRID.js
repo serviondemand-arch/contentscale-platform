@@ -63,6 +63,74 @@ async function validateContent(parserOutput) {
  * Build validation prompt based on HYBRID spec criteria
  */
 function buildValidationPrompt(parserOutput) {
+  // ======================= SAFETY CHECKS - ADDED HERE =======================
+  // Safety check: ensure parserOutput has required structure
+  if (!parserOutput) {
+    console.warn('⚠️ CLAUDE: parserOutput is undefined/null');
+    parserOutput = { counts: {}, snippets: {} };
+  }
+  
+  // Ensure snippets object exists with all required arrays
+  if (!parserOutput.snippets) {
+    console.warn('⚠️ CLAUDE: parserOutput.snippets is missing');
+    parserOutput.snippets = {
+      expertQuotes: [],
+      statistics: [],
+      caseStudies: [],
+      faqQuestions: []
+    };
+  }
+  
+  // Ensure counts object exists with all required fields
+  if (!parserOutput.counts) {
+    console.warn('⚠️ CLAUDE: parserOutput.counts is missing');
+    parserOutput.counts = {
+      expertQuotes: 0,
+      statistics: 0,
+      caseStudies: 0,
+      faqCount: 0,
+      sources: 0
+    };
+  }
+  
+  // Ensure each snippets array exists (can't be null/undefined)
+  if (!Array.isArray(parserOutput.snippets.expertQuotes)) {
+    console.warn('⚠️ CLAUDE: expertQuotes is not an array');
+    parserOutput.snippets.expertQuotes = [];
+  }
+  if (!Array.isArray(parserOutput.snippets.statistics)) {
+    console.warn('⚠️ CLAUDE: statistics is not an array');
+    parserOutput.snippets.statistics = [];
+  }
+  if (!Array.isArray(parserOutput.snippets.caseStudies)) {
+    console.warn('⚠️ CLAUDE: caseStudies is not an array');
+    parserOutput.snippets.caseStudies = [];
+  }
+  if (!Array.isArray(parserOutput.snippets.faqQuestions)) {
+    console.warn('⚠️ CLAUDE: faqQuestions is not an array');
+    parserOutput.snippets.faqQuestions = [];
+  }
+  
+  // Ensure count values are numbers (not undefined)
+  if (typeof parserOutput.counts.expertQuotes !== 'number') {
+    parserOutput.counts.expertQuotes = 0;
+  }
+  if (typeof parserOutput.counts.statistics !== 'number') {
+    parserOutput.counts.statistics = 0;
+  }
+  if (typeof parserOutput.counts.caseStudies !== 'number') {
+    parserOutput.counts.caseStudies = 0;
+  }
+  if (typeof parserOutput.counts.faqCount !== 'number') {
+    parserOutput.counts.faqCount = 0;
+  }
+  if (typeof parserOutput.counts.sources !== 'number') {
+    parserOutput.counts.sources = 0;
+  }
+  // ======================= END SAFETY CHECKS =======================
+  
+  console.log(`📊 CLAUDE: Data prepared - ${parserOutput.counts.expertQuotes} quotes, ${parserOutput.counts.statistics} stats`);
+  
   return `You are a content quality validator for an SEO scoring system. Your task is to validate detected elements based on strict criteria. You can ONLY REJECT elements that don't meet criteria - you CANNOT ADD new elements.
 
 # PARSER DETECTED:
