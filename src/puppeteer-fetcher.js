@@ -1,84 +1,179 @@
+// ==========================================
+// PUPPETEER FETCHER - FIXED VERSION
+// With browser pooling and proper cleanup
+// ==========================================
+
 const puppeteer = require('puppeteer');
 
+// Browser instance pooling
+let browserInstance = null;
+let browserLaunchPromise = null;
+const MAX_PAGES = 5;
+let activePages = 0;
+
+/**
+ * Get or create browser instance (pooling)
+ */
+async function getBrowser() {
+  // If browser is already launching, wait for it
+  if (browserLaunchPromise) {
+    return browserLaunchPromise;
+  }
+  
+  // If browser exists and is connected, return it
+  if (browserInstance && browserInstance.isConnected()) {
+    return browserInstance;
+  }
+  
+  // Launch new browser
+  console.log('🚀 Launching browser...');
+  
+  browserLaunchPromise = puppeteer.launch({
+    headless: 'new',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--window-size=1920,1080',
+      '--disable-web-security',
+      '--disable-features=IsolateOrigins,site-per-process'
+    ]
+  }).then(browser => {
+    browserInstance = browser;
+    browserLaunchPromise = null;
+    console.log('✅ Browser launched successfully');
+    return browser;
+  }).catch(error => {
+    browserLaunchPromise = null;
+    throw error;
+  });
+  
+  return browserLaunchPromise;
+}
+
+/**
+ * Fetch page content with Puppeteer
+ * @param {string} url - URL to fetch
+ * @param {object} options - Fetch options
+ * @returns {object} - Fetch result with HTML content
+ */
 async function fetchWithPuppeteer(url, options = {}) {
   const {
     timeout = 30000,
     waitUntil = 'networkidle2',
-    waitDelay = 2000,
-    screenshot = false
+    waitDelay = 2000
   } = options;
   
-  let browser = null;
   const startTime = Date.now();
+  let page = null;
   
   try {
-    console.log(`🌐 Fetching: ${url}`);
-    
     // Validate URL
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       throw new Error('URL must start with http:// or https://');
     }
     
-    // Launch browser
-    browser = await puppeteer.launch({
-      headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--window-size=1920,1080'
-      ],
-      timeout: timeout
-    });
+    console.log(`🌐 Fetching: ${url}`);
     
-    const page = await browser.newPage();
+    // Check if we can create new page
+    if (activePages >= MAX_PAGES) {
+      throw new Error('Too many concurrent pages. Please wait.');
+    }
+    
+    // Get browser
+    const browser = await getBrowser();
+    
+    // Create new page
+    page = await browser.newPage();
+    activePages++;
     
     // Set user agent
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-    await page.setViewport({ width: 1920, height: 1080 });
     
-    // Block unnecessary resources
+    // Set viewport
+    await page.setViewport({ 
+      width: 1920, 
+      height: 1080 
+    });
+    
+    // Block only heavy resources (images, video, media)
+    // Keep CSS and JS for proper rendering!
     await page.setRequestInterception(true);
     page.on('request', (req) => {
       const resourceType = req.resourceType();
-      if (resourceType === 'image' || resourceType === 'font' || resourceType === 'stylesheet') {
+      const url = req.url();
+      
+      // Block only heavy media files
+      if (resourceType === 'image' || 
+          resourceType === 'media' || 
+          resourceType === 'font' ||
+          url.includes('.mp4') ||
+          url.includes('.webm') ||
+          url.includes('.avi')) {
         req.abort();
       } else {
         req.continue();
       }
     });
     
+    // Set timeout for navigation
+    page.setDefaultTimeout(timeout);
+    
     // Navigate to URL
+    console.log(`📥 Navigating to: ${url}`);
     await page.goto(url, {
       waitUntil: waitUntil,
       timeout: timeout
     });
     
-    // Wait additional time
+    // Wait for content to settle
     if (waitDelay > 0) {
+      console.log(`⏳ Waiting ${waitDelay}ms for content to load...`);
       await new Promise(resolve => setTimeout(resolve, waitDelay));
     }
     
-    // Get page content
+    // Scroll page to trigger lazy loading
+    await page.evaluate(() => {
+      window.scrollTo(0, document.body.scrollHeight / 2);
+    });
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    await page.evaluate(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    await page.evaluate(() => {
+      window.scrollTo(0, 0);
+    });
+    
+    // Get full HTML content
     const htmlContent = await page.content();
     
-    // Check if content is valid
+    // Validate content
     if (!htmlContent || htmlContent.length < 100) {
       throw new Error('Page content is too small or empty');
     }
     
-    // Extract text for word count
+    // Extract text content
     const textContent = await page.evaluate(() => {
-      return document.body.innerText || '';
+      // Remove script and style tags
+      const clone = document.body.cloneNode(true);
+      const scripts = clone.querySelectorAll('script, style, noscript');
+      scripts.forEach(el => el.remove());
+      
+      return clone.innerText || clone.textContent || '';
     });
     
     // Calculate word count
-    const wordCount = textContent
+    const words = textContent
+      .trim()
       .split(/\s+/)
-      .filter(word => word.length > 0)
-      .length;
+      .filter(word => word.length > 0);
+    
+    const wordCount = words.length;
     
     // Extract metadata
     const metadata = await page.evaluate(() => {
@@ -86,6 +181,7 @@ async function fetchWithPuppeteer(url, options = {}) {
         title: document.title || '',
         h1Count: document.querySelectorAll('h1').length,
         h2Count: document.querySelectorAll('h2').length,
+        h3Count: document.querySelectorAll('h3').length,
         imageCount: document.querySelectorAll('img').length,
         linkCount: document.querySelectorAll('a').length,
         description: document.querySelector('meta[name="description"]')?.content || '',
@@ -94,19 +190,24 @@ async function fetchWithPuppeteer(url, options = {}) {
         ogDescription: document.querySelector('meta[property="og:description"]')?.content || '',
         canonical: document.querySelector('link[rel="canonical"]')?.href || '',
         language: document.documentElement.lang || '',
-        url: window.location.href
+        viewport: document.querySelector('meta[name="viewport"]')?.content || ''
       };
     });
     
     const duration = (Date.now() - startTime) / 1000;
     
-    console.log(`✅ Fetched ${url} (${duration.toFixed(1)}s, ${wordCount} words)`);
+    // Close page BEFORE returning
+    await page.close();
+    activePages--;
+    page = null;
+    
+    console.log(`✅ Fetch complete: ${wordCount} words in ${duration.toFixed(1)}s`);
     
     return {
       success: true,
       url: url,
-      content: htmlContent,
       html: htmlContent,
+      content: htmlContent,
       textContent: textContent,
       wordCount: wordCount,
       metadata: metadata,
@@ -115,30 +216,54 @@ async function fetchWithPuppeteer(url, options = {}) {
     };
     
   } catch (error) {
-    console.error(`❌ Error fetching ${url}:`, error.message);
+    console.error(`❌ Fetch error for ${url}:`, error.message);
     
-    // Try to close browser on error
-    if (browser) {
+    // Clean up page on error
+    if (page) {
       try {
-        await browser.close();
+        await page.close();
+        activePages--;
       } catch (closeError) {
-        // Ignore close errors
+        console.error('Error closing page:', closeError.message);
       }
     }
     
-    return {
-      success: false,
-      url: url,
-      content: '',
-      html: '',
-      textContent: '',
-      wordCount: 0,
-      metadata: {},
-      error: error.message,
-      duration: (Date.now() - startTime) / 1000,
-      timestamp: new Date().toISOString()
-    };
+    throw new Error(`Failed to fetch ${url}: ${error.message}`);
   }
 }
 
-module.exports = { fetchWithPuppeteer };
+/**
+ * Close browser instance (for graceful shutdown)
+ */
+async function closeBrowser() {
+  if (browserInstance) {
+    console.log('🛑 Closing browser...');
+    try {
+      await browserInstance.close();
+      browserInstance = null;
+      browserLaunchPromise = null;
+      activePages = 0;
+      console.log('✅ Browser closed');
+    } catch (error) {
+      console.error('Error closing browser:', error.message);
+    }
+  }
+}
+
+// Graceful shutdown handlers
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received');
+  await closeBrowser();
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT received');
+  await closeBrowser();
+  process.exit(0);
+});
+
+module.exports = {
+  fetchWithPuppeteer,
+  closeBrowser
+};
