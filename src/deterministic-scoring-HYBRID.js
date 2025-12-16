@@ -1,413 +1,329 @@
 // ==========================================
-// DETERMINISTIC SCORING ENGINE - HYBRID SYSTEM
-// Uses validated counts to calculate final score
-// 100% reproducible - same input = same output
+// DETERMINISTIC SCORING - HYBRID SYSTEM
+// Calculate final scores based on validated counts
 // ==========================================
 
 /**
- * Calculate final score from validated counts
- * @param {Object} validatedCounts - Output from claude-validator
- * @param {Object} parserCounts - Raw counts from parser
- * @returns {Object} Score breakdown
+ * Calculate final score using validated counts
+ * This is STEP 4 of the hybrid pipeline
+ * 
+ * @param {object} validatedCounts - Validated counts from Claude
+ * @param {object} parserCounts - Original parser counts
+ * @returns {object} - Final score breakdown
  */
 function calculateScore(validatedCounts, parserCounts) {
-  console.log('🎯 SCORING: Calculating final score...');
+  // ==========================================
+  // GRAAF FRAMEWORK (50 POINTS)
+  // ==========================================
   
-  // GRAAF Framework (50 points)
-  const credibility = calculateCredibility(validatedCounts);
-  const relevance = calculateRelevance(parserCounts);
-  const actionability = calculateActionability(parserCounts);
-  const accuracy = calculateAccuracy(validatedCounts, parserCounts);
-  const freshness = calculateFreshness(parserCounts);
+  const graaf = {
+    // G - GENUINELY CREDIBLE (10 pts)
+    credibility: {
+      expertQuotes: scoreExpertQuotes(validatedCounts.expertQuotes || 0),
+      statistics: scoreStatistics(validatedCounts.statistics || 0),
+      sourceCitations: scoreSourceCitations(validatedCounts.sourceCitations || 0),
+      total: 0
+    },
+    
+    // R - RELEVANCE (10 pts)
+    relevance: {
+      keywordInTitle: 3, // Default - can be calculated with actual keyword
+      keywordInFirst100: 3, // Default
+      keywordDensity: 3, // Default
+      lsiKeywords: scoreLSIKeywords(validatedCounts.lsiKeywords || 0),
+      total: 0
+    },
+    
+    // A - ACTIONABILITY (10 pts)
+    actionability: {
+      stepByStep: scoreStepByStep(validatedCounts.stepByStep || 0),
+      examples: scoreExamples(validatedCounts.examples || 0),
+      ctas: scoreCTAs(validatedCounts.ctas || 0),
+      toolsResources: scoreToolsResources(validatedCounts.toolsResources || 0),
+      total: 0
+    },
+    
+    // A - ACCURACY (10 pts)
+    accuracy: {
+      dataCitations: scoreDataCitations(validatedCounts.dataCitations || 0),
+      caseStudies: scoreCaseStudies(validatedCounts.caseStudies || 0),
+      factSources: scoreFactSources(validatedCounts.factSources || 0),
+      publicationDate: validatedCounts.publicationDate > 0 ? 2 : 0,
+      total: 0
+    },
+    
+    // F - FRESHNESS (10 pts)
+    freshness: {
+      lastModified: validatedCounts.lastModified > 0 ? 3 : 0,
+      currentYearMentions: scoreYearMentions(validatedCounts.currentYearMentions || 0),
+      dataRecency: scoreDataRecency(validatedCounts.dataRecency || 0),
+      trendingTopics: validatedCounts.trendingTopics > 0 ? 1 : 0,
+      total: 0
+    },
+    
+    total: 0
+  };
   
-  const graafTotal = credibility + relevance + actionability + accuracy + freshness;
+  // Calculate totals
+  graaf.credibility.total = graaf.credibility.expertQuotes + graaf.credibility.statistics + graaf.credibility.sourceCitations;
+  graaf.relevance.total = graaf.relevance.keywordInTitle + graaf.relevance.keywordInFirst100 + graaf.relevance.keywordDensity + graaf.relevance.lsiKeywords;
+  graaf.actionability.total = graaf.actionability.stepByStep + graaf.actionability.examples + graaf.actionability.ctas + graaf.actionability.toolsResources;
+  graaf.accuracy.total = graaf.accuracy.dataCitations + graaf.accuracy.caseStudies + graaf.accuracy.factSources + graaf.accuracy.publicationDate;
+  graaf.freshness.total = graaf.freshness.lastModified + graaf.freshness.currentYearMentions + graaf.freshness.dataRecency + graaf.freshness.trendingTopics;
   
-  // CRAFT Framework (30 points)
-  const cutFluff = calculateCutFluff(parserCounts);
-  const reviewOptimize = calculateReviewOptimize(parserCounts);
-  const addVisuals = calculateAddVisuals(parserCounts);
-  const faqIntegration = calculateFAQIntegration(validatedCounts, parserCounts);
-  const trustBuilding = calculateTrustBuilding(validatedCounts, parserCounts);
+  graaf.total = graaf.credibility.total + graaf.relevance.total + graaf.actionability.total + graaf.accuracy.total + graaf.freshness.total;
   
-  const craftTotal = cutFluff + reviewOptimize + addVisuals + faqIntegration + trustBuilding;
+  // ==========================================
+  // CRAFT FRAMEWORK (30 POINTS)
+  // ==========================================
   
-  // Technical SEO (20 points)
-  const metaOptimization = calculateMetaOptimization(parserCounts);
-  const schemaMarkup = calculateSchemaMarkup(parserCounts);
-  const internalLinking = calculateInternalLinking(parserCounts);
-  const headingHierarchy = calculateHeadingHierarchy(parserCounts);
-  const mobileOptimization = calculateMobileOptimization(parserCounts);
+  const craft = {
+    // C - CUT THE FLUFF (7 pts)
+    cutFluff: {
+      fleschScore: scoreFleschScore(validatedCounts.fleschScore || 50),
+      sentenceLength: scoreSentenceLength(validatedCounts.avgSentenceLength || 20),
+      shortParagraphs: scoreParagraphs(validatedCounts.longParagraphs || 0),
+      total: 0
+    },
+    
+    // R - REVIEW & OPTIMIZE (8 pts)
+    reviewOptimize: {
+      keywordOptimization: 3, // Default
+      metaTitleLength: scoreMetaTitleLength(validatedCounts.metaTitleLength || 0),
+      metaDescLength: scoreMetaDescLength(validatedCounts.metaDescLength || 0),
+      lsiKeywords: scoreLSIKeywords(validatedCounts.lsiKeywords || 0),
+      total: 0
+    },
+    
+    // A - ADD VISUALS (6 pts)
+    addVisuals: {
+      imagesWithAlt: scoreImages(validatedCounts.imagesWithAlt || 0),
+      videos: validatedCounts.videos > 0 ? 1 : 0,
+      tables: scoreTables(validatedCounts.tables || 0),
+      comparisonTables: validatedCounts.comparisonTables > 0 ? 1 : 0,
+      total: 0
+    },
+    
+    // F - FAQ INTEGRATION (5 pts)
+    faqIntegration: {
+      faqCount: scoreFAQCount(validatedCounts.faqCount || 0),
+      faqAnswerLength: 1, // Default
+      faqHeading: validatedCounts.faqSchema > 0 ? 1 : 0,
+      total: 0
+    },
+    
+    // T - TRUST BUILDING (4 pts)
+    trustBuilding: {
+      authorBio: validatedCounts.authorBio > 0 ? 1 : 0,
+      credentials: validatedCounts.credentials > 0 ? 1 : 0,
+      testimonials: validatedCounts.testimonials > 0 ? 1 : 0,
+      authorityLinks: scoreAuthorityLinks(validatedCounts.authorityLinks || 0),
+      total: 0
+    },
+    
+    total: 0
+  };
   
-  const technicalTotal = metaOptimization + schemaMarkup + internalLinking + 
-                         headingHierarchy + mobileOptimization;
+  // Calculate totals
+  craft.cutFluff.total = craft.cutFluff.fleschScore + craft.cutFluff.sentenceLength + craft.cutFluff.shortParagraphs;
+  craft.reviewOptimize.total = craft.reviewOptimize.keywordOptimization + craft.reviewOptimize.metaTitleLength + craft.reviewOptimize.metaDescLength + craft.reviewOptimize.lsiKeywords;
+  craft.addVisuals.total = craft.addVisuals.imagesWithAlt + craft.addVisuals.videos + craft.addVisuals.tables + craft.addVisuals.comparisonTables;
+  craft.faqIntegration.total = craft.faqIntegration.faqCount + craft.faqIntegration.faqAnswerLength + craft.faqIntegration.faqHeading;
+  craft.trustBuilding.total = craft.trustBuilding.authorBio + craft.trustBuilding.credentials + craft.trustBuilding.testimonials + craft.trustBuilding.authorityLinks;
   
-  const total = Math.round(graafTotal + craftTotal + technicalTotal);
+  craft.total = craft.cutFluff.total + craft.reviewOptimize.total + craft.addVisuals.total + craft.faqIntegration.total + craft.trustBuilding.total;
   
-  console.log(`✅ SCORING: Final score ${total}/100 (GRAAF: ${Math.round(graafTotal)}, CRAFT: ${Math.round(craftTotal)}, Technical: ${Math.round(technicalTotal)})`);
+  // ==========================================
+  // TECHNICAL SEO (20 POINTS)
+  // ==========================================
+  
+  const technical = {
+    metaTitleLength: scoreMetaTitleLength(validatedCounts.metaTitleLength || 0),
+    metaDescLength: scoreMetaDescLength(validatedCounts.metaDescLength || 0),
+    schemaMarkup: scoreSchemaMarkup(validatedCounts.schemaTypes || 0),
+    internalLinks: scoreInternalLinks(validatedCounts.internalLinks || 0),
+    headingHierarchy: validatedCounts.headingHierarchy > 0 ? 3 : 0,
+    tableOfContents: validatedCounts.tableOfContents > 0 ? 2 : 0,
+    mobileResponsive: validatedCounts.mobileResponsive > 0 ? 1 : 0,
+    total: 0
+  };
+  
+  technical.total = technical.metaTitleLength + technical.metaDescLength + technical.schemaMarkup + 
+                    technical.internalLinks + technical.headingHierarchy + technical.tableOfContents + 
+                    technical.mobileResponsive;
+  
+  // ==========================================
+  // FINAL SCORE
+  // ==========================================
+  
+  const total = graaf.total + craft.total + technical.total;
   
   return {
-    total: total,
-    graaf: {
-      total: Math.round(graafTotal),
-      credibility: Math.round(credibility),
-      relevance: Math.round(relevance),
-      actionability: Math.round(actionability),
-      accuracy: Math.round(accuracy),
-      freshness: Math.round(freshness),
-    },
-    craft: {
-      total: Math.round(craftTotal),
-      cutFluff: Math.round(cutFluff),
-      reviewOptimize: Math.round(reviewOptimize),
-      addVisuals: Math.round(addVisuals),
-      faqIntegration: Math.round(faqIntegration),
-      trustBuilding: Math.round(trustBuilding),
-    },
-    technical: {
-      total: Math.round(technicalTotal),
-      metaOptimization: Math.round(metaOptimization),
-      schemaMarkup: Math.round(schemaMarkup),
-      internalLinking: Math.round(internalLinking),
-      headingHierarchy: Math.round(headingHierarchy),
-      mobileOptimization: Math.round(mobileOptimization),
-    },
+    total: Math.round(total),
+    graaf,
+    craft,
+    technical
   };
 }
 
-// =============================================================================
-// GRAAF FRAMEWORK (50 POINTS)
-// =============================================================================
+// ==========================================
+// SCORING FUNCTIONS
+// ==========================================
 
-/**
- * G - Genuinely Credible (10 points)
- */
-function calculateCredibility(validated) {
-  let score = 0;
-  
-  // Expert Quotes (0-4 points)
-  if (validated.expertQuotes >= 3) score += 4;
-  else if (validated.expertQuotes >= 2) score += 3;
-  else if (validated.expertQuotes >= 1) score += 2;
-  
-  // Statistics with sources (0-3 points)
-  if (validated.statistics >= 10) score += 3;
-  else if (validated.statistics >= 5) score += 2;
-  else if (validated.statistics >= 1) score += 1;
-  
-  // Source citations (0-3 points)
-  if (validated.sources >= 5) score += 3;
-  else if (validated.sources >= 3) score += 2;
-  else if (validated.sources >= 1) score += 1;
-  
-  return Math.min(score, 10);
-}
-
-/**
- * R - Relevance (10 points)
- */
-function calculateRelevance(counts) {
-  let score = 0;
-  
-  // Keyword in title (0-3 points)
-  // Simplified: check if title length is optimized
-  if (counts.metaTitleLength >= 50 && counts.metaTitleLength <= 60) score += 3;
-  else if (counts.metaTitleLength >= 40 && counts.metaTitleLength <= 70) score += 2;
-  else if (counts.metaTitleLength >= 30) score += 1;
-  
-  // Meta description (0-3 points)
-  if (counts.metaDescLength >= 140 && counts.metaDescLength <= 160) score += 3;
-  else if (counts.metaDescLength >= 120 && counts.metaDescLength <= 180) score += 2;
-  else if (counts.metaDescLength >= 100) score += 1;
-  
-  // Keyword density proxy: word count appropriateness (0-3 points)
-  if (counts.wordCount >= 1500 && counts.wordCount <= 3000) score += 3;
-  else if (counts.wordCount >= 800) score += 2;
-  else if (counts.wordCount >= 500) score += 1;
-  
-  // H2 structure (0-1 point bonus)
-  if (counts.h2Count >= 5) score += 1;
-  
-  return Math.min(score, 10);
-}
-
-/**
- * A - Actionability (10 points)
- */
-function calculateActionability(counts) {
-  let score = 0;
-  
-  // Lists for step-by-step (0-3 points)
-  if (counts.lists >= 5) score += 3;
-  else if (counts.lists >= 3) score += 2;
-  else if (counts.lists >= 1) score += 1;
-  
-  // Examples proxy: paragraph count (0-3 points)
-  if (counts.paragraphCount >= 20) score += 3;
-  else if (counts.paragraphCount >= 10) score += 2;
-  else if (counts.paragraphCount >= 5) score += 1;
-  
-  // Tables as actionable resources (0-3 points)
-  if (counts.tables >= 3) score += 3;
-  else if (counts.tables >= 1) score += 2;
-  
-  // Comparison tables bonus (0-1 point)
-  if (counts.comparisonTables >= 1) score += 1;
-  
-  return Math.min(score, 10);
-}
-
-/**
- * A - Accuracy (10 points)
- */
-function calculateAccuracy(validated, counts) {
-  let score = 0;
-  
-  // Data citations (uses validated statistics) (0-3 points)
-  if (validated.statistics >= 5) score += 3;
-  else if (validated.statistics >= 3) score += 2;
-  else if (validated.statistics >= 1) score += 1;
-  
-  // Case studies (0-3 points)
-  if (validated.caseStudies >= 2) score += 3;
-  else if (validated.caseStudies >= 1) score += 2;
-  
-  // Fact sources (uses validated sources) (0-2 points)
-  if (validated.sources >= 3) score += 2;
-  else if (validated.sources >= 1) score += 1;
-  
-  // External links as source proxy (0-2 points)
-  if (counts.externalLinks >= 5) score += 2;
-  else if (counts.externalLinks >= 2) score += 1;
-  
-  return Math.min(score, 10);
-}
-
-/**
- * F - Freshness (10 points)
- */
-function calculateFreshness(counts) {
-  let score = 0;
-  
-  // Word count depth (0-3 points)
-  if (counts.wordCount >= 2500) score += 3;
-  else if (counts.wordCount >= 1500) score += 2;
-  else if (counts.wordCount >= 800) score += 1;
-  
-  // Images (0-3 points)
-  if (counts.images >= 8) score += 3;
-  else if (counts.images >= 5) score += 2;
-  else if (counts.images >= 2) score += 1;
-  
-  // Images with alt text (0-3 points)
-  if (counts.images > 0) {
-    const altRatio = counts.imagesWithAlt / counts.images;
-    if (altRatio >= 0.9) score += 3;
-    else if (altRatio >= 0.7) score += 2;
-    else if (altRatio >= 0.5) score += 1;
-  }
-  
-  // Schema markup (0-1 point bonus)
-  if (counts.hasSchema) score += 1;
-  
-  return Math.min(score, 10);
-}
-
-// =============================================================================
-// CRAFT FRAMEWORK (30 POINTS)
-// =============================================================================
-
-/**
- * C - Cut the Fluff (7 points)
- */
-function calculateCutFluff(counts) {
-  let score = 0;
-  
-  // Word count appropriateness (0-3 points)
-  if (counts.wordCount >= 1500 && counts.wordCount <= 3500) score += 3;
-  else if (counts.wordCount >= 800 && counts.wordCount <= 5000) score += 2;
-  else if (counts.wordCount >= 500) score += 1;
-  
-  // Paragraph structure (0-2 points)
-  if (counts.avgParagraphLength >= 40 && counts.avgParagraphLength <= 100) score += 2;
-  else if (counts.avgParagraphLength >= 30 && counts.avgParagraphLength <= 150) score += 1;
-  
-  // Paragraph count indicates good structure (0-2 points)
-  if (counts.paragraphCount >= 15) score += 2;
-  else if (counts.paragraphCount >= 8) score += 1;
-  
-  return Math.min(score, 7);
-}
-
-/**
- * R - Review & Optimize (8 points)
- */
-function calculateReviewOptimize(counts) {
-  let score = 0;
-  
-  // Meta title (0-3 points)
-  if (counts.metaTitleLength >= 50 && counts.metaTitleLength <= 60) score += 3;
-  else if (counts.metaTitleLength >= 40 && counts.metaTitleLength <= 70) score += 2;
-  else if (counts.metaTitleLength >= 30) score += 1;
-  
-  // Meta description (0-3 points)
-  if (counts.metaDescLength >= 140 && counts.metaDescLength <= 160) score += 3;
-  else if (counts.metaDescLength >= 120 && counts.metaDescLength <= 180) score += 2;
-  else if (counts.metaDescLength >= 100) score += 1;
-  
-  // H1 presence (0-1 point)
-  if (counts.h1Count === 1) score += 1;
-  
-  // H2 structure (0-1 point)
-  if (counts.h2Count >= 5) score += 1;
-  
-  return Math.min(score, 8);
-}
-
-/**
- * A - Add Visuals (6 points)
- */
-function calculateAddVisuals(counts) {
-  let score = 0;
-  
-  // Images (0-2 points)
-  if (counts.images >= 8) score += 2;
-  else if (counts.images >= 4) score += 1;
-  
-  // Images with alt text (0-2 points)
-  if (counts.images > 0 && counts.imagesWithAlt / counts.images >= 0.8) score += 2;
-  else if (counts.images > 0 && counts.imagesWithAlt / counts.images >= 0.5) score += 1;
-  
-  // Tables (0-1 point)
-  if (counts.tables >= 1) score += 1;
-  
-  // Comparison tables (0-1 point)
-  if (counts.comparisonTables >= 1) score += 1;
-  
-  return Math.min(score, 6);
-}
-
-/**
- * F - FAQ Integration (5 points)
- */
-function calculateFAQIntegration(validated, counts) {
-  let score = 0;
-  
-  // FAQ count (uses validated count) (0-3 points)
-  if (validated.faqCount >= 8) score += 3;
-  else if (validated.faqCount >= 5) score += 2;
-  else if (validated.faqCount >= 3) score += 1;
-  
-  // FAQ answer quality (0-1 point)
-  if (counts.faqAvgWords >= 80) score += 1;
-  
-  // FAQ schema (0-1 point)
-  if (counts.schemaTypes && counts.schemaTypes.includes('FAQPage')) score += 1;
-  
-  return Math.min(score, 5);
-}
-
-/**
- * T - Trust Building (4 points)
- */
-function calculateTrustBuilding(validated, counts) {
-  let score = 0;
-  
-  // Expert quotes (uses validated count) (0-2 points)
-  if (validated.expertQuotes >= 8) score += 2;
-  else if (validated.expertQuotes >= 4) score += 1;
-  
-  // Case studies (uses validated count) (0-1 point)
-  if (validated.caseStudies >= 1) score += 1;
-  
-  // External authority links (0-1 point)
-  if (counts.externalLinks >= 3) score += 1;
-  
-  return Math.min(score, 4);
-}
-
-// =============================================================================
-// TECHNICAL SEO (20 POINTS)
-// =============================================================================
-
-/**
- * Meta Optimization (4 points)
- */
-function calculateMetaOptimization(counts) {
-  let score = 0;
-  
-  // Title (0-2 points)
-  if (counts.metaTitleLength >= 50 && counts.metaTitleLength <= 60) score += 2;
-  else if (counts.metaTitleLength >= 40 && counts.metaTitleLength <= 70) score += 1;
-  
-  // Description (0-2 points)
-  if (counts.metaDescLength >= 140 && counts.metaDescLength <= 160) score += 2;
-  else if (counts.metaDescLength >= 120 && counts.metaDescLength <= 180) score += 1;
-  
-  return Math.min(score, 4);
-}
-
-/**
- * Schema Markup (4 points)
- */
-function calculateSchemaMarkup(counts) {
-  if (!counts.hasSchema) return 0;
-  
-  const types = counts.schemaTypes ? counts.schemaTypes.length : 0;
-  
-  if (types >= 3) return 4;
-  if (types >= 2) return 3;
-  if (types >= 1) return 2;
-  
+function scoreExpertQuotes(count) {
+  if (count >= 3) return 4;
+  if (count === 2) return 3;
+  if (count === 1) return 2;
   return 0;
 }
 
-/**
- * Internal Linking (4 points)
- */
-function calculateInternalLinking(counts) {
-  let score = 0;
-  
-  if (counts.internalLinks >= 30) score = 4;
-  else if (counts.internalLinks >= 20) score = 3;
-  else if (counts.internalLinks >= 10) score = 2;
-  else if (counts.internalLinks >= 5) score = 1;
-  
-  return score;
+function scoreStatistics(count) {
+  if (count >= 10) return 3;
+  if (count >= 5) return 2;
+  if (count >= 1) return 1;
+  return 0;
 }
 
-/**
- * Heading Hierarchy (4 points)
- */
-function calculateHeadingHierarchy(counts) {
-  let score = 0;
-  
-  // Exactly 1 H1 (0-2 points)
-  if (counts.h1Count === 1) score += 2;
-  else if (counts.h1Count > 0) score += 1;
-  
-  // Multiple H2s (0-2 points)
-  if (counts.h2Count >= 5) score += 2;
-  else if (counts.h2Count >= 3) score += 1;
-  
-  return Math.min(score, 4);
+function scoreSourceCitations(count) {
+  if (count >= 5) return 3;
+  if (count >= 3) return 2;
+  if (count >= 1) return 1;
+  return 0;
 }
 
-/**
- * Mobile Optimization (4 points)
- */
-function calculateMobileOptimization(counts) {
-  let score = 0;
-  
-  // Responsive design proxy: proper structure
-  if (counts.images > 0 && counts.imagesWithAlt / counts.images >= 0.7) score += 2;
-  
-  // Readable content: good paragraph structure
-  if (counts.avgParagraphLength <= 120) score += 2;
-  
-  return Math.min(score, 4);
+function scoreLSIKeywords(count) {
+  return count >= 8 ? 1 : 0;
 }
 
-// Export
+function scoreStepByStep(count) {
+  if (count >= 5) return 3;
+  if (count >= 3) return 2;
+  if (count >= 1) return 1;
+  return 0;
+}
+
+function scoreExamples(count) {
+  if (count >= 3) return 3;
+  if (count === 2) return 2;
+  if (count === 1) return 1;
+  return 0;
+}
+
+function scoreCTAs(count) {
+  if (count >= 3) return 3;
+  if (count === 2) return 2;
+  if (count >= 1) return 1;
+  return 0;
+}
+
+function scoreToolsResources(count) {
+  return count > 0 ? 1 : 0;
+}
+
+function scoreDataCitations(count) {
+  if (count >= 5) return 3;
+  if (count >= 3) return 2;
+  if (count >= 1) return 1;
+  return 0;
+}
+
+function scoreCaseStudies(count) {
+  if (count >= 2) return 3;
+  if (count === 1) return 2;
+  return 0;
+}
+
+function scoreFactSources(count) {
+  if (count >= 3) return 2;
+  if (count >= 1) return 1;
+  return 0;
+}
+
+function scoreYearMentions(count) {
+  if (count >= 3) return 3;
+  if (count === 2) return 2;
+  if (count === 1) return 1;
+  return 0;
+}
+
+function scoreDataRecency(count) {
+  if (count >= 3) return 3;
+  if (count >= 2) return 2;
+  if (count >= 1) return 1;
+  return 0;
+}
+
+function scoreFleschScore(score) {
+  if (score >= 60 && score <= 70) return 3;
+  if ((score >= 50 && score < 60) || (score > 70 && score <= 80)) return 2;
+  if (score >= 40 && score < 50) return 1;
+  return 0;
+}
+
+function scoreSentenceLength(avgLength) {
+  if (avgLength <= 20) return 2;
+  if (avgLength <= 25) return 1;
+  return 0;
+}
+
+function scoreParagraphs(longCount) {
+  if (longCount <= 2) return 2;
+  if (longCount <= 4) return 1;
+  return 0;
+}
+
+function scoreMetaTitleLength(length) {
+  if (length >= 50 && length <= 60) return 3;
+  if (length >= 40 && length < 50) return 2;
+  if ((length >= 30 && length < 40) || (length > 60 && length <= 70)) return 1;
+  return 0;
+}
+
+function scoreMetaDescLength(length) {
+  if (length >= 140 && length <= 160) return 3;
+  if (length >= 120 && length < 140) return 2;
+  if ((length >= 100 && length < 120) || (length > 160 && length <= 180)) return 1;
+  return 0;
+}
+
+function scoreImages(count) {
+  if (count >= 3) return 2;
+  if (count >= 1) return 1;
+  return 0;
+}
+
+function scoreTables(count) {
+  if (count >= 2) return 2;
+  if (count === 1) return 1;
+  return 0;
+}
+
+function scoreFAQCount(count) {
+  if (count >= 8) return 3;
+  if (count >= 5) return 2;
+  if (count >= 3) return 1;
+  return 0;
+}
+
+function scoreAuthorityLinks(count) {
+  return count >= 3 ? 1 : 0;
+}
+
+function scoreSchemaMarkup(typeCount) {
+  if (typeCount >= 3) return 4;
+  if (typeCount >= 2) return 3;
+  if (typeCount >= 1) return 2;
+  return 0;
+}
+
+function scoreInternalLinks(count) {
+  if (count >= 30) return 4;
+  if (count >= 20) return 3;
+  if (count >= 10) return 2;
+  if (count >= 5) return 1;
+  return 0;
+}
+
 module.exports = {
-  calculateScore,
+  calculateScore
 };
