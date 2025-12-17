@@ -6,6 +6,17 @@
   <title>SEO ContentScore - Free Analysis Tool</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .calc-breakdown { display: none; }
+    .calc-breakdown.open { display: block; }
+    .score-formula { 
+      font-family: 'Courier New', monospace; 
+      background: #1f2937; 
+      padding: 8px; 
+      border-radius: 4px;
+      margin: 4px 0;
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
 
@@ -111,10 +122,6 @@
     let currentScanData = null;
     let currentShareId = null;
 
-    // ==========================================
-    // SCAN SUBMISSION
-    // ==========================================
-
     async function submitScan(event) {
       event.preventDefault();
       
@@ -165,7 +172,6 @@
           throw new Error(data.error || 'Scan failed');
         }
         
-        // Store scan data
         currentScanData = data;
         currentShareId = data.share_id || generateShareId();
         
@@ -182,15 +188,10 @@
       }
     }
 
-    // ==========================================
-    // DISPLAY SUCCESS
-    // ==========================================
-
     function showSuccess(data) {
       const resultDiv = document.getElementById('scan-result');
       const score = Math.round(data.score || 0);
       
-      // Quality colors
       let qualityColor = 'text-red-400';
       let qualityLabel = 'Needs Improvement';
       let qualityBg = 'bg-red-900';
@@ -213,11 +214,10 @@
         qualityBg = 'bg-orange-900';
       }
 
-      // Get recommendations
       const recommendations = generateRecommendations(data);
-      
-      // Get word count - FIXED!
       const wordCount = data.wordCount || 0;
+      
+      const breakdownHtml = generateBreakdownHTML(data);
       
       resultDiv.className = 'bg-gray-800 rounded-lg p-6 border border-gray-700';
       resultDiv.innerHTML = `
@@ -225,8 +225,8 @@
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-2xl font-bold">✅ Analysis Complete!</h3>
           <div class="flex gap-2">
-            <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-bold text-sm transition">
-              📄 Export PDF
+            <button onclick="exportDetailedPDF()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-bold text-sm transition">
+              📄 Export Detailed PDF
             </button>
             <button onclick="copyShareLink()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-bold text-sm transition">
               🔗 Share Link
@@ -241,26 +241,8 @@
           <div class="text-sm text-gray-400">${data.quality || ''}</div>
         </div>
 
-        <!-- Breakdown -->
-        ${data.breakdown ? `
-          <div class="grid md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-gray-700 rounded-lg p-4">
-              <h4 class="text-sm text-gray-400 mb-2">🎯 GRAAF Score</h4>
-              <div class="text-3xl font-bold text-blue-400">${Math.round(data.breakdown.graaf?.total || 0)}/50</div>
-              <div class="text-xs text-gray-500 mt-1">Credibility & Accuracy</div>
-            </div>
-            <div class="bg-gray-700 rounded-lg p-4">
-              <h4 class="text-sm text-gray-400 mb-2">⚡ CRAFT Score</h4>
-              <div class="text-3xl font-bold text-purple-400">${Math.round(data.breakdown.craft?.total || 0)}/30</div>
-              <div class="text-xs text-gray-500 mt-1">Content Quality</div>
-            </div>
-            <div class="bg-gray-700 rounded-lg p-4">
-              <h4 class="text-sm text-gray-400 mb-2">🔧 Technical</h4>
-              <div class="text-3xl font-bold text-green-400">${Math.round(data.breakdown.technical?.total || 0)}/20</div>
-              <div class="text-xs text-gray-500 mt-1">SEO Technical</div>
-            </div>
-          </div>
-        ` : ''}
+        <!-- Scoring Breakdown with Calculations -->
+        ${breakdownHtml}
 
         <!-- Details -->
         <div class="grid md:grid-cols-2 gap-4 mb-6">
@@ -287,18 +269,34 @@
           </div>
         </div>
 
-        <!-- RECOMMENDATIONS -->
+        <!-- RECOMMENDATIONS WITH CALCULATIONS -->
         <div class="bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg p-6 mb-6 border border-blue-700">
-          <h3 class="text-2xl font-bold mb-4">🎯 Recommendations to Reach 95+</h3>
+          <h3 class="text-2xl font-bold mb-4">🎯 Recommendations to Reach 95+ (with Calculations)</h3>
           <div class="space-y-4">
             ${recommendations.critical.length > 0 ? `
               <div>
                 <h4 class="font-bold text-red-400 mb-2">🔴 Critical Issues (Fix First)</h4>
-                <ul class="space-y-2">
+                <ul class="space-y-3">
                   ${recommendations.critical.map(rec => `
-                    <li class="flex items-start gap-2">
-                      <span class="text-red-400 mt-1">▶</span>
-                      <span class="text-sm">${rec}</span>
+                    <li class="bg-gray-800 rounded p-3">
+                      <div class="flex items-start gap-2">
+                        <span class="text-red-400 mt-1">▶</span>
+                        <div class="flex-1">
+                          <div class="text-sm mb-1">${rec.text}</div>
+                          ${rec.calculation ? `
+                            <div class="text-xs text-gray-400 mt-2">
+                              <button onclick="toggleCalc('calc-${rec.id}')" class="text-blue-400 hover:text-blue-300">
+                                🔍 Show Calculation ▼
+                              </button>
+                              <div id="calc-${rec.id}" class="calc-breakdown mt-2 p-2 bg-gray-900 rounded">
+                                <div class="font-bold text-yellow-400 mb-1">💡 Impact: ${rec.impact}</div>
+                                <div class="score-formula">${rec.calculation}</div>
+                                <div class="text-green-400 mt-1">⚡ ${rec.solution}</div>
+                              </div>
+                            </div>
+                          ` : ''}
+                        </div>
+                      </div>
                     </li>
                   `).join('')}
                 </ul>
@@ -308,11 +306,27 @@
             ${recommendations.important.length > 0 ? `
               <div>
                 <h4 class="font-bold text-yellow-400 mb-2">🟡 Important Improvements</h4>
-                <ul class="space-y-2">
+                <ul class="space-y-3">
                   ${recommendations.important.map(rec => `
-                    <li class="flex items-start gap-2">
-                      <span class="text-yellow-400 mt-1">▶</span>
-                      <span class="text-sm">${rec}</span>
+                    <li class="bg-gray-800 rounded p-3">
+                      <div class="flex items-start gap-2">
+                        <span class="text-yellow-400 mt-1">▶</span>
+                        <div class="flex-1">
+                          <div class="text-sm mb-1">${rec.text}</div>
+                          ${rec.calculation ? `
+                            <div class="text-xs text-gray-400 mt-2">
+                              <button onclick="toggleCalc('calc-${rec.id}')" class="text-blue-400 hover:text-blue-300">
+                                🔍 Show Calculation ▼
+                              </button>
+                              <div id="calc-${rec.id}" class="calc-breakdown mt-2 p-2 bg-gray-900 rounded">
+                                <div class="font-bold text-yellow-400 mb-1">💡 Impact: ${rec.impact}</div>
+                                <div class="score-formula">${rec.calculation}</div>
+                                <div class="text-green-400 mt-1">⚡ ${rec.solution}</div>
+                              </div>
+                            </div>
+                          ` : ''}
+                        </div>
+                      </div>
                     </li>
                   `).join('')}
                 </ul>
@@ -326,7 +340,7 @@
                   ${recommendations.nice_to_have.map(rec => `
                     <li class="flex items-start gap-2">
                       <span class="text-green-400 mt-1">▶</span>
-                      <span class="text-sm">${rec}</span>
+                      <span class="text-sm">${typeof rec === 'string' ? rec : rec.text}</span>
                     </li>
                   `).join('')}
                 </ul>
@@ -343,7 +357,7 @@
             <a href="https://contentscale.site/contact" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-bold transition">
               📞 Contact Us
             </a>
-            <a href="https://wa.me/31612345678" target="_blank" class="inline-block bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-bold transition">
+            <a href="https://wa.me/31628073996" target="_blank" class="inline-block bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-bold transition">
               💬 WhatsApp
             </a>
             <a href="mailto:info@contentscale.site" class="inline-block bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-bold transition">
@@ -357,9 +371,118 @@
       resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    // ==========================================
-    // GENERATE RECOMMENDATIONS
-    // ==========================================
+    function generateBreakdownHTML(data) {
+      const breakdown = data.breakdown || {};
+      
+      return `
+        <div class="mb-6">
+          <h4 class="text-xl font-bold mb-4">📊 Detailed Score Breakdown</h4>
+          
+          <!-- GRAAF Framework -->
+          <div class="bg-gray-700 rounded-lg p-4 mb-4">
+            <div class="flex justify-between items-center mb-2 cursor-pointer" onclick="toggleCalc('graaf-breakdown')">
+              <h5 class="font-bold text-blue-400">🎯 GRAAF Framework</h5>
+              <div class="text-2xl font-bold">${Math.round(breakdown.graaf?.total || 0)}/50</div>
+            </div>
+            <div id="graaf-breakdown" class="calc-breakdown">
+              <div class="space-y-2 mt-3 text-sm">
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Credibility (expert quotes, statistics, sources)</span>
+                  <span class="font-bold">${Math.round(breakdown.graaf?.credibility || 0)}/10</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Relevance (keyword optimization, search intent)</span>
+                  <span class="font-bold">${Math.round(breakdown.graaf?.relevance || 0)}/10</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Actionability (step-by-step, examples, CTAs)</span>
+                  <span class="font-bold">${Math.round(breakdown.graaf?.actionability || 0)}/10</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Accuracy (data citations, case studies, sources)</span>
+                  <span class="font-bold">${Math.round(breakdown.graaf?.accuracy || 0)}/10</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Freshness (recent updates, current year mentions)</span>
+                  <span class="font-bold">${Math.round(breakdown.graaf?.freshness || 0)}/10</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CRAFT Framework -->
+          <div class="bg-gray-700 rounded-lg p-4 mb-4">
+            <div class="flex justify-between items-center mb-2 cursor-pointer" onclick="toggleCalc('craft-breakdown')">
+              <h5 class="font-bold text-purple-400">⚡ CRAFT Framework</h5>
+              <div class="text-2xl font-bold">${Math.round(breakdown.craft?.total || 0)}/30</div>
+            </div>
+            <div id="craft-breakdown" class="calc-breakdown">
+              <div class="space-y-2 mt-3 text-sm">
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Cut Fluff (readability, sentence length)</span>
+                  <span class="font-bold">${Math.round(breakdown.craft?.cutFluff || 0)}/8</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Review & Optimize (meta tags, heading hierarchy)</span>
+                  <span class="font-bold">${Math.round(breakdown.craft?.reviewOptimize || 0)}/8</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Add Visuals (images, tables, lists, videos)</span>
+                  <span class="font-bold">${Math.round(breakdown.craft?.addVisuals || 0)}/6</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>FAQ Integration (count, quality, schema)</span>
+                  <span class="font-bold">${Math.round(breakdown.craft?.faqIntegration || 0)}/4</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Trust Building (author bio, testimonials)</span>
+                  <span class="font-bold">${Math.round(breakdown.craft?.trustBuilding || 0)}/4</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Technical SEO -->
+          <div class="bg-gray-700 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-2 cursor-pointer" onclick="toggleCalc('technical-breakdown')">
+              <h5 class="font-bold text-green-400">🔧 Technical SEO</h5>
+              <div class="text-2xl font-bold">${Math.round(breakdown.technical?.total || 0)}/20</div>
+            </div>
+            <div id="technical-breakdown" class="calc-breakdown">
+              <div class="space-y-2 mt-3 text-sm">
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Meta Optimization (title, description lengths)</span>
+                  <span class="font-bold">${Math.round(breakdown.technical?.metaOptimization || 0)}/4</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Schema Markup (Article, FAQ, HowTo, etc.)</span>
+                  <span class="font-bold">${Math.round(breakdown.technical?.schemaMarkup || 0)}/4</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Internal Linking (contextual links)</span>
+                  <span class="font-bold">${Math.round(breakdown.technical?.internalLinking || 0)}/4</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Page Structure (headings, word count)</span>
+                  <span class="font-bold">${Math.round(breakdown.technical?.pageStructure || 0)}/4</span>
+                </div>
+                <div class="flex justify-between p-2 bg-gray-800 rounded">
+                  <span>Mobile Optimization (responsive, alt texts)</span>
+                  <span class="font-bold">${Math.round(breakdown.technical?.mobileOptimization || 0)}/4</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleCalc(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.toggle('open');
+      }
+    }
 
     function generateRecommendations(data) {
       const score = data.score || 0;
@@ -372,75 +495,114 @@
         nice_to_have: []
       };
 
-      // Score-based recommendations
-      if (score < 60) {
-        recommendations.critical.push('Your content needs significant improvement. Consider a complete content audit.');
+      let recId = 0;
+
+      // Schema Markup
+      const schemaScore = breakdown.technical?.schemaMarkup || 0;
+      if (schemaScore < 4) {
+        recommendations.critical.push({
+          id: recId++,
+          text: 'Add schema markup (JSON-LD) for better AI Overview visibility',
+          impact: '+4 points',
+          calculation: `Current: ${schemaScore}/4 points
+• Article schema → 2 points
+• Specialized schema (FAQ/HowTo) → 2 points
+Formula: Article (2pts) + Specialized (2pts) = 4 total`,
+          solution: 'Add <script type="application/ld+json"> with Article and FAQPage schemas'
+        });
       }
 
-      // GRAAF Score recommendations
-      const graafScore = breakdown.graaf?.total || 0;
-      if (graafScore < 40) {
-        recommendations.critical.push('Add more credible sources and expert citations to boost GRAAF score.');
-        recommendations.critical.push('Include author credentials and publication dates for all content.');
-      } else if (graafScore < 45) {
-        recommendations.important.push('Strengthen your content credibility with more authoritative sources.');
+      // Meta Description
+      const metaScore = breakdown.technical?.metaOptimization || 0;
+      if (metaScore < 4) {
+        recommendations.critical.push({
+          id: recId++,
+          text: 'Optimize meta description (150-160 characters optimal)',
+          impact: '+1 point',
+          calculation: `Current: ${metaScore}/4 points
+• Title 50-60 chars → 2 points
+• Description 150-160 chars → 2 points
+Formula: Optimal length = max points`,
+          solution: 'Expand meta description to 155 characters with key benefits'
+        });
       }
 
-      // CRAFT Score recommendations
-      const craftScore = breakdown.craft?.total || 0;
-      if (craftScore < 24 && wordCount < 1500) {
-        recommendations.critical.push('Increase content depth - aim for 1500+ words with comprehensive coverage.');
-        recommendations.important.push('Improve content structure with clear H2 and H3 headings.');
-      } else if (craftScore < 27) {
-        recommendations.important.push('Add more examples, case studies, or data to enrich content quality.');
-      }
-
-      // Technical Score recommendations
-      const technicalScore = breakdown.technical?.total || 0;
-      if (technicalScore < 16) {
-        recommendations.critical.push('Add schema markup (JSON-LD) for better AI Overview visibility.');
-        recommendations.critical.push('Optimize meta description and title tags for target keywords.');
-      } else if (technicalScore < 18) {
-        recommendations.important.push('Add Open Graph and Twitter Card meta tags for better social sharing.');
-      }
-
-      // Word count recommendations - SMART LOGIC!
+      // Word Count
       if (wordCount < 800) {
-        recommendations.critical.push(`Increase content length to 1200+ words (currently ${wordCount} words).`);
+        recommendations.critical.push({
+          id: recId++,
+          text: `Increase content length to 1200+ words (currently ${wordCount} words)`,
+          impact: '+1-3 points',
+          calculation: `Current word count: ${wordCount}
+• <800 words → 0 points
+• 800-1200 words → +1 point (important)
+• 1200-1500 words → +2 points
+• 1500+ words → +3 points (GRAAF + Page Structure)
+Formula: More comprehensive content = higher scores`,
+          solution: 'Add more examples, case studies, and actionable steps'
+        });
       } else if (wordCount < 1200) {
-        recommendations.important.push(`Consider expanding content to 1500+ words for better coverage (currently ${wordCount} words).`);
+        recommendations.important.push({
+          id: recId++,
+          text: `Consider expanding content to 1500+ words for better coverage (currently ${wordCount} words)`,
+          impact: '+1-2 points',
+          calculation: `Current: ${wordCount} words = moderate depth
+• 1500+ words → Page Structure bonus
+• More content → Better GRAAF scores
+Formula: Depth = Word Count × Content Quality`,
+          solution: 'Add detailed explanations and more visual content'
+        });
       }
 
-      // Always add recommendations to reach 95+
+      // GRAAF improvements
+      const graafScore = breakdown.graaf?.total || 0;
+      if (graafScore < 45) {
+        recommendations.important.push({
+          id: recId++,
+          text: 'Strengthen your content credibility with more authoritative sources',
+          impact: '+2-3 points',
+          calculation: `Current GRAAF: ${graafScore}/50
+Credibility scoring:
+• 1 source → 1 point
+• 3 sources → 2 points  
+• 5+ sources → 3 points
+Formula: More authoritative citations = higher credibility`,
+          solution: 'Add 2-3 peer-reviewed sources or industry reports'
+        });
+      }
+
+      // Point Gap
       if (score < 95) {
         const pointsNeeded = 95 - score;
-        recommendations.important.push(`You need ${pointsNeeded} more points to reach 95+ score.`);
-        
-        if (graafScore < 48) {
-          recommendations.important.push('Add 3-5 expert quotes or statistics to maximize GRAAF score.');
-        }
-        if (craftScore < 29) {
-          recommendations.important.push('Enhance readability and add visual content (images, diagrams).');
-        }
-        if (technicalScore < 19) {
-          recommendations.important.push('Implement all technical SEO best practices (schema, meta tags, etc.).');
-        }
+        recommendations.important.push({
+          id: recId++,
+          text: `You need ${pointsNeeded} more points to reach 95+ score`,
+          impact: `Target: +${pointsNeeded} points`,
+          calculation: `Current: ${score}/100
+Target: 95/100
+Gap: ${pointsNeeded} points
+
+Priority fixes for maximum impact:
+1. Schema markup → +4 points
+2. Word count expansion → +2-3 points
+3. Meta optimization → +1-2 points
+4. Visual content → +1-2 points
+
+Formula: Fix highest-impact items first`,
+          solution: 'Focus on Critical Issues first, then Important Improvements'
+        });
       }
 
       // Nice to have
-      recommendations.nice_to_have.push('Add FAQ schema for common questions in your content.');
-      recommendations.nice_to_have.push('Include internal links to related content on your site.');
-      recommendations.nice_to_have.push('Optimize images with descriptive alt text and proper compression.');
-      recommendations.nice_to_have.push('Add video content or rich media to increase engagement.');
+      recommendations.nice_to_have.push('Add FAQ schema for common questions in your content');
+      recommendations.nice_to_have.push('Include internal links to related content on your site');
+      recommendations.nice_to_have.push('Optimize images with descriptive alt text and proper compression');
+      recommendations.nice_to_have.push('Add video content or rich media to increase engagement');
 
       return recommendations;
     }
 
-    // ==========================================
-    // EXPORT TO PDF
-    // ==========================================
-
-    async function exportToPDF() {
+    async function exportDetailedPDF() {
       if (!currentScanData) {
         alert('No scan data available');
         return;
@@ -449,68 +611,528 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       
-      const score = currentScanData.score || 0;
+      const score = Math.round(currentScanData.score || 0);
       const url = currentScanData.url || '';
       const timestamp = new Date(currentScanData.timestamp).toLocaleString();
+      const wordCount = currentScanData.wordCount || 0;
+      const breakdown = currentScanData.breakdown || {};
+      const audit = currentScanData.audit || {};
+      
+      let yPos = 20;
+      const pageHeight = 280;
+      const leftMargin = 20;
+      const rightMargin = 190;
+      
+      // Helper function to check if we need a new page
+      function checkNewPage(neededSpace = 10) {
+        if (yPos + neededSpace > pageHeight) {
+          doc.addPage();
+          yPos = 20;
+          return true;
+        }
+        return false;
+      }
+      
+      // Helper function to add section header
+      function addSectionHeader(title, color = [66, 133, 244]) {
+        checkNewPage(15);
+        doc.setFontSize(14);
+        doc.setTextColor(...color);
+        doc.text(title, leftMargin, yPos);
+        yPos += 7;
+      }
+      
+      // Helper function to add calculation box
+      function addCalculationBox(label, current, max, formula, details = []) {
+        checkNewPage(25);
+        
+        // Background box
+        doc.setFillColor(245, 245, 245);
+        doc.rect(leftMargin, yPos - 4, rightMargin - leftMargin, details.length * 4 + 12, 'F');
+        
+        // Score line
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${label}: ${current}/${max} points`, leftMargin + 2, yPos);
+        yPos += 5;
+        
+        // Formula
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        if (formula) {
+          const formulaLines = doc.splitTextToSize(`Formula: ${formula}`, rightMargin - leftMargin - 4);
+          formulaLines.forEach(line => {
+            doc.text(line, leftMargin + 2, yPos);
+            yPos += 3.5;
+          });
+        }
+        
+        // Details
+        if (details.length > 0) {
+          doc.setTextColor(100, 100, 100);
+          details.forEach(detail => {
+            const detailLines = doc.splitTextToSize(detail, rightMargin - leftMargin - 4);
+            detailLines.forEach(line => {
+              doc.text(line, leftMargin + 4, yPos);
+              yPos += 3.5;
+            });
+          });
+        }
+        
+        yPos += 4;
+      }
+      
+      // ==================== PAGE 1: OVERVIEW ====================
       
       // Title
       doc.setFontSize(20);
       doc.setTextColor(66, 133, 244);
-      doc.text('SEO ContentScore Report', 20, 20);
+      doc.text('SEO ContentScore', leftMargin, yPos);
+      yPos += 8;
       
-      // Score
-      doc.setFontSize(40);
-      doc.setTextColor(score >= 90 ? 34 : score >= 70 ? 244 : 244, 
-                       score >= 90 ? 197 : score >= 70 ? 180 : 67, 
-                       score >= 90 ? 94 : score >= 70 ? 67 : 54);
-      doc.text(`${score}/100`, 20, 40);
-      
-      // URL
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`URL: ${url}`, 20, 50);
-      doc.text(`Analyzed: ${timestamp}`, 20, 55);
-      
-      // Breakdown
       doc.setFontSize(14);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Detailed Analysis Report with Calculations', leftMargin, yPos);
+      yPos += 12;
+      
+      // Score Circle
+      doc.setFontSize(48);
+      const scoreColor = score >= 90 ? [34, 197, 94] : score >= 70 ? [244, 180, 67] : [244, 67, 54];
+      doc.setTextColor(...scoreColor);
+      doc.text(`${score}`, leftMargin, yPos);
+      
+      doc.setFontSize(20);
+      doc.setTextColor(150, 150, 150);
+      doc.text('/100', leftMargin + 25, yPos);
+      yPos += 12;
+      
+      // Meta info
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      const urlLines = doc.splitTextToSize(`URL: ${url}`, rightMargin - leftMargin);
+      urlLines.forEach(line => {
+        doc.text(line, leftMargin, yPos);
+        yPos += 4;
+      });
+      doc.text(`Words: ${wordCount.toLocaleString()} | Analyzed: ${timestamp}`, leftMargin, yPos);
+      yPos += 10;
+      
+      // Overall Calculation
+      addSectionHeader('Score Calculation Overview', [66, 133, 244]);
+      doc.setFontSize(9);
       doc.setTextColor(0, 0, 0);
-      doc.text('Score Breakdown:', 20, 70);
       
-      doc.setFontSize(10);
-      doc.text(`GRAAF Score: ${Math.round(currentScanData.breakdown?.graaf?.total || 0)}/50`, 30, 78);
-      doc.text(`CRAFT Score: ${Math.round(currentScanData.breakdown?.craft?.total || 0)}/30`, 30, 84);
-      doc.text(`Technical Score: ${Math.round(currentScanData.breakdown?.technical?.total || 0)}/20`, 30, 90);
+      const overallCalc = [
+        `GRAAF Framework: ${Math.round(breakdown.graaf?.total || 0)}/50 points`,
+        `CRAFT Framework: ${Math.round(breakdown.craft?.total || 0)}/30 points`,
+        `Technical SEO: ${Math.round(breakdown.technical?.total || 0)}/20 points`,
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+        `TOTAL SCORE: ${score}/100 points`,
+      ];
       
-      // Recommendations
+      overallCalc.forEach(line => {
+        if (line.includes('━━━')) {
+          doc.setTextColor(200, 200, 200);
+        } else if (line.includes('TOTAL')) {
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...scoreColor);
+        } else {
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(0, 0, 0);
+        }
+        doc.text(line, leftMargin + 5, yPos);
+        yPos += 4;
+      });
+      yPos += 5;
+      
+      // ==================== PAGE 2: GRAAF FRAMEWORK ====================
+      
+      doc.addPage();
+      yPos = 20;
+      
+      addSectionHeader('GRAAF Framework Breakdown (50 points)', [59, 130, 246]);
+      
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.text('GRAAF = Genuinely Credible + Relevance + Actionability + Accuracy + Freshness', leftMargin, yPos);
+      yPos += 7;
+      
+      // Credibility
+      addCalculationBox(
+        'Credibility',
+        Math.round(breakdown.graaf?.credibility || 0),
+        10,
+        'Expert Quotes (0-4pts) + Statistics (0-3pts) + Sources (0-3pts)',
+        [
+          `• Expert quotes found: ${audit.expertQuotes || 0} → ${audit.expertQuotes >= 3 ? '4pts' : audit.expertQuotes >= 2 ? '3pts' : audit.expertQuotes >= 1 ? '2pts' : '0pts'}`,
+          `  (Optimal: 3+ quotes = 4 points)`,
+          `• Statistics found: ${audit.statistics || 0} → ${audit.statistics >= 10 ? '3pts' : audit.statistics >= 5 ? '2pts' : audit.statistics >= 3 ? '1pt' : '0pts'}`,
+          `  (Optimal: 10+ statistics = 3 points)`,
+          `• Sources cited: ${audit.sources || 0} → ${audit.sources >= 5 ? '3pts' : audit.sources >= 3 ? '2pts' : audit.sources >= 1 ? '1pt' : '0pts'}`,
+          `  (Optimal: 5+ authoritative sources = 3 points)`,
+        ]
+      );
+      
+      // Relevance
+      addCalculationBox(
+        'Relevance',
+        Math.round(breakdown.graaf?.relevance || 0),
+        10,
+        'Keyword in Title (0-3pts) + Keyword in First 100 words (0-3pts) + Keyword Density (0-3pts) + LSI (0-1pt)',
+        [
+          `• Keyword in title: ${audit.keywordInTitle || 0} points`,
+          `• Keyword in first 100 words: ${audit.keywordInFirst100 || 0} points`,
+          `• Keyword density: ${audit.keywordDensity || 0} points (optimal: 1-2%)`,
+          `• LSI keywords found: ${audit.lsiKeywords || 0} (need 5+ for bonus point)`,
+        ]
+      );
+      
+      // Actionability
+      addCalculationBox(
+        'Actionability',
+        Math.round(breakdown.graaf?.actionability || 0),
+        10,
+        'Step-by-Step (0-3pts) + Examples (0-3pts) + CTAs (0-3pts) + Tools (0-1pt)',
+        [
+          `• Step-by-step instructions: ${audit.stepByStep || 0} points`,
+          `• Concrete examples: ${audit.examplesCount || 0} found → ${audit.examplesCount >= 5 ? '3pts' : audit.examplesCount >= 3 ? '2pts' : audit.examplesCount >= 1 ? '1pt' : '0pts'}`,
+          `• Clear CTAs present: ${audit.ctaPresent || 0} points`,
+          `• Tools/resources mentioned: ${audit.toolsResources || 0} point`,
+        ]
+      );
+      
+      // Accuracy
+      addCalculationBox(
+        'Accuracy',
+        Math.round(breakdown.graaf?.accuracy || 0),
+        10,
+        'Data Citations (0-3pts) + Case Studies (0-3pts) + Fact Sources (0-2pts) + Pub Date (0-2pts)',
+        [
+          `• Data citations: ${audit.dataCitations || 0} found → ${audit.dataCitations >= 5 ? '3pts' : audit.dataCitations >= 3 ? '2pts' : audit.dataCitations >= 1 ? '1pt' : '0pts'}`,
+          `• Case studies: ${audit.caseStudies || 0} found → ${audit.caseStudies >= 2 ? '3pts' : audit.caseStudies >= 1 ? '2pts' : '0pts'}`,
+          `• Fact sources: ${audit.factSources || 0} found → ${audit.factSources >= 3 ? '2pts' : audit.factSources >= 1 ? '1pt' : '0pts'}`,
+          `• Publication date: ${audit.publicationDate ? '2pts' : '0pts'} (shows content maintenance)`,
+        ]
+      );
+      
+      // Freshness
+      addCalculationBox(
+        'Freshness',
+        Math.round(breakdown.graaf?.freshness || 0),
+        10,
+        'Recent Updates (0-3pts) + Current Year (0-3pts) + Data Recency (0-3pts) + Trending (0-1pt)',
+        [
+          `• Recent updates: ${audit.recentUpdates || 0} points (based on last modified date)`,
+          `• Current year mentions: ${audit.currentYearMentions || 0} points`,
+          `• Data recency: ${audit.dataRecency || 0} points (2023-2025 mentions)`,
+          `• Trending topics: ${audit.trendingTopics || 0} point (AI, SGE mentions)`,
+        ]
+      );
+      
+      // ==================== PAGE 3: CRAFT FRAMEWORK ====================
+      
+      doc.addPage();
+      yPos = 20;
+      
+      addSectionHeader('CRAFT Framework Breakdown (30 points)', [168, 85, 247]);
+      
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.text('CRAFT = Cut Fluff + Review & Optimize + Add Visuals + FAQ Integration + Trust Building', leftMargin, yPos);
+      yPos += 7;
+      
+      // Cut Fluff
+      addCalculationBox(
+        'Cut Fluff',
+        Math.round(breakdown.craft?.cutFluff || 0),
+        8,
+        'Readability (0-3pts) + Sentence Length (0-2pts) + Paragraph Length (0-3pts)',
+        [
+          `• Readability score: ${audit.readabilityScore || 0} (Flesch Reading Ease)`,
+          `  → ${audit.readabilityScore >= 60 && audit.readabilityScore <= 70 ? '3pts (optimal)' : '1-2pts'}`,
+          `• Average sentence length: ${audit.avgSentenceLength || 0} points`,
+          `  (Optimal: 15-20 words per sentence)`,
+          `• Average paragraph length: ${audit.avgParagraphLength || 0} words`,
+          `  Paragraphs >150 words: ${audit.paragraphsOver150Words || 0}`,
+          `  (Optimal: 50-100 words avg, <3 long paragraphs)`,
+        ]
+      );
+      
+      // Review & Optimize
+      addCalculationBox(
+        'Review & Optimize',
+        Math.round(breakdown.craft?.reviewOptimize || 0),
+        8,
+        'Meta Title (0-2pts) + Meta Description (0-2pts) + Heading Hierarchy (0-3pts) + TOC (0-1pt)',
+        [
+          `• Meta title length: ${audit.metaTitleLength || 0} chars → ${audit.metaTitleLength >= 50 && audit.metaTitleLength <= 60 ? '2pts' : audit.metaTitleLength >= 40 && audit.metaTitleLength <= 70 ? '1pt' : '0pts'}`,
+          `  (Optimal: 50-60 characters)`,
+          `• Meta description: ${audit.metaDescLength || 0} chars → ${audit.metaDescLength >= 150 && audit.metaDescLength <= 160 ? '2pts' : audit.metaDescLength >= 120 && audit.metaDescLength <= 180 ? '1pt' : '0pts'}`,
+          `  (Optimal: 150-160 characters)`,
+          `• Heading structure: ${audit.headingHierarchy || 0} points`,
+          `  H1: ${audit.headingCount?.h1 || 0}, H2: ${audit.headingCount?.h2 || 0}, H3: ${audit.headingCount?.h3 || 0}`,
+          `  (Optimal: 1 H1, 3+ H2s, H3s under H2s)`,
+          `• Table of contents: ${audit.tocPresent >= 1 ? '1pt' : '0pts'}`,
+        ]
+      );
+      
+      // Add Visuals
+      addCalculationBox(
+        'Add Visuals',
+        Math.round(breakdown.craft?.addVisuals || 0),
+        6,
+        'Images (0-2pts) + Tables (0-2pts) + Lists (0-1pt) + Videos (0-1pt)',
+        [
+          `• Images: ${audit.images || 0} found`,
+          `  Words per image: ${audit.images > 0 ? Math.round(wordCount / audit.images) : 'N/A'}`,
+          `  (Optimal: 1 image per 300-500 words)`,
+          `• Comparison tables: ${audit.comparisonTables || 0} found`,
+          `  Total tables: ${audit.tables || 0}`,
+          `• Lists (ul/ol): ${audit.lists || 0} found (need 3+ for bonus)`,
+          `• Videos embedded: ${audit.videos || 0} found`,
+        ]
+      );
+      
+      // FAQ Integration
+      addCalculationBox(
+        'FAQ Integration',
+        Math.round(breakdown.craft?.faqIntegration || 0),
+        4,
+        'FAQ Count (0-2pts) + FAQ Quality (0-1pt) + FAQ Schema (0-1pt)',
+        [
+          `• FAQ questions: ${audit.faqCount || 0} found → ${audit.faqCount >= 8 ? '2pts' : audit.faqCount >= 5 ? '1pt' : '0pts'}`,
+          `  (Optimal: 8+ comprehensive questions)`,
+          `• FAQ answer quality: ${audit.faqAvgWords || 0} words avg`,
+          `  → ${audit.faqAvgWords >= 100 ? '1pt' : '0pts'} (need 100+ words per answer)`,
+          `• FAQ schema markup: ${audit.schemaTypes?.includes('FAQPage') || audit.schemaTypes?.includes('Question') ? '1pt' : '0pts'}`,
+        ]
+      );
+      
+      // Trust Building
+      addCalculationBox(
+        'Trust Building',
+        Math.round(breakdown.craft?.trustBuilding || 0),
+        4,
+        'Author Bio (0-2pts) + Credentials (0-1pt) + Testimonials (0-1pt)',
+        [
+          `• Author bio present: ${audit.authorBio || 0} points`,
+          `• Credentials shown: ${audit.credentials || 0} point`,
+          `• Testimonials/social proof: ${audit.testimonials || 0} found`,
+        ]
+      );
+      
+      // ==================== PAGE 4: TECHNICAL SEO ====================
+      
+      doc.addPage();
+      yPos = 20;
+      
+      addSectionHeader('Technical SEO Breakdown (20 points)', [34, 197, 94]);
+      
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.text('Technical = Meta Optimization + Schema Markup + Internal Linking + Page Structure + Mobile', leftMargin, yPos);
+      yPos += 7;
+      
+      // Meta Optimization
+      addCalculationBox(
+        'Meta Optimization',
+        Math.round(breakdown.technical?.metaOptimization || 0),
+        4,
+        'Title Length (0-2pts) + Description Length (0-2pts)',
+        [
+          `• Title: ${audit.metaTitleLength || 0} chars → ${audit.metaTitleLength >= 50 && audit.metaTitleLength <= 60 ? '2pts' : audit.metaTitleLength >= 30 ? '1pt' : '0pts'}`,
+          `• Description: ${audit.metaDescLength || 0} chars → ${audit.metaDescLength >= 150 && audit.metaDescLength <= 160 ? '2pts' : audit.metaDescLength >= 100 ? '1pt' : '0pts'}`,
+        ]
+      );
+      
+      // Schema Markup
+      const schemaTypes = audit.schemaTypes || [];
+      addCalculationBox(
+        'Schema Markup',
+        Math.round(breakdown.technical?.schemaMarkup || 0),
+        4,
+        'Article Schema (0-2pts) + Specialized Schema (0-2pts)',
+        [
+          `• Schema types found: ${schemaTypes.length > 0 ? schemaTypes.join(', ') : 'None'}`,
+          `• Article/BlogPosting schema: ${schemaTypes.includes('Article') || schemaTypes.includes('NewsArticle') || schemaTypes.includes('BlogPosting') ? '2pts' : '0pts'}`,
+          `• Specialized schemas (HowTo/FAQ/Review/etc): ${schemaTypes.some(s => ['HowTo', 'FAQPage', 'Review', 'Recipe', 'Product'].includes(s)) ? '2pts' : '0pts'}`,
+          `  (CRITICAL: Schema markup helps AI Overviews cite your content)`,
+        ]
+      );
+      
+      // Internal Linking
+      addCalculationBox(
+        'Internal Linking',
+        Math.round(breakdown.technical?.internalLinking || 0),
+        4,
+        'Number of Internal Links (0-4pts)',
+        [
+          `• Internal links found: ${audit.internalLinks || 0}`,
+          `  → ${audit.internalLinks >= 10 ? '4pts' : audit.internalLinks >= 5 ? '3pts' : audit.internalLinks >= 3 ? '2pts' : audit.internalLinks >= 1 ? '1pt' : '0pts'}`,
+          `  (Optimal: 5-10 contextual internal links)`,
+        ]
+      );
+      
+      // Page Structure
+      addCalculationBox(
+        'Page Structure',
+        Math.round(breakdown.technical?.pageStructure || 0),
+        4,
+        'H1 Count (0-1pt) + H2 Count (0-1pt) + Word Count (0-1pt) + Depth (0-1pt)',
+        [
+          `• H1 headings: ${audit.headingCount?.h1 || 0} → ${audit.headingCount?.h1 === 1 ? '1pt' : '0pts'} (must be exactly 1)`,
+          `• H2 headings: ${audit.headingCount?.h2 || 0} → ${audit.headingCount?.h2 >= 3 ? '1pt' : '0pts'} (need 3+)`,
+          `• Word count: ${wordCount} → ${wordCount >= 1500 ? '1pt' : '0pts'} (optimal: 1500+)`,
+          `• Content depth: ${audit.contentDepth || 0} point`,
+        ]
+      );
+      
+      // Mobile Optimization
+      addCalculationBox(
+        'Mobile Optimization',
+        Math.round(breakdown.technical?.mobileOptimization || 0),
+        4,
+        'Responsive Design (0-2pts) + Alt Texts (0-1pt) + Readability (0-1pt)',
+        [
+          `• Mobile responsive: ${audit.mobileResponsive || 0} points`,
+          `  (Viewport meta + CSS media queries)`,
+          `• Alt texts: ${audit.altTexts || 0}/${audit.images || 0} images`,
+          `  → ${audit.images > 0 && (audit.altTexts / audit.images) >= 0.8 ? '1pt' : '0pts'} (need 80%+)`,
+          `• Mobile readability: ${audit.readabilityScore >= 60 ? '1pt' : '0pts'}`,
+        ]
+      );
+      
+      // ==================== PAGE 5: RECOMMENDATIONS ====================
+      
+      doc.addPage();
+      yPos = 20;
+      
+      addSectionHeader('Priority Recommendations with Calculations', [239, 68, 68]);
+      
       const recommendations = generateRecommendations(currentScanData);
       
-      doc.setFontSize(14);
-      doc.text('Recommendations:', 20, 105);
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.text('These recommendations are ranked by impact. Fix Critical issues first for maximum score improvement.', leftMargin, yPos);
+      yPos += 10;
       
-      let yPos = 113;
-      doc.setFontSize(10);
-      
+      // Critical Issues
       if (recommendations.critical.length > 0) {
+        doc.setFontSize(12);
         doc.setTextColor(239, 68, 68);
-        doc.text('Critical Issues:', 30, yPos);
-        yPos += 6;
-        doc.setTextColor(0, 0, 0);
-        recommendations.critical.forEach(rec => {
-          const lines = doc.splitTextToSize(rec, 160);
-          doc.text(lines, 35, yPos);
-          yPos += lines.length * 5 + 2;
+        doc.text('Critical Issues (Fix First)', leftMargin, yPos);
+        yPos += 7;
+        
+        recommendations.critical.forEach((rec, idx) => {
+          checkNewPage(30);
+          
+          doc.setFillColor(254, 242, 242);
+          const boxHeight = 25 + (rec.calculation ? 15 : 0);
+          doc.rect(leftMargin, yPos - 4, rightMargin - leftMargin, boxHeight, 'F');
+          
+          doc.setFontSize(10);
+          doc.setTextColor(0, 0, 0);
+          doc.setFont(undefined, 'bold');
+          doc.text(`${idx + 1}. ${rec.text}`, leftMargin + 2, yPos);
+          yPos += 5;
+          
+          if (rec.impact) {
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(234, 88, 12);
+            doc.text(`Impact: ${rec.impact}`, leftMargin + 4, yPos);
+            yPos += 4;
+          }
+          
+          if (rec.calculation) {
+            doc.setFontSize(7);
+            doc.setTextColor(80, 80, 80);
+            const calcLines = doc.splitTextToSize(rec.calculation, rightMargin - leftMargin - 6);
+            calcLines.forEach(line => {
+              doc.text(line, leftMargin + 4, yPos);
+              yPos += 3;
+            });
+            yPos += 2;
+          }
+          
+          if (rec.solution) {
+            doc.setFontSize(8);
+            doc.setTextColor(22, 163, 74);
+            doc.setFont(undefined, 'italic');
+            const solLines = doc.splitTextToSize(`Solution: ${rec.solution}`, rightMargin - leftMargin - 6);
+            solLines.forEach(line => {
+              doc.text(line, leftMargin + 4, yPos);
+              yPos += 3.5;
+            });
+            doc.setFont(undefined, 'normal');
+          }
+          
+          yPos += 5;
         });
       }
       
-      // Save
-      doc.save(`contentscale-report-${Date.now()}.pdf`);
+      // Important Improvements
+      if (recommendations.important.length > 0) {
+        checkNewPage(20);
+        
+        doc.setFontSize(12);
+        doc.setTextColor(234, 179, 8);
+        doc.text('Important Improvements', leftMargin, yPos);
+        yPos += 7;
+        
+        recommendations.important.slice(0, 3).forEach((rec, idx) => {
+          checkNewPage(25);
+          
+          doc.setFillColor(254, 252, 232);
+          const boxHeight = 20 + (rec.calculation ? 12 : 0);
+          doc.rect(leftMargin, yPos - 4, rightMargin - leftMargin, boxHeight, 'F');
+          
+          doc.setFontSize(9);
+          doc.setTextColor(0, 0, 0);
+          doc.setFont(undefined, 'bold');
+          doc.text(`${idx + 1}. ${rec.text}`, leftMargin + 2, yPos);
+          yPos += 4;
+          
+          if (rec.impact) {
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(234, 88, 12);
+            doc.text(`Impact: ${rec.impact}`, leftMargin + 4, yPos);
+            yPos += 4;
+          }
+          
+          if (rec.calculation) {
+            doc.setFontSize(7);
+            doc.setTextColor(80, 80, 80);
+            const calcLines = doc.splitTextToSize(rec.calculation, rightMargin - leftMargin - 6);
+            calcLines.slice(0, 4).forEach(line => {
+              doc.text(line, leftMargin + 4, yPos);
+              yPos += 3;
+            });
+          }
+          
+          yPos += 5;
+        });
+      }
       
-      alert('✅ PDF exported successfully!');
+      // ==================== FOOTER ON ALL PAGES ====================
+      
+      const totalPages = doc.internal.getNumberOfPages();
+      doc.setFontSize(7);
+      doc.setTextColor(150, 150, 150);
+      
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.text(`Page ${i} of ${totalPages}`, leftMargin, 290);
+        doc.text('Generated by SEO ContentScore - contentscale.site', 105, 290, { align: 'center' });
+      }
+      
+      doc.save(`contentscore-full-analysis-${Date.now()}.pdf`);
+      
+      alert('✅ Comprehensive PDF with all calculations exported!\n\n📄 Includes:\n• Complete scoring breakdown\n• Calculation formulas\n• Priority recommendations\n• Impact analysis');
     }
-
-    // ==========================================
-    // COPY SHARE LINK
-    // ==========================================
 
     function copyShareLink() {
       if (!currentShareId) {
@@ -523,7 +1145,6 @@
       navigator.clipboard.writeText(shareUrl).then(() => {
         alert(`✅ Share link copied!\n\n${shareUrl}`);
       }).catch(() => {
-        // Fallback
         const textarea = document.createElement('textarea');
         textarea.value = shareUrl;
         document.body.appendChild(textarea);
@@ -533,10 +1154,6 @@
         alert(`✅ Share link copied!\n\n${shareUrl}`);
       });
     }
-
-    // ==========================================
-    // UTILITIES
-    // ==========================================
 
     function generateShareId() {
       return 'scan-' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
@@ -593,10 +1210,6 @@
       const firstCard = container.querySelector('.bg-gray-800');
       container.insertBefore(notice, firstCard);
     }
-
-    // ==========================================
-    // INIT
-    // ==========================================
 
     document.addEventListener('DOMContentLoaded', function() {
       console.log('📊 ContentScore tool loaded');
