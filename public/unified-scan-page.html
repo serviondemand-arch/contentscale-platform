@@ -368,7 +368,7 @@
     // ============================================================================
     
     const CONFIG = {
-      scanEndpoint: '/api/scan-free',  // RECOMMENDED: Has caching for consistency
+      scanEndpoint: '/api/scan',  // Fresh scan with full audit data
       claudeEnabled: true
     };
 
@@ -613,9 +613,258 @@ RETURN ONLY JSON:
       const recs = [];
       const breakdown = data.breakdown || {};
       const audit = data.audit || {};
+      const validation = data.validation || {};
       
-      // Check if we have detailed breakdown
+      // Check if we have detailed breakdown with audit data
       const hasDetailedBreakdown = breakdown.technical?.schemaMarkup !== undefined;
+      const hasAuditData = audit && Object.keys(audit).length > 5;
+      
+      console.log('Generating recommendations:', {
+        hasDetailedBreakdown,
+        hasAuditData,
+        auditKeys: Object.keys(audit).length
+      });
+      
+      if (hasDetailedBreakdown && hasAuditData) {
+        // DETAILED RECOMMENDATIONS based on ACTUAL audit data
+        
+        // 1. Schema markup - check actual schema
+        const schemaScore = breakdown.technical?.schemaMarkup || 0;
+        const hasSchema = audit.schemaTypes && audit.schemaTypes.length > 0;
+        if (schemaScore < 4 || !hasSchema) {
+          const missingSchemas = [];
+          if (!hasSchema || !audit.schemaTypes.includes('Article')) {
+            missingSchemas.push('Article');
+          }
+          if (!hasSchema || !audit.schemaTypes.includes('FAQPage')) {
+            missingSchemas.push('FAQPage');
+          }
+          
+          if (missingSchemas.length > 0) {
+            recs.push({
+              text: `Add ${missingSchemas.join(' + ')} schema markup (JSON-LD)`,
+              why: "67% of searches show AI Overviews. Without schema, your content is invisible to AI systems. This is THE most critical technical fix.",
+              how: `Missing: ${missingSchemas.join(', ')}\n\n1. Go to schema.org for templates\n2. Add Article schema with headline, author, datePublished\n3. Add FAQPage schema for Q&A sections\n4. Insert JSON-LD in <head> section\n5. Test with Google Rich Results Validator`,
+              impact: 4 - schemaScore,
+              realWorldBenefit: "Appear in AI Overviews, Featured Snippets, Knowledge Panels",
+              priority: "critical",
+              effort: "low",
+              category: "technical"
+            });
+          }
+        }
+        
+        // 2. FAQ - check actual FAQ quality
+        const faqScore = breakdown.craft?.faqIntegration || 0;
+        const faqCount = audit.faqCount || 0;
+        const faqAvgWords = audit.faqAvgWords || 0;
+        
+        if (faqCount === 0) {
+          // No FAQ at all
+          recs.push({
+            text: "Create FAQ section (currently missing)",
+            why: "FAQ sections are GOLD for AI Overviews. Articles with FAQ get 2x more featured snippets. You have NO FAQ section detected.",
+            how: "1. Research 'People Also Ask' for your topic\n2. Create 5-10 common questions\n3. Write 100-150 word answers with examples\n4. Add FAQPage schema markup\n5. Place FAQ near end of article",
+            impact: 4 - faqScore,
+            realWorldBenefit: "2x higher Featured Snippet chance + AI citations",
+            priority: "critical",
+            effort: "medium",
+            category: "craft"
+          });
+        } else if (faqAvgWords < 100 && faqScore < 4) {
+          // FAQ exists but answers too short
+          recs.push({
+            text: `Expand FAQ answers - currently ${faqCount} questions averaging ${faqAvgWords} words`,
+            why: `You have ${faqCount} FAQs but answers are too short (${faqAvgWords} words avg). AI Overviews prefer 100+ word answers with examples and sources.`,
+            how: "1. Review each FAQ answer\n2. Add specific examples\n3. Include statistics with sources\n4. Aim for 100-150 words per answer\n5. Add 'According to [source]...' citations",
+            impact: 4 - faqScore,
+            realWorldBenefit: "Higher AI Overview citation rate",
+            priority: "high",
+            effort: "medium",
+            category: "craft"
+          });
+        }
+        
+        // 3. Meta tags - check actual lengths
+        const metaScore = breakdown.technical?.metaOptimization || 0;
+        const titleLength = audit.metaTitleLength || 0;
+        const descLength = audit.metaDescLength || 0;
+        
+        if (metaScore < 4) {
+          const issues = [];
+          if (titleLength < 50 || titleLength > 60) {
+            issues.push(`Title: ${titleLength} chars (should be 50-60)`);
+          }
+          if (descLength < 150 || descLength > 160) {
+            issues.push(`Description: ${descLength} chars (should be 150-160)`);
+          }
+          
+          if (issues.length > 0) {
+            recs.push({
+              text: "Optimize meta tags",
+              why: "Meta tags improve CTR by 20-30%. Your current tags need adjustment:\n" + issues.join('\n'),
+              how: `Current:\n- Title: ${titleLength} chars\n- Description: ${descLength} chars\n\nFix:\n- Title: Keep 50-60 chars, keyword in first 30\n- Description: Write 150-160 chars with CTA`,
+              impact: 4 - metaScore,
+              realWorldBenefit: "+20-30% more clicks from search results",
+              priority: "high",
+              effort: "low",
+              category: "technical"
+            });
+          }
+        }
+        
+        // 4. Images & Alt texts - check actual counts
+        const mobileScore = breakdown.technical?.mobileOptimization || 0;
+        const imageCount = audit.images || 0;
+        const altTextCount = audit.altTexts || 0;
+        const missingAlts = Math.max(0, imageCount - altTextCount);
+        
+        if (missingAlts > 0 && mobileScore < 4) {
+          recs.push({
+            text: `Add alt texts to ${missingAlts} images (${imageCount} total, ${altTextCount} have alt)`,
+            why: `You have ${imageCount} images but ${missingAlts} are missing alt texts. This hurts accessibility, SEO, and mobile rankings.`,
+            how: "1. Review each image without alt text\n2. Describe what's in the image (10-15 words)\n3. Include target keyword naturally\n4. Be specific, not generic\n5. Skip alt for decorative images",
+            impact: Math.min(4, Math.ceil(missingAlts / 2)),
+            realWorldBenefit: "Better mobile rankings + image search visibility",
+            priority: "high",
+            effort: "low",
+            category: "technical"
+          });
+        }
+        
+        // 5. Visuals - check if enough
+        const visualsScore = breakdown.craft?.addVisuals || 0;
+        const wordCount = audit.wordCount || 0;
+        const expectedImages = Math.ceil(wordCount / 300); // 1 per 300 words
+        
+        if (imageCount < expectedImages && visualsScore < 6) {
+          recs.push({
+            text: `Add more visuals - ${imageCount} images for ${wordCount} words (recommend ${expectedImages})`,
+            why: `Your article has ${wordCount} words but only ${imageCount} images. Aim for 1 image per 300 words. Content with visuals gets 94% more views.`,
+            how: "1. Add images every 300-400 words\n2. Create data tables for statistics\n3. Add infographic for key concepts\n4. Include screenshots if tutorial\n5. Optimize all images (compress, add alt)",
+            impact: 6 - visualsScore,
+            realWorldBenefit: "+94% more views, better engagement",
+            priority: "high",
+            effort: "medium",
+            category: "craft"
+          });
+        }
+        
+        // 6. Expert quotes - check actual count
+        const credibilityScore = breakdown.graaf?.credibility || 0;
+        const expertQuotes = audit.expertQuotes || 0;
+        const statistics = audit.statistics || 0;
+        const sources = audit.sources || 0;
+        
+        if (expertQuotes < 3 && credibilityScore < 8) {
+          recs.push({
+            text: `Add expert quotes - currently ${expertQuotes} detected`,
+            why: `Only ${expertQuotes} expert quotes found. Articles with 3+ expert quotes rank 40% higher through E-E-A-T signals.`,
+            how: "1. Find 2-3 industry experts to quote\n2. Include: 'According to [Name], [Title] at [Org]...'\n3. Use recent quotes (2023-2025)\n4. Link to original source\n5. Add actual credentials (PhD, 20 years experience, etc.)",
+            impact: Math.min(3, 8 - credibilityScore),
+            realWorldBenefit: "+40% better rankings through E-E-A-T",
+            priority: "high",
+            effort: "medium",
+            category: "graaf"
+          });
+        }
+        
+        // 7. Statistics & sources
+        if (statistics < 5 || sources < 3) {
+          recs.push({
+            text: `Add more data: ${statistics} statistics, ${sources} cited sources`,
+            why: `Current: ${statistics} statistics, ${sources} sources. Articles with 5+ statistics and 3+ sources rank significantly better.`,
+            how: "1. Find recent industry reports (2023-2025)\n2. Add specific numbers: '47% of companies...'\n3. Cite source: 'According to [Report Name]...'\n4. Link to original research\n5. Prefer .edu, .gov, industry leaders",
+            impact: 2,
+            realWorldBenefit: "Build authority and trust signals",
+            priority: "medium",
+            effort: "medium",
+            category: "graaf"
+          });
+        }
+        
+        // 8. Table of contents - check if article is long enough
+        const tocPresent = audit.tocPresent || 0;
+        if (wordCount > 1500 && tocPresent === 0) {
+          recs.push({
+            text: "Add table of contents (article is long enough)",
+            why: `Your article has ${wordCount} words but no TOC. Articles over 1500 words need TOC for better UX and Google loves clear structure.`,
+            how: "1. Add TOC at the beginning (after intro)\n2. Link to each H2 heading\n3. Use jump links (#heading-name)\n4. Keep it simple and scannable\n5. Consider making it sticky on desktop",
+            impact: 1,
+            realWorldBenefit: "Better UX, lower bounce rate, clearer structure",
+            priority: "medium",
+            effort: "low",
+            category: "craft"
+          });
+        }
+        
+        // 9. Internal links
+        const linkingScore = breakdown.technical?.internalLinking || 0;
+        const internalLinks = audit.internalLinks || 0;
+        if (internalLinks < 3 && linkingScore < 4) {
+          recs.push({
+            text: `Add internal links - currently ${internalLinks} detected`,
+            why: `Only ${internalLinks} internal links found. Articles with 3-5 internal links rank 40% better through better site structure.`,
+            how: "1. Link to related articles\n2. Use descriptive anchor text\n3. Link to pillar content\n4. Aim for 3-5 contextual links\n5. Link naturally within content",
+            impact: 4 - linkingScore,
+            realWorldBenefit: "Better rankings + distribute page authority",
+            priority: "medium",
+            effort: "low",
+            category: "technical"
+          });
+        }
+        
+      } else {
+        // FALLBACK: Generic recommendations when no detailed data
+        console.warn('No detailed audit data - using generic recommendations');
+        
+        const technicalTotal = breakdown.technical?.total || 0;
+        const craftTotal = breakdown.craft?.total || 0;
+        const graafTotal = breakdown.graaf?.total || 0;
+        
+        if (technicalTotal < 16) {
+          recs.push({
+            text: "Improve Technical SEO (needs fresh scan for specifics)",
+            why: "Technical SEO score is low. Run a fresh scan (not cached) to see specific missing elements like schema, meta tags, mobile issues.",
+            how: "For detailed audit:\n1. Click scan again (forces fresh scan)\n2. System will analyze 100+ metrics\n3. You'll get specific recommendations\n4. Based on what's actually missing",
+            impact: Math.min(8, 20 - technicalTotal),
+            realWorldBenefit: "Get specific actionable fixes",
+            priority: "critical",
+            effort: "low",
+            category: "technical"
+          });
+        }
+        
+        if (craftTotal < 24) {
+          recs.push({
+            text: "Enhance Content Quality (needs fresh scan for specifics)",
+            why: "Content quality score is low. Fresh scan will show exact issues: FAQ quality, visual count, readability metrics.",
+            how: "Run fresh scan to see:\n- Exact FAQ count and quality\n- Image count vs word count\n- Actual readability metrics\n- Missing content elements",
+            impact: Math.min(6, 30 - craftTotal),
+            realWorldBenefit: "Know exactly what to fix",
+            priority: "high",
+            effort: "medium",
+            category: "craft"
+          });
+        }
+      }
+      
+      // If no recommendations, content is excellent
+      if (recs.length === 0) {
+        recs.push({
+          text: "Excellent! Content is well-optimized",
+          why: "Your content scores high across all frameworks. All major optimization opportunities have been addressed.",
+          how: "Maintenance:\n1. Update statistics quarterly\n2. Refresh content every 6 months\n3. Monitor search rankings\n4. Keep FAQ answers current\n5. Add new expert quotes periodically",
+          impact: 0,
+          realWorldBenefit: "Maintain top rankings",
+          priority: "medium",
+          effort: "low",
+          category: "maintenance"
+        });
+      }
+      
+      return recs;
+    }
       
       if (hasDetailedBreakdown) {
         // DETAILED RECOMMENDATIONS
