@@ -664,51 +664,155 @@ RETURN ONLY JSON:
         
       } else {
         // SIMPLIFIED RECOMMENDATIONS (when only totals available)
+        // Generate 6-8 specific recommendations based on what's missing
         
         const technicalTotal = breakdown.technical?.total || 0;
         const craftTotal = breakdown.craft?.total || 0;
         const graafTotal = breakdown.graaf?.total || 0;
         
-        // Technical SEO recommendations
-        if (technicalTotal < 16) {
+        // TECHNICAL SEO - Break down into specific items
+        if (technicalTotal < 20) {
+          // Schema Markup (most impactful)
           recs.push({
-            text: "Improve Technical SEO (Schema, Meta, Mobile)",
-            why: "Technical SEO is the foundation. Without it, even great content won't rank well. Focus on schema markup for AI Overviews visibility.",
-            how: "1. Add Article + FAQPage schema markup (critical for AI Overviews)\n2. Optimize meta title (50-60 chars) and description (150-160 chars)\n3. Ensure mobile responsiveness and fast loading\n4. Add proper alt texts to all images",
-            impact: Math.min(12, Math.ceil((20 - technicalTotal) * 0.6)),
-            realWorldBenefit: "Appear in AI Overviews, Featured Snippets, and improve mobile rankings",
+            text: "Add Article + FAQPage schema markup (JSON-LD)",
+            why: "67% of searches now show AI Overviews. Without schema markup, your content is invisible to AI systems. This is THE most critical technical fix.",
+            how: "1. Go to schema.org/Article for template\n2. Fill in: headline, author, datePublished, description\n3. Add FAQPage schema for all Q&A content\n4. Insert JSON-LD in <head> section\n5. Test with Google Rich Results Validator",
+            impact: 4,
+            realWorldBenefit: "Appear in AI Overviews, Featured Snippets, Knowledge Panels",
             priority: "critical",
             effort: "low",
             category: "technical"
           });
+          
+          // Meta Tags
+          if (technicalTotal < 18) {
+            recs.push({
+              text: "Optimize meta title and description",
+              why: "Meta tags are your content's 'ad' in search results. Well-optimized tags can improve click-through rate by 20-30%.",
+              how: "Meta Title:\n- Keep 50-60 characters\n- Include main keyword in first 30 chars\n- Add brand at end (if space)\n\nMeta Description:\n- Write 150-160 characters\n- Include main keyword naturally\n- Add clear call-to-action\n- Make it compelling!",
+              impact: 2,
+              realWorldBenefit: "+20-30% more clicks from search results",
+              priority: "high",
+              effort: "low",
+              category: "technical"
+            });
+          }
+          
+          // Mobile Optimization
+          if (technicalTotal < 16) {
+            recs.push({
+              text: "Improve mobile optimization and image alt texts",
+              why: "60% of searches happen on mobile. Missing alt texts hurt accessibility, SEO, and mobile image search rankings.",
+              how: "Mobile:\n- Test with Google Mobile-Friendly Test\n- Ensure text is readable without zooming\n- Make buttons/links easy to tap (44px min)\n\nAlt Texts:\n- Describe what's actually in the image\n- Include target keyword naturally\n- Keep 10-15 words\n- Be specific, not generic",
+              impact: 2,
+              realWorldBenefit: "Better mobile rankings + image search visibility",
+              priority: "high",
+              effort: "low",
+              category: "technical"
+            });
+          }
+          
+          // Internal Linking
+          if (technicalTotal < 14) {
+            recs.push({
+              text: "Add contextual internal links",
+              why: "Internal links help Google understand your site structure and distribute ranking power. Pages with 3+ internal links rank 40% better.",
+              how: "1. Identify your pillar content (most important pages)\n2. Link to them from related articles\n3. Use descriptive anchor text (not 'click here')\n4. Aim for 3-5 internal links per article\n5. Link to both older and newer content",
+              impact: 2,
+              realWorldBenefit: "Better site structure + distribute ranking power",
+              priority: "medium",
+              effort: "low",
+              category: "technical"
+            });
+          }
         }
         
-        // CRAFT recommendations
-        if (craftTotal < 24) {
+        // CRAFT FRAMEWORK - Specific content improvements
+        if (craftTotal < 30) {
+          // FAQ Section
+          if (craftTotal < 26) {
+            recs.push({
+              text: "Create or expand FAQ section with detailed answers",
+              why: "FAQ sections are GOLD for AI Overviews. Google loves Q&A format. Articles with FAQ sections get 2x more featured snippet appearances.",
+              how: "1. Research 'People Also Ask' questions for your topic\n2. Write 100-150 word answers for each question\n3. Include statistics, examples, and sources\n4. Add FAQPage schema markup\n5. Place FAQ near the end of article",
+              impact: 4,
+              realWorldBenefit: "2x higher chance of Featured Snippets + AI Overview citations",
+              priority: "high",
+              effort: "medium",
+              category: "craft"
+            });
+          }
+          
+          // Visual Content
+          if (craftTotal < 24) {
+            recs.push({
+              text: "Add more visual content (images, infographics, tables)",
+              why: "Content with visuals gets 94% more views. Tables make data scannable. Infographics are shared 3x more than text.",
+              how: "1. Add 1 image per 300 words minimum\n2. Create data tables for statistics/comparisons\n3. Design simple infographic for key concepts\n4. Add screenshots for tutorials\n5. Use original images when possible\n6. Optimize all images (compress, add alt text)",
+              impact: 3,
+              realWorldBenefit: "+94% more views, better engagement, lower bounce rate",
+              priority: "high",
+              effort: "medium",
+              category: "craft"
+            });
+          }
+          
+          // Readability
+          if (craftTotal < 22) {
+            recs.push({
+              text: "Improve readability and content structure",
+              why: "Users scan, they don't read. Well-structured content keeps readers engaged 2x longer. Clear structure signals quality to Google.",
+              how: "1. Break paragraphs into 2-4 sentences max\n2. Add clear subheadings (H2, H3) every 200-300 words\n3. Use bullet points for lists\n4. Add table of contents for long articles\n5. Highlight key takeaways in callout boxes\n6. Use simple language (avoid jargon)",
+              impact: 2,
+              realWorldBenefit: "2x longer time on page, lower bounce rate",
+              priority: "medium",
+              effort: "low",
+              category: "craft"
+            });
+          }
+        }
+        
+        // GRAAF FRAMEWORK - Authority & Trust
+        if (graafTotal < 45) {
+          // Expert Quotes & Sources
           recs.push({
-            text: "Enhance Content Quality (CRAFT Framework)",
-            why: "Quality content keeps users engaged and signals value to search engines. Well-structured content with visuals performs 40% better.",
-            how: "1. Add more visuals (images, infographics, tables)\n2. Create or expand FAQ section with detailed answers (100+ words each)\n3. Break up long paragraphs for better readability\n4. Add table of contents for longer articles",
-            impact: Math.min(8, Math.ceil((30 - craftTotal) * 0.25)),
-            realWorldBenefit: "Higher engagement, lower bounce rate, better rankings",
+            text: "Add expert quotes and cite authoritative sources",
+            why: "E-E-A-T (Experience, Expertise, Authority, Trust) is Google's #1 quality signal. Content with expert quotes ranks 40% higher.",
+            how: "1. Find 2-3 industry experts to quote\n2. Include their full name, title, and organization\n3. Link to original source if quoting research\n4. Add 'According to [Expert Name], [Title]...'\n5. Include recent statistics (2023-2025) with sources\n6. Link to .edu, .gov, or reputable industry sites",
+            impact: 3,
+            realWorldBenefit: "40% better rankings + build E-E-A-T score",
             priority: "high",
             effort: "medium",
-            category: "craft"
-          });
-        }
-        
-        // GRAAF recommendations
-        if (graafTotal < 40) {
-          recs.push({
-            text: "Strengthen Content Authority (GRAAF Framework)",
-            why: "E-E-A-T (Experience, Expertise, Authoritativeness, Trust) is critical for rankings. Content with expert quotes and citations ranks 2x better.",
-            how: "1. Add expert quotes with proper attribution\n2. Include recent statistics (2023-2025) with sources\n3. Add author bio with credentials\n4. Update content with recent developments\n5. Link to authoritative sources",
-            impact: Math.min(6, Math.ceil((50 - graafTotal) * 0.12)),
-            realWorldBenefit: "Build trust, improve E-E-A-T score, rank for competitive keywords",
-            priority: "medium",
-            effort: "high",
             category: "graaf"
           });
+          
+          // Author Bio & Credentials
+          if (graafTotal < 42) {
+            recs.push({
+              text: "Add comprehensive author bio with credentials",
+              why: "Google wants to know WHO wrote the content. Author expertise directly impacts E-E-A-T. Articles with author bios rank 15% higher.",
+              how: "1. Add author name at top of article\n2. Include professional photo\n3. Write 100-word bio highlighting:\n   - Relevant experience/years in field\n   - Credentials, certifications, degrees\n   - Previous publications or achievements\n4. Link to author's LinkedIn or website\n5. Add Author schema markup",
+              impact: 2,
+              realWorldBenefit: "+15% better rankings through E-E-A-T",
+              priority: "medium",
+              effort: "low",
+              category: "graaf"
+          });
+          }
+          
+          // Content Freshness
+          if (graafTotal < 40) {
+            recs.push({
+              text: "Update content with recent data and current year mentions",
+              why: "Google favors fresh content. Adding recent statistics and updating the publish date can boost rankings by 25%.",
+              how: "1. Replace old statistics with 2024-2025 data\n2. Add 'Updated: [Current Month Year]' at top\n3. Mention current year in intro paragraph\n4. Update examples to recent events\n5. Remove outdated information\n6. Add section on latest trends/developments",
+              impact: 2,
+              realWorldBenefit: "+25% ranking boost through freshness signal",
+              priority: "medium",
+              effort: "low",
+              category: "graaf"
+            });
+          }
         }
       }
       
