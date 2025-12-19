@@ -393,35 +393,56 @@
         });
         
       } else {
-        // SIMPLIFIED BREAKDOWN - Estimate based on totals
-        console.log('⚠️ Using simplified breakdown - estimating potential');
+        // SIMPLIFIED BREAKDOWN - Calculate FULL potential
+        console.log('⚠️ Using simplified breakdown - showing full potential');
         
-        // Technical SEO (max 20 points)
+        // Calculate MAXIMUM possible scores
         const technicalTotal = breakdown.technical?.total || 0;
-        const technicalMissing = Math.max(0, 20 - technicalTotal);
+        const technicalMax = 20;
+        const technicalMissing = Math.max(0, technicalMax - technicalTotal);
         
-        // Estimate realistic gains (typically 60% of missing points are quick wins)
-        const technicalGains = Math.min(12, Math.ceil(technicalMissing * 0.6));
-        gains.technical = technicalGains;
-        quickWins += technicalGains;
-        
-        // CRAFT (max 30 points)
         const craftTotal = breakdown.craft?.total || 0;
-        const craftMissing = Math.max(0, 30 - craftTotal);
+        const craftMax = 30;
+        const craftMissing = Math.max(0, craftMax - craftTotal);
         
-        // Estimate realistic gains (typically 25% of missing points are quick wins)
-        const craftGains = Math.min(8, Math.ceil(craftMissing * 0.25));
-        gains.craft = craftGains;
-        quickWins += craftGains;
+        const graafTotal = breakdown.graaf?.total || 0;
+        const graafMax = 50;
+        const graafMissing = Math.max(0, graafMax - graafTotal);
         
-        // GRAAF is harder to improve quickly, skip for quick wins
-        gains.graaf = 0;
+        // TOTAL potential (to reach 100)
+        const totalPotential = technicalMissing + craftMissing + graafMissing;
+        
+        // Estimate QUICK WINS (realistic short-term gains)
+        const technicalQuick = Math.ceil(technicalMissing * 0.6); // 60% of technical is quick
+        const craftQuick = Math.ceil(craftMissing * 0.3); // 30% of craft is quick
+        const graafQuick = Math.ceil(graafMissing * 0.2); // 20% of graaf is quick
+        
+        quickWins = technicalQuick + craftQuick + graafQuick;
+        
+        gains.technical = technicalMissing;
+        gains.craft = craftMissing;
+        gains.graaf = graafMissing;
+        gains.quickWins = quickWins;
+        gains.totalPotential = totalPotential;
+        
+        console.log('Simplified calculations:', {
+          technical: `${technicalTotal}/${technicalMax} (missing: ${technicalMissing})`,
+          craft: `${craftTotal}/${craftMax} (missing: ${craftMissing})`,
+          graaf: `${graafTotal}/${graafMax} (missing: ${graafMissing})`,
+          totalPotential: totalPotential,
+          quickWins: quickWins
+        });
       }
+      
+      const maxPotential = Math.min(100, current + (gains.totalPotential || (gains.technical + gains.craft + gains.graaf)));
+      const quickWinsPotential = Math.min(100, current + quickWins);
       
       return {
         current: current,
-        potential: Math.min(100, current + quickWins),
+        potential: quickWinsPotential, // Quick wins potential
+        maxPotential: maxPotential, // Maximum possible
         quickWins: quickWins,
+        totalPotential: gains.totalPotential || (gains.technical + gains.craft + gains.graaf),
         gains: gains
       };
     }
@@ -707,48 +728,59 @@ RETURN ONLY JSON:
         
       } else {
         // SIMPLIFIED RECOMMENDATIONS (when only totals available)
+        // Show ALL improvements needed to reach maximum potential
         
         const technicalTotal = breakdown.technical?.total || 0;
         const craftTotal = breakdown.craft?.total || 0;
         const graafTotal = breakdown.graaf?.total || 0;
         
-        // Technical SEO recommendations
-        if (technicalTotal < 16) {
+        const technicalMissing = Math.max(0, 20 - technicalTotal);
+        const craftMissing = Math.max(0, 30 - craftTotal);
+        const graafMissing = Math.max(0, 50 - graafTotal);
+        
+        console.log('Generating simplified recommendations:', {
+          technical: `${technicalTotal}/20 (missing: ${technicalMissing})`,
+          craft: `${craftTotal}/30 (missing: ${craftMissing})`,
+          graaf: `${graafTotal}/50 (missing: ${graafMissing})`
+        });
+        
+        // Technical SEO - Priority 1 (Quick Wins)
+        if (technicalMissing > 0) {
           recs.push({
-            text: "Improve Technical SEO (Schema, Meta, Mobile)",
-            why: "Technical SEO is the foundation. Without it, even great content won't rank well. Focus on schema markup for AI Overviews visibility.",
-            how: "1. Add Article + FAQPage schema markup (critical for AI Overviews)\n2. Optimize meta title (50-60 chars) and description (150-160 chars)\n3. Ensure mobile responsiveness and fast loading\n4. Add proper alt texts to all images",
-            impact: Math.min(12, Math.ceil((20 - technicalTotal) * 0.6)),
-            realWorldBenefit: "Appear in AI Overviews, Featured Snippets, and improve mobile rankings",
+            text: "Improve Technical SEO",
+            why: "Technical SEO is the foundation. 67% of searches show AI Overviews - without schema markup, you're invisible.",
+            how: "1. Add Article + FAQPage schema markup (JSON-LD)\n2. Optimize meta title (50-60 chars) and description (150-160 chars)\n3. Improve mobile responsiveness and page speed\n4. Add alt texts to all images\n5. Fix internal linking structure",
+            impact: technicalMissing,
+            realWorldBenefit: "Appear in AI Overviews, Featured Snippets, better mobile rankings",
             priority: "critical",
             effort: "low",
             category: "technical"
           });
         }
         
-        // CRAFT recommendations
-        if (craftTotal < 24) {
+        // CRAFT - Priority 2 (Medium Effort)
+        if (craftMissing > 0) {
           recs.push({
-            text: "Enhance Content Quality (CRAFT Framework)",
-            why: "Quality content keeps users engaged and signals value to search engines. Well-structured content with visuals performs 40% better.",
-            how: "1. Add more visuals (images, infographics, tables)\n2. Create or expand FAQ section with detailed answers (100+ words each)\n3. Break up long paragraphs for better readability\n4. Add table of contents for longer articles",
-            impact: Math.min(8, Math.ceil((30 - craftTotal) * 0.25)),
-            realWorldBenefit: "Higher engagement, lower bounce rate, better rankings",
+            text: "Enhance Content Quality (CRAFT)",
+            why: "Quality content keeps users engaged. Articles with FAQ sections get 2x more featured snippets.",
+            how: "1. Add or expand FAQ section (100+ words per answer)\n2. Add more visuals (images, infographics, comparison tables)\n3. Break up long paragraphs for readability\n4. Add table of contents for structure\n5. Optimize for user intent and readability",
+            impact: craftMissing,
+            realWorldBenefit: "Higher engagement, lower bounce rate, more featured snippets",
             priority: "high",
             effort: "medium",
             category: "craft"
           });
         }
         
-        // GRAAF recommendations
-        if (graafTotal < 40) {
+        // GRAAF - Priority 3 (Requires Expertise)
+        if (graafMissing > 0) {
           recs.push({
-            text: "Strengthen Content Authority (GRAAF Framework)",
-            why: "E-E-A-T (Experience, Expertise, Authoritativeness, Trust) is critical for rankings. Content with expert quotes and citations ranks 2x better.",
-            how: "1. Add expert quotes with proper attribution\n2. Include recent statistics (2023-2025) with sources\n3. Add author bio with credentials\n4. Update content with recent developments\n5. Link to authoritative sources",
-            impact: Math.min(6, Math.ceil((50 - graafTotal) * 0.12)),
-            realWorldBenefit: "Build trust, improve E-E-A-T score, rank for competitive keywords",
-            priority: "medium",
+            text: "Strengthen Content Authority (GRAAF)",
+            why: "E-E-A-T is critical. Content with expert quotes and citations ranks 40% better in competitive niches.",
+            how: "1. Add expert quotes with proper attribution\n2. Include recent statistics (2024-2025) with sources\n3. Add author bio with credentials\n4. Update content regularly with latest developments\n5. Link to authoritative sources (.edu, .gov, industry publications)\n6. Add case studies or real-world examples",
+            impact: graafMissing,
+            realWorldBenefit: "Build trust, improve E-E-A-T, rank for competitive keywords",
+            priority: "high",
             effort: "high",
             category: "graaf"
           });
@@ -891,21 +923,24 @@ RETURN ONLY JSON:
       
       document.getElementById('resultsContainer').classList.remove('hidden');
       document.getElementById('currentScore').textContent = Math.round(data.score);
-      document.getElementById('deterministicPotential').textContent = deterministicResult.potential;
       
-      const validatedScore = validation.validated || deterministicResult.potential;
+      // Show MAXIMUM potential (what's achievable to reach 100)
+      const maxPotential = deterministicResult.maxPotential || 100;
+      document.getElementById('deterministicPotential').textContent = maxPotential;
+      
+      const validatedScore = validation.validated || maxPotential;
       document.getElementById('validatedPotential').textContent = validatedScore;
       
       const validationStatus = document.getElementById('validationStatus');
       if (CONFIG.claudeEnabled && validation.usedClaude) {
-        const diff = validatedScore - deterministicResult.potential;
+        const diff = validatedScore - maxPotential;
         if (diff !== 0) {
           validationStatus.innerHTML = `
             <div class="mt-3 p-3 bg-purple-900 bg-opacity-50 rounded-lg border border-purple-500">
               <div class="flex items-center gap-2">
                 <span class="text-purple-400">🤖 AI Adjustment:</span>
                 <span class="text-white font-semibold">${diff > 0 ? '+' : ''}${diff} points</span>
-                <span class="text-gray-400 text-sm">(${deterministicResult.potential} → ${validatedScore})</span>
+                <span class="text-gray-400 text-sm">(${maxPotential} → ${validatedScore})</span>
               </div>
             </div>
           `;
@@ -923,12 +958,14 @@ RETURN ONLY JSON:
       }
       
       const targetMsg = document.getElementById('targetMessage');
+      const totalGain = validatedScore - Math.round(data.score);
+      
       if (validatedScore >= 95) {
-        targetMsg.innerHTML = `<div class="text-green-400 font-semibold">✅ Excellent! Target of 95+ is achievable with these fixes!</div>`;
+        targetMsg.innerHTML = `<div class="text-green-400 font-semibold">✅ Excellent! You can reach ${validatedScore}/100 with these improvements!</div>`;
       } else if (validatedScore >= 90) {
-        targetMsg.innerHTML = `<div class="text-yellow-400 font-semibold">⚠️ Close! To reach 95+, focus on content quality improvements.</div>`;
+        targetMsg.innerHTML = `<div class="text-yellow-400 font-semibold">⚠️ You can reach ${validatedScore}/100 by implementing all recommendations below.</div>`;
       } else {
-        targetMsg.innerHTML = `<div class="text-blue-400">📊 Focus on quick wins first (+${validatedScore - Math.round(data.score)} points), then reassess.</div>`;
+        targetMsg.innerHTML = `<div class="text-blue-400">📊 Maximum potential: ${validatedScore}/100 (+${totalGain} points). Start with quick wins, then tackle deeper improvements.</div>`;
       }
       
       displayScoreBreakdown(data);
