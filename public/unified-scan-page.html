@@ -343,13 +343,17 @@
       let quickWins = 0;
       const gains = {};
       
-      // Check if we have detailed breakdown - need ALL frameworks to have sub-scores
+      // CONSISTENT CHECK - Must match all 3 functions!
       const hasDetailedBreakdown = 
         breakdown.technical?.schemaMarkup !== undefined &&
         breakdown.craft?.faqIntegration !== undefined &&
-        breakdown.craft?.addVisuals !== undefined;
+        breakdown.graaf?.credibility !== undefined;
       
-      console.log('calculateDeterministicPotential - hasDetailedBreakdown:', hasDetailedBreakdown);
+      console.log('calculateDeterministicPotential - hasDetailedBreakdown:', hasDetailedBreakdown, {
+        schema: breakdown.technical?.schemaMarkup !== undefined,
+        faq: breakdown.craft?.faqIntegration !== undefined,
+        credibility: breakdown.graaf?.credibility !== undefined
+      });
       
       if (hasDetailedBreakdown) {
         // DETAILED BREAKDOWN - Use sub-scores
@@ -556,13 +560,17 @@ RETURN ONLY JSON:
       const breakdown = data.breakdown || {};
       const audit = data.audit || {};
       
-      // Check if we have detailed breakdown - need ALL frameworks to have sub-scores
+      // CONSISTENT CHECK - Must match all 3 functions!
       const hasDetailedBreakdown = 
         breakdown.technical?.schemaMarkup !== undefined &&
         breakdown.craft?.faqIntegration !== undefined &&
-        breakdown.technical?.metaOptimization !== undefined;
+        breakdown.graaf?.credibility !== undefined;
       
-      console.log('generateDeterministicRecommendations - hasDetailedBreakdown:', hasDetailedBreakdown);
+      console.log('generateDeterministicRecommendations - hasDetailedBreakdown:', hasDetailedBreakdown, {
+        schema: breakdown.technical?.schemaMarkup !== undefined,
+        faq: breakdown.craft?.faqIntegration !== undefined,
+        credibility: breakdown.graaf?.credibility !== undefined
+      });
       
       if (hasDetailedBreakdown) {
         // DETAILED RECOMMENDATIONS
@@ -849,16 +857,16 @@ RETURN ONLY JSON:
     function displayScoreBreakdown(data) {
       const breakdown = data.breakdown;
       
-      // Check if we have detailed breakdown - need to verify ALL frameworks have sub-scores
+      // CONSISTENT CHECK - Must match all 3 functions!
       const hasDetailedBreakdown = 
         breakdown.technical?.schemaMarkup !== undefined &&
-        breakdown.graaf?.credibility !== undefined &&
-        breakdown.craft?.cutFluff !== undefined;
+        breakdown.craft?.faqIntegration !== undefined &&
+        breakdown.graaf?.credibility !== undefined;
       
       console.log('displayScoreBreakdown - hasDetailedBreakdown:', hasDetailedBreakdown, {
-        hasSchema: breakdown.technical?.schemaMarkup !== undefined,
-        hasGraafSubs: breakdown.graaf?.credibility !== undefined,
-        hasCraftSubs: breakdown.craft?.cutFluff !== undefined
+        schema: breakdown.technical?.schemaMarkup !== undefined,
+        faq: breakdown.craft?.faqIntegration !== undefined,
+        credibility: breakdown.graaf?.credibility !== undefined
       });
       
       if (!hasDetailedBreakdown) {
