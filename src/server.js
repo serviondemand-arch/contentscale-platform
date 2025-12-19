@@ -84,38 +84,6 @@ function hashUrl(url) {
   return crypto.createHash('md5').update(url).digest('hex');
 }
 
-async function recordScan(scanData) {
-  try {
-    await pool.query(
-      `INSERT INTO scans (
-        agency_id, client_id, url, score, quality,
-        graaf_score, craft_score, technical_score,
-        validation_data, scan_type, ip_address, word_count
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-      [
-        scanData.agencyId || null,
-        scanData.clientId || null,
-        scanData.url,
-        scanData.score,
-        scanData.quality,
-        scanData.graafScore || null,
-        scanData.craftScore || null,
-        scanData.technicalScore || null,
-        JSON.stringify(scanData.validation || {}),
-        scanData.scanType || 'free',
-        scanData.ipAddress || null,
-        scanData.wordCount || 0
-      ]
-    );
-  } catch (error) {
-    console.error('Error recording scan:', error);
-  }
-}
-
-// ==========================================
-// HYBRID SCAN FUNCTION (4-Step Pipeline)
-// ==========================================
-
 async function performHybridScan(url) {
   console.log(`\n${'='.repeat(60)}`);
   console.log(`🎯 HYBRID SCAN: ${url}`);
@@ -173,7 +141,7 @@ async function performHybridScan(url) {
       url: url,
       score: score.total,
       quality: quality,
-      breakdown: score,
+      breakdown: score.breakdown,
       validation: {
         parserCounts: parserOutput.counts,
         validatedCounts: validatedCounts,
