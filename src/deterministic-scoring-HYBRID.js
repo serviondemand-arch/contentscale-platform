@@ -153,16 +153,45 @@ function calculateScore(validatedCounts, parserCounts) {
                     technical.mobileResponsive;
   
   // ==========================================
-  // FINAL SCORE
+  // FINAL SCORE - FLATTENED STRUCTURE FOR FRONTEND
   // ==========================================
   
   const total = graaf.total + craft.total + technical.total;
   
   return {
     total: Math.round(total),
-    graaf,
-    craft,
-    technical
+    breakdown: {
+      graaf: {
+        total: Math.round(graaf.total),
+        credibility: Math.round(graaf.credibility.total),
+        relevance: Math.round(graaf.relevance.total),
+        actionability: Math.round(graaf.actionability.total),
+        accuracy: Math.round(graaf.accuracy.total),
+        freshness: Math.round(graaf.freshness.total)
+      },
+      craft: {
+        total: Math.round(craft.total),
+        cutFluff: Math.round(craft.cutFluff.total),
+        reviewOptimize: Math.round(craft.reviewOptimize.total),
+        addVisuals: Math.round(craft.addVisuals.total),
+        faqIntegration: Math.round(craft.faqIntegration.total),
+        trustBuilding: Math.round(craft.trustBuilding.total)
+      },
+      technical: {
+        total: Math.round(technical.total),
+        schemaMarkup: Math.round(technical.schemaMarkup),
+        metaOptimization: Math.round(technical.metaTitleLength + technical.metaDescLength),
+        internalLinking: Math.round(technical.internalLinks),
+        pageStructure: Math.round(technical.headingHierarchy + technical.tableOfContents),
+        mobileOptimization: Math.round(technical.mobileResponsive)
+      }
+    },
+    // Keep detailed breakdown for audit/debugging
+    detailedBreakdown: {
+      graaf,
+      craft,
+      technical
+    }
   };
 }
 
