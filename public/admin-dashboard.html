@@ -84,6 +84,7 @@
           <button onclick="switchTab('generators')" id="tab-generators" class="tab-button">🎨 Code Generators</button>
           <button onclick="switchTab('ltdcodes')" id="tab-ltdcodes" class="tab-button">💰 LTD Codes</button>
           <button onclick="switchTab('settings')" id="tab-settings" class="tab-button">⚙️ Settings</button>
+          <button onclick="switchTab('handleiding')" id="tab-handleiding" class="tab-button">📚 Handleiding</button>
         </div>
       </div>
     </div>
@@ -924,6 +925,716 @@
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- HANDLEIDING TAB -->
+      <div id="content-handleiding" class="tab-content hidden">
+        <div class="max-w-5xl">
+          <h2 class="text-3xl font-bold mb-2">📚 Complete Admin Dashboard Handleiding</h2>
+          <p class="text-gray-400 mb-8">Uitgebreide uitleg van alle functies en tabs in het ContentScale platform</p>
+
+          <!-- Quick Navigation -->
+          <div class="bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg p-6 mb-8 border border-blue-700">
+            <h3 class="text-xl font-bold mb-3">🗺️ Snelle Navigatie</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <a href="#guide-overview" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">📊 Overview</a>
+              <a href="#guide-admins" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">👥 Admins</a>
+              <a href="#guide-agencies" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🏢 Agencies</a>
+              <a href="#guide-clients" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">👤 Clients</a>
+              <a href="#guide-scans" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🔍 Scans</a>
+              <a href="#guide-sharelinks" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🔗 Share Links</a>
+              <a href="#guide-leaderboard" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🏆 Leaderboard</a>
+              <a href="#guide-leadscanner" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🎯 Lead Scanner</a>
+              <a href="#guide-contentscore" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">📊 ContentScore</a>
+              <a href="#guide-generators" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🎨 Generators</a>
+              <a href="#guide-ltdcodes" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">💰 LTD Codes</a>
+              <a href="#guide-settings" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">⚙️ Settings</a>
+            </div>
+          </div>
+
+          <!-- TAB 1: OVERVIEW -->
+          <div id="guide-overview" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">📊</span>
+              <span>Tab 1: Overview</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Dashboard overzicht met platform statistieken en snelle acties</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Statistieken:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>Total Agencies</strong> - Aantal agencies in het platform</li>
+                  <li><strong>Total Clients</strong> - Alle clients van alle agencies samen</li>
+                  <li><strong>Total Scans</strong> - Totaal aantal uitgevoerde scans</li>
+                  <li><strong>Active Helpers</strong> - Actieve admin/helper accounts</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Quick Actions:</h4>
+                <div class="bg-gray-700 rounded p-3 font-mono text-sm">
+                  ➕ Add Agency → Opent agency modal<br>
+                  👤 Add Helper → Opent admin modal<br>
+                  🔗 Create Share Link → Opent share link modal<br>
+                  🎯 Scan Leads → Ga naar Lead Scanner
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Platform Health:</h4>
+                <p>Toont de status van database, API, auto-scan service en laatste backup</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: ADMINS -->
+          <div id="guide-admins" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">👥</span>
+              <span>Tab 2: Admins & Helpers</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Beheer admin en helper accounts die toegang hebben tot dit dashboard</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Account Types:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>🔑 Super Admin</strong> - Volledige toegang tot alles</li>
+                  <li><strong>💼 Sales</strong> - Client management, share links</li>
+                  <li><strong>🧪 Tester</strong> - Read-only access (alleen bekijken)</li>
+                  <li><strong>🎧 Support</strong> - Beperkte toegang voor support taken</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Admin Toevoegen:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>Stap 1:</strong> Klik "➕ Add Admin/Helper"</p>
+                  <p><strong>Stap 2:</strong> Vul in:</p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Username: bijv. "salesrep1"</li>
+                    <li>Password: minimaal 6 karakters</li>
+                    <li>Role: Super Admin / Sales / Tester / Support</li>
+                    <li>Full Name: optioneel</li>
+                    <li>Email: optioneel</li>
+                  </ul>
+                  <p><strong>Stap 3:</strong> Klik "✅ Create Admin"</p>
+                  <p class="text-green-400">✅ Account is direct actief!</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Acties:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>⏸️/▶️</strong> - Pause/Activate account (toggle)</li>
+                  <li><strong>🔑</strong> - Reset password (nieuw wachtwoord instellen)</li>
+                  <li><strong>🗑️</strong> - Delete account (permanent verwijderen)</li>
+                </ul>
+              </div>
+
+              <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3">
+                <p class="text-yellow-300 text-sm">
+                  <strong>⚠️ Let op:</strong> Je kunt je eigen account NIET verwijderen. Inactive admins kunnen niet inloggen.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: AGENCIES -->
+          <div id="guide-agencies" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">🏢</span>
+              <span>Tab 3: Agencies</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Beheer SEO agencies die het ContentScale platform gebruiken voor hun clients</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Agency Informatie:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>Naam</strong> - bijv. "Amsterdam SEO Pro"</li>
+                  <li><strong>Domain</strong> - bijv. "amsterdamseo.nl"</li>
+                  <li><strong>Land</strong> - voor leaderboard ranking (NL, PH, custom)</li>
+                  <li><strong>Plan</strong> - Starter / Professional / Agency / Enterprise</li>
+                  <li><strong>Admin Key</strong> - Unieke key voor agency login</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Agency Aanmaken:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>1. Basic Info:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Name: Digital Marketing Amsterdam</li>
+                    <li>Domain: dmamsterdam.nl (zonder https://)</li>
+                    <li>Country: 🇳🇱 Nederland of 🇵🇭 Filipijnen</li>
+                    <li>Voor ander land: selecteer "🌍 Ander land" en typ bijv. "belgium"</li>
+                    <li>Plan: Professional</li>
+                  </ul>
+                  <p class="mt-2"><strong>2. Contact Info (optioneel):</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Contact Person: John Doe</li>
+                    <li>Email: john@dmamsterdam.nl</li>
+                    <li>Phone: +31 20 123 4567</li>
+                  </ul>
+                  <p class="mt-2"><strong>3. Settings:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>☑ Whitelabel - Agency kan eigen branding gebruiken</li>
+                    <li>☑ Active - Agency kan platform direct gebruiken</li>
+                  </ul>
+                  <p class="mt-2 text-green-400"><strong>4. Klik "✅ Create Agency"</strong></p>
+                  <p class="text-yellow-400"><strong>⚠️ BELANGRIJK:</strong> Kopieer de Admin Key en geef deze aan de agency!</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Admin Key:</h4>
+                <div class="bg-gray-700 rounded p-3 font-mono text-sm">
+                  Format: ADMIN-ABC123-DEF456<br>
+                  Gebruik: Agency login op /agency<br>
+                  ⚠️ Kan niet opnieuw gegenereerd worden!
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Agency Dashboard:</h4>
+                <p>Agency logt in op <code class="bg-gray-700 px-2 py-1 rounded">/agency</code> met Admin Key en kan:</p>
+                <ul class="list-disc list-inside space-y-1 ml-4 mt-2">
+                  <li>Eigen clients toevoegen</li>
+                  <li>Clients scannen (binnen limiet)</li>
+                  <li>Scan history bekijken</li>
+                  <li>Whitelabel instellingen aanpassen</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: ALL CLIENTS -->
+          <div id="guide-clients" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">👤</span>
+              <span>Tab 4: All Clients</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Platform-wide overzicht van ALLE clients van ALLE agencies</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Informatie Weergave:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li>Client naam</li>
+                  <li>Bij welke agency</li>
+                  <li>Email adres</li>
+                  <li>Scans gebruikt / limiet (bijv. 15/30)</li>
+                  <li>Laatste scan datum</li>
+                  <li>Status (active/inactive)</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Gebruik:</h4>
+                <p>Dit is een <strong>read-only overzicht</strong> voor monitoring:</p>
+                <ul class="list-disc list-inside space-y-1 ml-4 mt-2">
+                  <li>Zie welke clients het meest actief zijn</li>
+                  <li>Monitor scan usage per client</li>
+                  <li>Troubleshoot client issues</li>
+                  <li>Platform-wide statistieken</li>
+                </ul>
+              </div>
+
+              <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-3">
+                <p class="text-blue-300 text-sm">
+                  <strong>💡 Verschil:</strong><br>
+                  <strong>ALL CLIENTS tab</strong> → Alle clients (super admin view)<br>
+                  <strong>Agency Dashboard</strong> → Alleen eigen clients (agency view)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: ALL SCANS -->
+          <div id="guide-scans" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">🔍</span>
+              <span>Tab 5: All Scans</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Platform-wide overzicht van ALLE scans die uitgevoerd zijn</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Informatie per Scan:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li>Datum & tijd van scan</li>
+                  <li>Agency naam</li>
+                  <li>Client naam</li>
+                  <li>URL (welke website gescand)</li>
+                  <li>ContentScore (0-100)</li>
+                  <li>Scan type (free/client/share_link)</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Gebruik Cases:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>Monitoring</strong> - Platform activiteit in real-time</li>
+                  <li><strong>Analytics</strong> - Welke URLs worden het meest gescand</li>
+                  <li><strong>Troubleshooting</strong> - Waarom faalde een scan</li>
+                  <li><strong>Billing</strong> - Usage tracking per agency</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 6: SHARE LINKS -->
+          <div id="guide-sharelinks" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">🔗</span>
+              <span>Tab 6: Share Links</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Maak tijdelijke scan links voor prospects, leads en demos zonder account</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Share Link Features:</h4>
+                <div class="bg-gray-700 rounded p-3 font-mono text-sm">
+                  Share Code: SCAN-ABC123-XYZ789<br>
+                  Scans Limit: 5 scans<br>
+                  Valid Days: 7 dagen<br>
+                  URL: /scan-with-link/SCAN-ABC123-XYZ789
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Share Link Aanmaken:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>1. Klik "➕ Create Share Link"</strong></p>
+                  <p><strong>2. Vul in:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Client Name: John Prospects</li>
+                    <li>Client Email: john@prospects.com (verplicht!)</li>
+                    <li>Company: Prospects BV</li>
+                    <li>Number of Scans: 5</li>
+                    <li>Valid Days: 7</li>
+                    <li>Notes: "Demo voor grote klant"</li>
+                    <li>☑ Send email (automatisch emailen)</li>
+                  </ul>
+                  <p class="mt-2"><strong>3. Resultaat:</strong></p>
+                  <p class="text-green-400">Share URL wordt gegenereerd!</p>
+                  <p class="text-yellow-400">Geef URL aan prospect → Geen account nodig!</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Statussen:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>✅ Active</strong> - Kan nog gebruikt worden</li>
+                  <li><strong>⏰ Expired</strong> - Vervallen (datum overschreden)</li>
+                  <li><strong>🚫 Limit Reached</strong> - Alle scans opgebruikt</li>
+                  <li><strong>⏸️ Inactive</strong> - Handmatig gedeactiveerd</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Use Cases:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>Sales Demo's</strong> - Laat prospects platform testen</li>
+                  <li><strong>Lead Magnets</strong> - Gratis scans in ruil voor email</li>
+                  <li><strong>Partner Demo's</strong> - Resellers kunnen testen</li>
+                  <li><strong>Event Attendees</strong> - Webinar/event bezoekers</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 7: LEADERBOARD -->
+          <div id="guide-leaderboard" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">🏆</span>
+              <span>Tab 7: Leaderboard</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Beheer en bekijk agency rankings per land op basis van ContentScore</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Hoe het werkt:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>1. Agencies Toevoegen</strong></p>
+                  <p class="ml-4">→ Ga naar 🏢 Agencies → Voeg agency toe met land</p>
+                  
+                  <p class="mt-2"><strong>2. Scannen</strong></p>
+                  <p class="ml-4">→ Automatisch (wekelijks) OF handmatig (🔍 Scan Nu)</p>
+                  <p class="ml-4">→ Systeem bezoekt website en genereert ContentScore (0-100)</p>
+                  
+                  <p class="mt-2"><strong>3. Ranking</strong></p>
+                  <p class="ml-4">→ Agencies per land gesorteerd op score</p>
+                  <p class="ml-4">→ Hoogste score = #1 positie</p>
+                  <p class="ml-4">→ Top 3 krijgt medals: 🥇🥈🥉</p>
+                  
+                  <p class="mt-2"><strong>4. Publiek Leaderboard</strong></p>
+                  <p class="ml-4">→ URL: /leaderboard/netherlands</p>
+                  <p class="ml-4 text-green-400">→ Gratis marketing voor agencies!</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Landen:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>🇳🇱 Nederland</strong> - Hoofdland</li>
+                  <li><strong>🇵🇭 Filipijnen</strong> - Tweede land</li>
+                  <li><strong>🌍 Custom</strong> - Elk ander land (bijv. belgium, germany)</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Auto-Scan Instellingen:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>Disabled</strong> - Geen automatische scans</li>
+                  <li><strong>Hourly</strong> - Elk uur (alleen voor testing)</li>
+                  <li><strong>Daily</strong> - Dagelijks</li>
+                  <li><strong>Weekly</strong> - Wekelijks (aanbevolen)</li>
+                  <li><strong>Monthly</strong> - Maandelijks</li>
+                </ul>
+              </div>
+
+              <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-3">
+                <p class="text-blue-300 text-sm">
+                  <strong>💡 Test Tip:</strong> Voeg eerst 2-3 test agencies toe in Nederland, scan deze handmatig, en check of ze in het leaderboard verschijnen met de juiste ranking.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 8: LEAD SCANNER -->
+          <div id="guide-leadscanner" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">🎯</span>
+              <span>Tab 8: Lead Scanner</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Zoek automatisch SEO agencies en marketing bedrijven voor prospecting</p>
+              </div>
+
+              <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3">
+                <p class="text-yellow-300 text-sm">
+                  <strong>⚠️ Huidige Status:</strong> Mock/dummy data (realistisch maar niet echt)<br>
+                  <strong>🔮 Toekomst:</strong> Echte Google Custom Search API integratie mogelijk
+                </p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Features (Mock Versie):</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>Input:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Country: Netherlands, Belgium, etc.</li>
+                    <li>City: Amsterdam, Rotterdam (optioneel)</li>
+                    <li>Keywords: "SEO agency", "digital marketing"</li>
+                    <li>Max Results: 10-100</li>
+                  </ul>
+                  
+                  <p class="mt-2"><strong>Output:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Company name</li>
+                    <li>Website URL</li>
+                    <li>Email (indien gevonden)</li>
+                    <li>Has contact form (ja/nee)</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Gebruik:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>1.</strong> Selecteer land, stad, keywords</p>
+                  <p><strong>2.</strong> Klik "🔍 Start Lead Scan"</p>
+                  <p><strong>3.</strong> Wacht 5-10 seconden (simulatie)</p>
+                  <p><strong>4.</strong> Resultaten verschijnen in tabel</p>
+                  <p><strong>5.</strong> Klik "📥 Export to CSV" om te downloaden</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Voor Echte Data Integratie:</h4>
+                <p>Vereisten:</p>
+                <ul class="list-disc list-inside space-y-1 ml-4 mt-2">
+                  <li>Google Custom Search API key</li>
+                  <li>Hunter.io voor email finding (optioneel)</li>
+                  <li>Budget: ~$50/maand voor 1000+ leads</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 9: CONTENTSCORE -->
+          <div id="guide-contentscore" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">📊</span>
+              <span>Tab 9: ContentScore Tool</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Embedded versie van de publieke ContentScore tool - scan URL's direct vanuit admin</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Features:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li>Scan URL's direct (geen account switch nodig)</li>
+                  <li>Zie live GRAAF scores (50 punten)</li>
+                  <li>CRAFT methodology breakdown (30 punten)</li>
+                  <li>Technical SEO analysis (20 punten)</li>
+                  <li>Word count tracking</li>
+                  <li>AI-era optimization tips</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Gebruik:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>1.</strong> Tab laadt iframe van /seo-contentscore</p>
+                  <p><strong>2.</strong> Vul URL in scanner</p>
+                  <p><strong>3.</strong> Klik "Analyze"</p>
+                  <p><strong>4.</strong> Zie resultaten in dashboard</p>
+                  <p><strong>5.</strong> Optie: Klik "🔗 Open in New Tab" voor fullscreen</p>
+                </div>
+              </div>
+
+              <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-3">
+                <p class="text-blue-300 text-sm">
+                  <strong>💡 Verschil:</strong><br>
+                  <strong>/seo-contentscore</strong> → Publieke tool, iedereen kan gebruiken<br>
+                  <strong>/admin ContentScore tab</strong> → Embedded in admin, zelfde functionaliteit
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 10: CODE GENERATORS -->
+          <div id="guide-generators" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">🎨</span>
+              <span>Tab 10: Code Generators</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Genereer verification badges en banners voor client websites</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">🏅 Badge Generator:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>Input:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Score: 0-100 (bijv. 92)</li>
+                    <li>Position: Bottom Right/Left, Top Right/Left</li>
+                    <li>Auto-show: Automatisch tonen op page load</li>
+                    <li>Delay: Vertraging in seconden</li>
+                  </ul>
+                  
+                  <p class="mt-2"><strong>Output:</strong></p>
+                  <p class="ml-4">Complete HTML/CSS/JS code voor compact badge</p>
+                  
+                  <p class="mt-2"><strong>Plaatsing:</strong></p>
+                  <p class="ml-4">Fixed position in hoek van website</p>
+                  <p class="ml-4 text-green-400">Copy-paste klaar!</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">🎉 Scroll Banner Generator:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>Input:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Score: 0-100 (bijv. 92)</li>
+                    <li>Date: Verification date (bijv. "December 2024")</li>
+                    <li>Auto-expand: Automatisch uitklappen</li>
+                    <li>Delay: Uitklap vertraging in seconden</li>
+                  </ul>
+                  
+                  <p class="mt-2"><strong>Output:</strong></p>
+                  <p class="ml-4">Complete HTML/CSS/JS code voor top banner</p>
+                  
+                  <p class="mt-2"><strong>Plaatsing:</strong></p>
+                  <p class="ml-4">Fixed header aan bovenkant website</p>
+                  <p class="ml-4">Expand/collapse animatie</p>
+                  <p class="ml-4 text-green-400">Copy-paste klaar!</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Workflow:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>1.</strong> Configureer badge/banner settings</p>
+                  <p><strong>2.</strong> Bekijk live preview (update real-time)</p>
+                  <p><strong>3.</strong> Klik "📋 Generate Code"</p>
+                  <p><strong>4.</strong> Klik "📋 Copy Code"</p>
+                  <p><strong>5.</strong> Plak in client website (voor &lt;/body&gt;)</p>
+                  <p class="text-green-400"><strong>6.</strong> Verificatie badge/banner verschijnt automatisch!</p>
+                </div>
+              </div>
+
+              <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-3">
+                <p class="text-blue-300 text-sm">
+                  <strong>💡 Features:</strong> Inline CSS (geen external files), vanilla JS (geen libraries), responsive design, production-ready code
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 11: LTD CODES -->
+          <div id="guide-ltdcodes" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">💰</span>
+              <span>Tab 11: LTD Codes</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Genereer en beheer Lifetime Deal codes voor special offers</p>
+              </div>
+
+              <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3">
+                <p class="text-yellow-300 text-sm">
+                  <strong>🚧 Status:</strong> Coming Soon - Placeholder functionaliteit
+                </p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Geplande Features:</h4>
+                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
+                  <p><strong>Code Format:</strong> LTD-ANNUAL99-2024</p>
+                  
+                  <p class="mt-2"><strong>Tiers:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li><strong>Tier 1:</strong> 50 scans/maand (lifetime)</li>
+                    <li><strong>Tier 2:</strong> 200 scans/maand (lifetime)</li>
+                    <li><strong>Tier 3:</strong> Unlimited scans/maand (lifetime)</li>
+                  </ul>
+                  
+                  <p class="mt-2"><strong>Features:</strong></p>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>One-time use code</li>
+                    <li>Valid indefinitely</li>
+                    <li>Can be revoked</li>
+                    <li>Usage tracking</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Use Cases:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li><strong>AppSumo Deals</strong> - Lifetime access via AppSumo</li>
+                  <li><strong>Product Hunt</strong> - Launch special offers</li>
+                  <li><strong>Promotions</strong> - Black Friday, cyber Monday</li>
+                  <li><strong>Partner Deals</strong> - Strategic partnerships</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 12: SETTINGS -->
+          <div id="guide-settings" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-3xl">⚙️</span>
+              <span>Tab 12: Settings</span>
+            </h3>
+            
+            <div class="space-y-4 text-gray-300">
+              <div>
+                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
+                <p>Platform instellingen, configuratie en maintenance tools</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Platform Information:</h4>
+                <div class="bg-gray-700 rounded p-3 space-y-1 text-sm">
+                  <p><strong>Version:</strong> 2.0.0</p>
+                  <p><strong>Deployment:</strong> Railway + Neon Database</p>
+                  <p><strong>API Status:</strong> ✅ Operational</p>
+                  <p><strong>Database:</strong> ✅ Connected</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">API Configuration:</h4>
+                <p>Anthropic API Key - Set via Railway environment variables</p>
+                <p class="text-sm text-gray-400 mt-1">Key wordt niet getoond in UI voor security</p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Danger Zone:</h4>
+                <div class="bg-red-900 bg-opacity-30 border border-red-700 rounded p-3">
+                  <p class="text-red-300 text-sm mb-2"><strong>⚠️ Gebruik met voorzichtigheid!</strong></p>
+                  <ul class="list-disc list-inside space-y-1 text-sm">
+                    <li><strong>🗑️ Delete All Test Data</strong> - Verwijder dummy/test data</li>
+                    <li><strong>🔄 Reset Database</strong> - Complete database reset (permanent!)</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white mb-2">Gebruik:</h4>
+                <ul class="list-disc list-inside space-y-1 ml-4">
+                  <li>Check platform health status</li>
+                  <li>Monitor API connectivity</li>
+                  <li>Maintenance en cleanup tasks</li>
+                  <li>Troubleshooting connection issues</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div class="bg-gradient-to-r from-purple-900 to-blue-900 rounded-lg p-6 border border-purple-700 mt-8">
+            <h3 class="text-xl font-bold mb-3">🎓 Nog Vragen?</h3>
+            <div class="space-y-2 text-sm text-gray-300">
+              <p>Deze handleiding wordt regelmatig bijgewerkt met nieuwe features en verbeteringen.</p>
+              <p><strong>Support nodig?</strong> Neem contact op via je admin account of check de platform documentatie.</p>
+              <p class="text-blue-300 mt-4">
+                <strong>Versie:</strong> 2.0.0 | 
+                <strong>Laatste Update:</strong> December 2024
+              </p>
+            </div>
+          </div>
+
         </div>
       </div>
 
