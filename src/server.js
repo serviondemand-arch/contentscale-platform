@@ -912,6 +912,21 @@ app.post('/api/admin/share-links/create', authenticateSuperAdmin, async (req, re
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + (valid_days || 7));
     
+    // Check if admin_id exists in admins table
+    // If not (super admin from super_admins table), set to NULL
+    let adminIdToUse = null;
+    
+    const adminCheck = await pool.query(
+      'SELECT id FROM admins WHERE id = $1',
+      [req.admin.id]
+    );
+    
+    if (adminCheck.rows.length > 0) {
+      adminIdToUse = req.admin.id;
+    }
+    // If not found in admins table, adminIdToUse remains NULL
+    // This allows super_admins to create share links
+    
     const result = await pool.query(`
       INSERT INTO share_links (
         share_code, admin_id, client_name, client_email, client_company,
@@ -920,7 +935,7 @@ app.post('/api/admin/share-links/create', authenticateSuperAdmin, async (req, re
       RETURNING *
     `, [
       shareCode,
-      req.admin.id,
+      adminIdToUse,
       client_name || null,
       client_email,
       client_company || null,
