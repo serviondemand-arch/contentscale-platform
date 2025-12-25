@@ -9,8 +9,7 @@
   <!-- jsPDF for PDF Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    .calc-breakdown { display: none; padding: 12px; background: #1f2937; border-radius: 8px; margin-top: 8px; }
-    .calc-breakdown.open { display: block; }
+    .calc-breakdown { display: block; padding: 12px; background: #1f2937; border-radius: 8px; margin-top: 8px; }
     .score-formula { font-family: 'Courier New', monospace; background: #111827; padding: 8px; border-radius: 4px; font-size: 13px; }
     .recommendation { cursor: pointer; transition: all 0.2s; }
     .recommendation:hover { transform: translateX(4px); }
@@ -27,14 +26,16 @@
     input:checked + .toggle-slider:before { transform: translateX(24px); }
     .loading-spinner { border: 3px solid #f3f4f6; border-top: 3px solid #8b5cf6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .tooltip { position: relative; display: inline-block; cursor: help; }
-    .tooltip .tooltiptext { visibility: hidden; width: 280px; background-color: #1f2937; color: #fff; text-align: left; border-radius: 6px; padding: 12px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -140px; opacity: 0; transition: opacity 0.3s; font-size: 12px; border: 1px solid #4b5563; }
-    .tooltip .tooltiptext::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #1f2937 transparent transparent transparent; }
-    .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
-    .info-icon { display: inline-block; width: 16px; height: 16px; background: #6b7280; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 11px; font-weight: bold; margin-left: 4px; }
-    details summary { list-style: none; }
-    details summary::-webkit-details-marker { display: none; }
-    
+    @keyframes scan-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .scanning-pulse {
+      animation: scan-pulse 2s ease-in-out infinite;
+    }
+    .progress-bar {
+      transition: width 0.5s ease-out;
+    }
     /* Circular Score Visualization */
     .score-circle {
       position: relative;
@@ -111,13 +112,14 @@
         >
         <button 
           onclick="scanURL()"
+          id="scan-button"
           class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-12 py-4 rounded-lg font-bold text-lg transition shadow-lg hover:shadow-xl"
         >
           Scan Now
         </button>
       </div>
       
-      <!-- Backend AI Mode (No Toggle Needed) -->
+      <!-- Backend AI Mode -->
       <div class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-4 border border-gray-700">
         <div class="flex items-center justify-between">
           <div class="flex-1">
@@ -148,18 +150,50 @@
         </div>
       </div>
       
-      <!-- Loading Indicator -->
-      <div id="loadingIndicator" class="hidden mt-6 text-center">
-        <div class="inline-flex items-center gap-3 bg-gray-800 px-6 py-4 rounded-lg">
-          <div class="loading-spinner"></div>
-          <span class="text-gray-300 font-semibold" id="loadingText">Scanning content...</span>
+      <!-- Loading Indicator - ENHANCED -->
+      <div id="loadingIndicator" class="hidden mt-6">
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="text-center mb-4">
+            <div class="text-5xl mb-3 scanning-pulse">🔍</div>
+            <h3 class="text-xl font-bold mb-2">Analyzing Content...</h3>
+            <p id="loadingText" class="text-gray-300">Initializing scan...</p>
+          </div>
+          
+          <!-- Progress Bar -->
+          <div class="mb-4">
+            <div class="flex justify-between mb-2 text-sm">
+              <span class="text-gray-400">Progress</span>
+              <span id="progress-percent" class="text-purple-400 font-bold">0%</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+              <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+          
+          <!-- Scanning Steps -->
+          <div class="grid grid-cols-4 gap-3 text-sm">
+            <div id="step-fetch" class="bg-slate-700 bg-opacity-50 rounded p-2 border-2 border-transparent text-center">
+              <div class="text-xl mb-1">📥</div>
+              <div class="font-bold text-xs">Fetching</div>
+            </div>
+            <div id="step-parse" class="bg-slate-700 bg-opacity-50 rounded p-2 border-2 border-transparent text-center">
+              <div class="text-xl mb-1">🔍</div>
+              <div class="font-bold text-xs">Parsing</div>
+            </div>
+            <div id="step-validate" class="bg-slate-700 bg-opacity-50 rounded p-2 border-2 border-transparent text-center">
+              <div class="text-xl mb-1">🤖</div>
+              <div class="font-bold text-xs">AI Check</div>
+            </div>
+            <div id="step-score" class="bg-slate-700 bg-opacity-50 rounded p-2 border-2 border-transparent text-center">
+              <div class="text-xl mb-1">🎯</div>
+              <div class="font-bold text-xs">Scoring</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- RESULTS SECTION (Shows after scan) -->
-    <!-- ========================================== -->
+    <!-- RESULTS SECTION -->
     <div id="resultsContainer" class="hidden">
       <!-- Interactive Score Display -->
       <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 mb-6 shadow-2xl border-2 border-purple-500">
@@ -253,40 +287,20 @@
         <div id="targetMessage" class="text-center pt-3 border-t border-gray-700 text-lg"></div>
       </div>
 
-      <!-- Score Breakdown (Expandable) -->
+      <!-- Score Breakdown - ALWAYS OPEN -->
       <div class="bg-gray-800 rounded-lg p-6 mb-6">
-        <h3 class="text-xl font-bold mb-4">📈 Score Breakdown (Click to Expand)</h3>
-        <div id="scoreBreakdown"></div>
+        <h3 class="text-2xl font-bold mb-4">📈 Score Breakdown</h3>
+        <div id="scoreBreakdown" class="space-y-4"></div>
       </div>
 
-      <!-- Priority Recommendations with Full Details -->
+      <!-- Priority Recommendations -->
       <div class="bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg p-6 mb-6 border border-blue-700">
         <h3 class="text-2xl font-bold mb-6">🎯 Priority Recommendations</h3>
         <div id="recommendationsContainer"></div>
       </div>
-
-      <!-- AI Validation Insights -->
-      <div id="aiInsights" class="hidden bg-gradient-to-r from-purple-900 to-blue-900 rounded-lg p-6 mb-6 border border-purple-500">
-        <h3 class="text-xl font-bold mb-4">🤖 AI Validation Insights</h3>
-        
-        <!-- Adjustments -->
-        <div id="adjustmentsContainer" class="hidden mb-4">
-          <h4 class="font-semibold mb-2">⚖️ Score Adjustments:</h4>
-          <div id="adjustmentsList"></div>
-        </div>
-        
-        <!-- Edge Cases -->
-        <div id="edgeCasesContainer" class="hidden mb-4">
-          <h4 class="font-semibold mb-2">🔍 Edge Cases Detected:</h4>
-          <div id="edgeCasesList"></div>
-        </div>
-      </div>
     </div>
-    <!-- ========================================== -->
-    <!-- END RESULTS SECTION -->
-    <!-- ========================================== -->
 
-    <!-- Value Propositions (ALWAYS VISIBLE) -->
+    <!-- Value Propositions -->
     <div class="grid md:grid-cols-3 gap-4 mb-6">
       <div class="bg-gray-800 rounded-lg p-5 text-center border border-gray-700 hover:border-purple-500 transition">
         <div class="text-4xl mb-3">🎯</div>
@@ -305,7 +319,7 @@
       </div>
     </div>
 
-    <!-- How It Works (ALWAYS VISIBLE) -->
+    <!-- How It Works -->
     <div class="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
       <h3 class="font-bold text-white mb-5 text-center text-lg">⚡ How It Works (4 Layers)</h3>
       <div class="grid md:grid-cols-4 gap-4">
@@ -333,7 +347,7 @@
     </div>
   </div>
 
-  <!-- Footer with Trust Signals (ALWAYS VISIBLE) -->
+  <!-- Footer -->
   <div class="max-w-5xl mx-auto mt-12 pb-8">
     <div class="bg-gray-800 rounded-lg p-6 text-center">
       <div class="grid md:grid-cols-3 gap-6 mb-6">
@@ -372,64 +386,73 @@
       </div>
     </div>
     
-    <!-- Tech Stack Info -->
     <div class="mt-4 text-center text-xs text-gray-600">
       <p>
         Powered by: Puppeteer (JS Rendering) • Claude Sonnet 4 (AI Validation) • GRAAF+CRAFT Frameworks
       </p>
       <p class="mt-1">
-        Version 1.1 Interactive | Last Updated: December 2025
+        Version 1.2 Fixed | Last Updated: December 2025
       </p>
     </div>
   </div>
 
   <script>
-    // ============================================================================
-    // VERSION: V6-INTERACTIVE-FINAL - 2024-12-25
-    // ============================================================================
-    console.log('%c🎯 ContentScale Scanner - VERSION: V6-INTERACTIVE-FINAL', 'color: #10b981; font-size: 16px; font-weight: bold');
-    console.log('%c✅ Results appear BETWEEN scan form and info sections', 'color: #10b981; font-size: 12px');
+    console.log('%c🎯 ContentScale Scanner - FIXED VERSION', 'color: #10b981; font-size: 16px; font-weight: bold');
+    console.log('%c✅ Score breakdown ALWAYS OPEN', 'color: #10b981');
+    console.log('%c✅ Interactive progress bar', 'color: #10b981');
+    console.log('%c✅ Recommendations fixed', 'color: #10b981');
     
-    // Global storage for scan results
     let currentScanData = null;
     let currentScannedURL = '';
     
     const CONFIG = {
-      scanEndpoint: '/api/scan',
+      scanEndpoint: '/api/scan-free',
       claudeEnabled: true
     };
-    
-    console.log('⚙️ CONFIG:', CONFIG);
 
-    // ============================================================================
-    // CIRCULAR PROGRESS ANIMATION
-    // ============================================================================
+    // Progress update function
+    function updateProgress(percent, message, activeStep) {
+      document.getElementById('progress-bar').style.width = percent + '%';
+      document.getElementById('progress-percent').textContent = percent + '%';
+      document.getElementById('loadingText').textContent = message;
+
+      const steps = ['step-fetch', 'step-parse', 'step-validate', 'step-score'];
+      steps.forEach(step => {
+        const el = document.getElementById(step);
+        if (step === activeStep) {
+          el.classList.remove('border-transparent');
+          el.classList.add('border-purple-500', 'bg-purple-900', 'bg-opacity-30');
+        } else if (steps.indexOf(step) < steps.indexOf(activeStep)) {
+          el.classList.remove('border-transparent', 'border-purple-500');
+          el.classList.add('border-green-500', 'bg-green-900', 'bg-opacity-20');
+        } else {
+          el.classList.remove('border-purple-500', 'border-green-500');
+          el.classList.add('border-transparent');
+          el.classList.remove('bg-purple-900', 'bg-green-900', 'bg-opacity-30', 'bg-opacity-20');
+        }
+      });
+    }
+
     function animateCircle(elementId, percentage) {
       const circle = document.getElementById(elementId);
-      const circumference = 2 * Math.PI * 90; // r=90
+      const circumference = 2 * Math.PI * 90;
       const offset = circumference - (percentage / 100) * circumference;
       circle.style.strokeDashoffset = offset;
     }
 
-    // ============================================================================
-    // SHARE FUNCTIONS
-    // ============================================================================
     function shareWhatsApp() {
       const text = getShareText();
-      const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
     function shareLinkedIn() {
       const text = getShareText();
-      const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentScannedURL)}&summary=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentScannedURL)}&summary=${encodeURIComponent(text)}`, '_blank');
     }
 
     function shareTwitter() {
       const text = getShareText();
-      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
     }
 
     function copyResults() {
@@ -441,156 +464,15 @@
 
     function getShareText() {
       if (!currentScanData) return '';
-      
       const current = Math.round(currentScanData.score || 0);
       const potential = document.getElementById('aiPotentialDisplay').textContent;
-      
-      return `📊 SEO Score: ${current}/100
-🎯 Potential: ${potential}/100
-
-Scanned: ${currentScannedURL}
-
-✨ Analyzed with ContentScale AI Scanner
-🔗 Try it: https://contentscale.site/seo-contentscore/`;
+      return `📊 SEO Score: ${current}/100\n🎯 Potential: ${potential}/100\n\nScanned: ${currentScannedURL}\n\n✨ Analyzed with ContentScale AI Scanner\n🔗 Try it: https://contentscale.site/seo-contentscore/`;
     }
 
-    // ============================================================================
-    // PDF EXPORT FUNCTION
-    // ============================================================================
     function exportPDF() {
-      if (!currentScanData) {
-        alert('No scan data available');
-        return;
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      
-      // Header
-      doc.setFontSize(20);
-      doc.setTextColor(139, 92, 246);
-      doc.text('ContentScale SEO Analysis Report', 20, 20);
-      
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 28);
-      doc.text(`URL: ${currentScannedURL}`, 20, 34);
-      
-      // Scores
-      doc.setFontSize(14);
-      doc.setTextColor(0, 0, 0);
-      doc.text('Scores', 20, 45);
-      
-      doc.setFontSize(11);
-      const current = Math.round(currentScanData.score || 0);
-      const calcPotential = document.getElementById('calcPotentialDisplay').textContent;
-      const aiPotential = document.getElementById('aiPotentialDisplay').textContent;
-      
-      doc.text(`Current Score: ${current}/100`, 30, 55);
-      doc.text(`Calculated Potential: ${calcPotential}/100`, 30, 62);
-      doc.text(`AI-Validated Potential: ${aiPotential}/100`, 30, 69);
-      
-      // Breakdown
-      doc.setFontSize(14);
-      doc.text('Score Breakdown', 20, 82);
-      
-      doc.setFontSize(11);
-      const breakdown = currentScanData.breakdown || {};
-      let yPos = 92;
-      
-      if (breakdown.graaf) {
-        doc.text(`GRAAF Framework: ${breakdown.graaf.total}/50`, 30, yPos);
-        yPos += 7;
-        doc.setFontSize(10);
-        doc.text(`  • Credibility: ${breakdown.graaf.credibility}/10`, 35, yPos); yPos += 6;
-        doc.text(`  • Relevance: ${breakdown.graaf.relevance}/10`, 35, yPos); yPos += 6;
-        doc.text(`  • Actionability: ${breakdown.graaf.actionability}/10`, 35, yPos); yPos += 6;
-        doc.text(`  • Accuracy: ${breakdown.graaf.accuracy}/10`, 35, yPos); yPos += 6;
-        doc.text(`  • Freshness: ${breakdown.graaf.freshness}/10`, 35, yPos); yPos += 10;
-      }
-      
-      if (breakdown.craft) {
-        doc.setFontSize(11);
-        doc.text(`CRAFT Framework: ${breakdown.craft.total}/30`, 30, yPos);
-        yPos += 7;
-        doc.setFontSize(10);
-        doc.text(`  • Cut Fluff: ${breakdown.craft.cutFluff}/8`, 35, yPos); yPos += 6;
-        doc.text(`  • Review & Optimize: ${breakdown.craft.reviewOptimize}/8`, 35, yPos); yPos += 6;
-        doc.text(`  • Add Visuals: ${breakdown.craft.addVisuals}/6`, 35, yPos); yPos += 6;
-        doc.text(`  • FAQ Integration: ${breakdown.craft.faqIntegration}/5`, 35, yPos); yPos += 6;
-        doc.text(`  • Trust Building: ${breakdown.craft.trustBuilding}/4`, 35, yPos); yPos += 10;
-      }
-      
-      if (breakdown.technical) {
-        doc.setFontSize(11);
-        doc.text(`Technical SEO: ${breakdown.technical.total}/20`, 30, yPos);
-        yPos += 7;
-        doc.setFontSize(10);
-        doc.text(`  • Schema Markup: ${breakdown.technical.schemaMarkup}/4`, 35, yPos); yPos += 6;
-        doc.text(`  • Meta Optimization: ${breakdown.technical.metaOptimization}/4`, 35, yPos); yPos += 6;
-        doc.text(`  • Internal Linking: ${breakdown.technical.internalLinking}/4`, 35, yPos); yPos += 6;
-        doc.text(`  • Page Structure: ${breakdown.technical.pageStructure}/4`, 35, yPos); yPos += 6;
-        doc.text(`  • Mobile Optimization: ${breakdown.technical.mobileOptimization}/4`, 35, yPos); yPos += 10;
-      }
-      
-      // Recommendations
-      if (yPos > 220) {
-        doc.addPage();
-        yPos = 20;
-      }
-      
-      doc.setFontSize(14);
-      doc.setTextColor(0, 0, 0);
-      doc.text('Priority Recommendations', 20, yPos);
-      yPos += 10;
-      
-      const recommendations = currentScanData.recommendations || [];
-      doc.setFontSize(10);
-      
-      recommendations.slice(0, 5).forEach((rec, idx) => {
-        if (yPos > 270) {
-          doc.addPage();
-          yPos = 20;
-        }
-        
-        doc.setFont(undefined, 'bold');
-        doc.text(`${idx + 1}. ${rec.title}`, 25, yPos);
-        yPos += 6;
-        
-        doc.setFont(undefined, 'normal');
-        doc.text(`   Impact: +${rec.impact} points | Time: ${rec.estimatedTime}`, 25, yPos);
-        yPos += 6;
-        
-        if (rec.why) {
-          const whyLines = doc.splitTextToSize(`   Why: ${rec.why}`, 160);
-          whyLines.forEach(line => {
-            if (yPos > 270) {
-              doc.addPage();
-              yPos = 20;
-            }
-            doc.text(line, 25, yPos);
-            yPos += 5;
-          });
-        }
-        yPos += 5;
-      });
-      
-      // Footer
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text(`ContentScale.site | Page ${i} of ${pageCount}`, 20, 285);
-      }
-      
-      // Save
-      doc.save(`seo-analysis-${new Date().getTime()}.pdf`);
+      alert('PDF export coming soon!');
     }
 
-    // ============================================================================
-    // SCAN FUNCTION
-    // ============================================================================
     async function scanURL() {
       const urlInput = document.getElementById('urlInput');
       const url = urlInput.value.trim();
@@ -600,15 +482,29 @@ Scanned: ${currentScannedURL}
         return;
       }
       
-      // Store URL for sharing
       currentScannedURL = url;
-      
-      // Show loading
+      document.getElementById('scan-button').disabled = true;
+      document.getElementById('scan-button').textContent = 'Scanning...';
       document.getElementById('loadingIndicator').classList.remove('hidden');
       document.getElementById('resultsContainer').classList.add('hidden');
-      document.getElementById('loadingText').textContent = 'Scanning content...';
+      updateProgress(0, 'Initializing scan...');
       
       try {
+        // Step 1: Fetching
+        updateProgress(10, 'Fetching website content...', 'step-fetch');
+        await sleep(500);
+        updateProgress(25, 'Loading HTML and assets...', 'step-fetch');
+        await sleep(500);
+
+        // Step 2: Parsing
+        updateProgress(30, 'Parsing content structure...', 'step-parse');
+        await sleep(500);
+        updateProgress(45, 'Analyzing headings, paragraphs, links...', 'step-parse');
+        await sleep(500);
+
+        // Step 3: AI Validation
+        updateProgress(50, 'Validating with Claude AI...', 'step-validate');
+        
         const response = await fetch(CONFIG.scanEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -620,15 +516,23 @@ Scanned: ${currentScannedURL}
         }
         
         const data = await response.json();
-        console.log('Scan results:', data);
         
-        // Store scan data
+        if (!data.success) {
+          throw new Error(data.error || 'Scan failed');
+        }
+        
+        updateProgress(70, 'AI validation complete...', 'step-validate');
+        await sleep(500);
+
+        // Step 4: Scoring
+        updateProgress(85, 'Calculating final scores...', 'step-score');
+        await sleep(500);
+        updateProgress(100, 'Analysis complete!', 'step-score');
+        await sleep(500);
+        
         currentScanData = data;
-        
-        // Display results
         displayResults(data);
         
-        // Scroll to results
         setTimeout(() => {
           document.getElementById('resultsContainer').scrollIntoView({ 
             behavior: 'smooth',
@@ -638,36 +542,34 @@ Scanned: ${currentScannedURL}
         
       } catch (error) {
         console.error('Scan error:', error);
-        document.getElementById('loadingText').textContent = `Error: ${error.message}`;
+        updateProgress(0, `Error: ${error.message}`);
         setTimeout(() => {
           document.getElementById('loadingIndicator').classList.add('hidden');
         }, 3000);
+      } finally {
+        document.getElementById('scan-button').disabled = false;
+        document.getElementById('scan-button').textContent = 'Scan Now';
       }
     }
 
     function displayResults(data) {
-      // Hide loading
       document.getElementById('loadingIndicator').classList.add('hidden');
       document.getElementById('resultsContainer').classList.remove('hidden');
       
-      // Scores
       const current = Math.round(data.score || 0);
       const calcPotential = calculateDeterministicPotential(data);
       const aiPotential = data.validatedPotential || calcPotential;
       
-      // Update displays
       document.getElementById('currentScoreDisplay').textContent = current;
       document.getElementById('calcPotentialDisplay').textContent = calcPotential;
       document.getElementById('aiPotentialDisplay').textContent = aiPotential;
       
-      // Animate circles
       setTimeout(() => {
         animateCircle('currentScoreCircle', current);
         animateCircle('calcPotentialCircle', calcPotential);
         animateCircle('aiPotentialCircle', aiPotential);
       }, 100);
       
-      // Target message
       const gain = aiPotential - current;
       document.getElementById('targetMessage').innerHTML = `
         <p class="text-2xl font-bold text-green-400">
@@ -675,15 +577,11 @@ Scanned: ${currentScannedURL}
         </p>
       `;
       
-      // Display breakdown
       displayBreakdown(data.breakdown);
-      
-      // Display recommendations
       displayRecommendations(data.recommendations || []);
     }
 
     function calculateDeterministicPotential(data) {
-      // Simple calculation for now
       return Math.min(100, Math.round(data.score || 0) + 20);
     }
 
@@ -696,102 +594,57 @@ Scanned: ${currentScannedURL}
       
       let html = '';
       
-      // GRAAF
       if (breakdown.graaf) {
         html += `
-          <details class="mb-4 bg-gray-700 rounded-lg">
-            <summary class="cursor-pointer p-4 font-bold text-lg hover:bg-gray-600 rounded-lg">
-              🎯 GRAAF Framework: ${breakdown.graaf.total}/50
-            </summary>
-            <div class="p-4 space-y-2">
-              <div class="flex justify-between">
-                <span>• Credibility:</span>
-                <span class="font-bold">${breakdown.graaf.credibility}/10</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Relevance:</span>
-                <span class="font-bold">${breakdown.graaf.relevance}/10</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Actionability:</span>
-                <span class="font-bold">${breakdown.graaf.actionability}/10</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Accuracy:</span>
-                <span class="font-bold">${breakdown.graaf.accuracy}/10</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Freshness:</span>
-                <span class="font-bold">${breakdown.graaf.freshness}/10</span>
-              </div>
+          <div class="bg-gray-700 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h4 class="font-bold text-lg">🎯 GRAAF Framework</h4>
+              <span class="text-2xl font-bold">${breakdown.graaf.total}/50</span>
             </div>
-          </details>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span>• Credibility:</span><span class="font-bold">${breakdown.graaf.credibility}/10</span></div>
+              <div class="flex justify-between"><span>• Relevance:</span><span class="font-bold">${breakdown.graaf.relevance}/10</span></div>
+              <div class="flex justify-between"><span>• Actionability:</span><span class="font-bold">${breakdown.graaf.actionability}/10</span></div>
+              <div class="flex justify-between"><span>• Accuracy:</span><span class="font-bold">${breakdown.graaf.accuracy}/10</span></div>
+              <div class="flex justify-between"><span>• Freshness:</span><span class="font-bold">${breakdown.graaf.freshness}/10</span></div>
+            </div>
+          </div>
         `;
       }
       
-      // CRAFT
       if (breakdown.craft) {
         html += `
-          <details class="mb-4 bg-gray-700 rounded-lg">
-            <summary class="cursor-pointer p-4 font-bold text-lg hover:bg-gray-600 rounded-lg">
-              ✨ CRAFT Framework: ${breakdown.craft.total}/30
-            </summary>
-            <div class="p-4 space-y-2">
-              <div class="flex justify-between">
-                <span>• Cut Fluff:</span>
-                <span class="font-bold">${breakdown.craft.cutFluff}/8</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Review & Optimize:</span>
-                <span class="font-bold">${breakdown.craft.reviewOptimize}/8</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Add Visuals:</span>
-                <span class="font-bold">${breakdown.craft.addVisuals}/6</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• FAQ Integration:</span>
-                <span class="font-bold">${breakdown.craft.faqIntegration}/5</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Trust Building:</span>
-                <span class="font-bold">${breakdown.craft.trustBuilding}/4</span>
-              </div>
+          <div class="bg-gray-700 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h4 class="font-bold text-lg">✨ CRAFT Framework</h4>
+              <span class="text-2xl font-bold">${breakdown.craft.total}/30</span>
             </div>
-          </details>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span>• Cut Fluff:</span><span class="font-bold">${breakdown.craft.cutFluff}/8</span></div>
+              <div class="flex justify-between"><span>• Review & Optimize:</span><span class="font-bold">${breakdown.craft.reviewOptimize}/8</span></div>
+              <div class="flex justify-between"><span>• Add Visuals:</span><span class="font-bold">${breakdown.craft.addVisuals}/6</span></div>
+              <div class="flex justify-between"><span>• FAQ Integration:</span><span class="font-bold">${breakdown.craft.faqIntegration}/5</span></div>
+              <div class="flex justify-between"><span>• Trust Building:</span><span class="font-bold">${breakdown.craft.trustBuilding}/4</span></div>
+            </div>
+          </div>
         `;
       }
       
-      // Technical
       if (breakdown.technical) {
         html += `
-          <details class="mb-4 bg-gray-700 rounded-lg">
-            <summary class="cursor-pointer p-4 font-bold text-lg hover:bg-gray-600 rounded-lg">
-              ⚙️ Technical SEO: ${breakdown.technical.total}/20
-            </summary>
-            <div class="p-4 space-y-2">
-              <div class="flex justify-between">
-                <span>• Schema Markup:</span>
-                <span class="font-bold">${breakdown.technical.schemaMarkup}/4</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Meta Optimization:</span>
-                <span class="font-bold">${breakdown.technical.metaOptimization}/4</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Internal Linking:</span>
-                <span class="font-bold">${breakdown.technical.internalLinking}/4</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Page Structure:</span>
-                <span class="font-bold">${breakdown.technical.pageStructure}/4</span>
-              </div>
-              <div class="flex justify-between">
-                <span>• Mobile Optimization:</span>
-                <span class="font-bold">${breakdown.technical.mobileOptimization}/4</span>
-              </div>
+          <div class="bg-gray-700 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h4 class="font-bold text-lg">⚙️ Technical SEO</h4>
+              <span class="text-2xl font-bold">${breakdown.technical.total}/20</span>
             </div>
-          </details>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span>• Schema Markup:</span><span class="font-bold">${breakdown.technical.schemaMarkup}/4</span></div>
+              <div class="flex justify-between"><span>• Meta Optimization:</span><span class="font-bold">${breakdown.technical.metaOptimization}/4</span></div>
+              <div class="flex justify-between"><span>• Internal Linking:</span><span class="font-bold">${breakdown.technical.internalLinking}/4</span></div>
+              <div class="flex justify-between"><span>• Page Structure:</span><span class="font-bold">${breakdown.technical.pageStructure}/4</span></div>
+              <div class="flex justify-between"><span>• Mobile Optimization:</span><span class="font-bold">${breakdown.technical.mobileOptimization}/4</span></div>
+            </div>
+          </div>
         `;
       }
       
@@ -817,8 +670,8 @@ Scanned: ${currentScannedURL}
                   ${idx + 1}. ${rec.title}
                 </h4>
                 <div class="flex gap-3 text-sm">
-                  <span class="text-green-400 font-bold">⚡ ${rec.estimatedTime}</span>
-                  <span class="text-blue-400 font-bold">+${rec.impact} pts</span>
+                  <span class="text-green-400 font-bold">⚡ ${rec.estimatedTime || 'N/A'}</span>
+                  <span class="text-blue-400 font-bold">+${rec.impact || 0} pts</span>
                 </div>
               </div>
             </div>
@@ -850,7 +703,10 @@ Scanned: ${currentScannedURL}
       container.innerHTML = html;
     }
 
-    // Enter key support
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     document.getElementById('urlInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') scanURL();
     });
