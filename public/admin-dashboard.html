@@ -81,6 +81,7 @@
           <button onclick="switchTab('leaderboard')" id="tab-leaderboard" class="tab-button">🏆 Leaderboard</button>
           <button onclick="switchTab('leadscanner')" id="tab-leadscanner" class="tab-button">🎯 Lead Scanner</button>
           <button onclick="switchTab('contentscore')" id="tab-contentscore" class="tab-button">📊 ContentScore</button>
+          <button onclick="switchTab('generators')" id="tab-generators" class="tab-button">🎨 Code Generators</button>
           <button onclick="switchTab('ltdcodes')" id="tab-ltdcodes" class="tab-button">💰 LTD Codes</button>
           <button onclick="switchTab('settings')" id="tab-settings" class="tab-button">⚙️ Settings</button>
         </div>
@@ -547,6 +548,210 @@
             frameborder="0"
             style="border: none;">
           </iframe>
+        </div>
+      </div>
+
+      <!-- CODE GENERATORS TAB -->
+      <div id="content-generators" class="tab-content hidden">
+        <h2 class="text-2xl font-bold mb-6">🎨 Code Generators</h2>
+        
+        <!-- BADGE GENERATOR -->
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+          <h3 class="text-xl font-bold mb-4">🏅 Verification Badge Generator</h3>
+          <p class="text-gray-400 text-sm mb-6">Create a compact verification badge for bottom corner placement</p>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Controls -->
+            <div>
+              <div class="mb-4">
+                <label class="block text-sm text-gray-400 mb-2">ContentScore (0-100)</label>
+                <input 
+                  type="number" 
+                  id="gen-badge-score" 
+                  min="0" 
+                  max="100" 
+                  value="92"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg"
+                  oninput="genUpdateBadgePreview()">
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-sm text-gray-400 mb-2">Badge Position</label>
+                <select 
+                  id="gen-badge-position"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg"
+                  onchange="genUpdateBadgePreview()">
+                  <option value="bottom-right">Bottom Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                  <option value="top-right">Top Right</option>
+                  <option value="top-left">Top Left</option>
+                </select>
+              </div>
+              
+              <div class="mb-4">
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" id="gen-badge-autoshow" checked class="w-4 h-4">
+                  <span class="text-sm text-gray-300">Auto-show on page load</span>
+                </label>
+              </div>
+              
+              <div class="mb-6">
+                <label class="block text-sm text-gray-400 mb-2">Show Delay (seconds)</label>
+                <input 
+                  type="number" 
+                  id="gen-badge-delay" 
+                  min="0" 
+                  max="10" 
+                  value="1"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg">
+              </div>
+              
+              <button 
+                onclick="genGenerateBadgeCode()"
+                class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-3 rounded-lg font-bold">
+                📋 Generate Badge Code
+              </button>
+            </div>
+            
+            <!-- Preview -->
+            <div>
+              <div class="bg-gray-700 rounded-lg p-6">
+                <h4 class="font-bold mb-4">👀 Live Preview</h4>
+                <div id="gen-badge-preview" class="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg" style="height: 300px; position: relative;">
+                  <div id="gen-preview-badge" style="position: absolute; bottom: 20px; right: 20px;">
+                    <div style="background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 16px 20px; display: flex; align-items: center; gap: 16px; max-width: 280px; border: 2px solid #e5e7eb;">
+                      <div style="position: relative; width: 60px; height: 60px;">
+                        <svg width="60" height="60" viewBox="0 0 60 60">
+                          <circle cx="30" cy="30" r="26" fill="none" stroke="#e5e7eb" stroke-width="5"></circle>
+                          <circle id="gen-preview-circle" cx="30" cy="30" r="26" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round" 
+                                  stroke-dasharray="163.36" stroke-dashoffset="16.34"
+                                  style="transform: rotate(-90deg); transform-origin: center;"></circle>
+                        </svg>
+                        <div id="gen-preview-score-num" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: 800; color: #1f2937;">92</div>
+                      </div>
+                      <div style="flex: 1;">
+                        <div style="font-size: 12px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">
+                          <span style="color: #22c55e;">✓</span> AI-Era SEO Verified
+                        </div>
+                        <div style="font-size: 10px; color: #6b7280; margin-bottom: 2px;">ContentScore:</div>
+                        <div id="gen-preview-rating" style="display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; background: #dcfce7; color: #166534;">EXCELLENT</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Code Output -->
+          <div id="gen-badge-code-output" class="hidden mt-6 bg-gray-900 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h4 class="font-bold">📄 Your Badge Code</h4>
+              <button onclick="genCopyBadgeCode()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-bold">
+                📋 Copy Code
+              </button>
+            </div>
+            <pre id="gen-badge-code" class="text-xs text-green-400 overflow-x-auto p-4 bg-black rounded"></pre>
+          </div>
+        </div>
+        
+        <!-- SCROLL BANNER GENERATOR -->
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <h3 class="text-xl font-bold mb-4">🎉 Scrolling Banner Generator</h3>
+          <p class="text-gray-400 text-sm mb-6">Create an eye-catching top banner with scrolling details</p>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Controls -->
+            <div>
+              <div class="mb-4">
+                <label class="block text-sm text-gray-400 mb-2">ContentScore (0-100)</label>
+                <input 
+                  type="number" 
+                  id="gen-scroll-score" 
+                  min="0" 
+                  max="100" 
+                  value="92"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg"
+                  oninput="genUpdateScrollPreview()">
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-sm text-gray-400 mb-2">Verification Date</label>
+                <input 
+                  type="text" 
+                  id="gen-scroll-date" 
+                  value="December 2024"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg"
+                  oninput="genUpdateScrollPreview()">
+              </div>
+              
+              <div class="mb-4">
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" id="gen-scroll-autoexpand" checked class="w-4 h-4" onchange="genUpdateScrollPreview()">
+                  <span class="text-sm text-gray-300">Auto-expand on page load</span>
+                </label>
+              </div>
+              
+              <div class="mb-6">
+                <label class="block text-sm text-gray-400 mb-2">Auto-Expand Delay (seconds)</label>
+                <input 
+                  type="number" 
+                  id="gen-scroll-delay" 
+                  min="0" 
+                  max="10" 
+                  value="2"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg"
+                  oninput="genUpdateScrollPreview()">
+              </div>
+              
+              <button 
+                onclick="genGenerateScrollCode()"
+                class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 py-3 rounded-lg font-bold">
+                📋 Generate Banner Code
+              </button>
+            </div>
+            
+            <!-- Preview -->
+            <div>
+              <div class="bg-gray-700 rounded-lg p-6">
+                <h4 class="font-bold mb-4">👀 Live Preview</h4>
+                <div id="gen-scroll-preview-container" style="background: #f9fafb; border-radius: 8px; overflow: hidden; min-height: 120px;">
+                  <div id="gen-scroll-preview-header" 
+                       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;"
+                       onclick="genToggleScrollPreview()">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <span style="font-size: 16px; color: white;">✓</span>
+                      <div>
+                        <div style="font-size: 12px; font-weight: 700; color: white;">AI-Era SEO Verified</div>
+                        <div style="font-size: 10px; color: rgba(255,255,255,0.9);">ContentScore: <span id="gen-preview-scroll-score">92</span> • Click details</div>
+                      </div>
+                    </div>
+                    <button id="gen-scroll-toggle-btn" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 26px; height: 26px; border-radius: 5px; font-weight: bold; font-size: 14px;">▼</button>
+                  </div>
+                  <div id="gen-scroll-preview-content" style="height: 0; overflow: hidden; transition: height 0.3s ease;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px;">
+                      <div style="font-size: 11px; color: white; font-weight: 600;">
+                        <span>✓ AI-Era SEO Verified</span> •
+                        <span>ContentScore: <span id="gen-preview-scroll-rating">92 EXCELLENT</span></span> •
+                        <span id="gen-preview-scroll-date-display">December 2024</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Code Output -->
+          <div id="gen-scroll-code-output" class="hidden mt-6 bg-gray-900 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h4 class="font-bold">📄 Your Banner Code</h4>
+              <button onclick="genCopyScrollCode()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-bold">
+                📋 Copy Code
+              </button>
+            </div>
+            <pre id="gen-scroll-code" class="text-xs text-green-400 overflow-x-auto p-4 bg-black rounded"></pre>
+          </div>
         </div>
       </div>
 
@@ -1062,6 +1267,7 @@
 
   <script>
     let adminUsername = null;
+    let genScrollPreviewExpanded = false;
 
     // Load on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -1071,6 +1277,10 @@
       if (loggedIn === 'true' && username) {
         showDashboard(username);
       }
+      
+      // Initialize generator previews
+      genUpdateBadgePreview();
+      genUpdateScrollPreview();
     });
 
     // ===========================================
@@ -1931,6 +2141,227 @@ Created: ${new Date(link.created_at).toLocaleString()}
       if (score >= 70) return 'text-yellow-400';
       if (score >= 60) return 'text-orange-400';
       return 'text-red-400';
+    }
+
+    // ===========================================
+    // CODE GENERATORS FUNCTIONS
+    // ===========================================
+    
+    function genUpdateBadgePreview() {
+      const score = parseInt(document.getElementById('gen-badge-score').value) || 0;
+      const position = document.getElementById('gen-badge-position').value;
+      
+      document.getElementById('gen-preview-score-num').textContent = score;
+      
+      const circumference = 2 * Math.PI * 26;
+      const offset = circumference - (score / 100) * circumference;
+      const circle = document.getElementById('gen-preview-circle');
+      circle.style.strokeDashoffset = offset;
+      
+      let rating = '', color = '', bgColor = '', textColor = '';
+      
+      if (score >= 90) {
+        rating = 'EXCELLENT';
+        color = '#22c55e';
+        bgColor = '#dcfce7';
+        textColor = '#166534';
+      } else if (score >= 80) {
+        rating = 'GOOD';
+        color = '#3b82f6';
+        bgColor = '#dbeafe';
+        textColor = '#1e40af';
+      } else if (score >= 70) {
+        rating = 'AVERAGE';
+        color = '#f59e0b';
+        bgColor = '#fef3c7';
+        textColor = '#92400e';
+      } else if (score >= 60) {
+        rating = 'FAIR';
+        color = '#fb923c';
+        bgColor = '#fed7aa';
+        textColor = '#9a3412';
+      } else {
+        rating = 'POOR';
+        color = '#ef4444';
+        bgColor = '#fee2e2';
+        textColor = '#991b1b';
+      }
+      
+      circle.style.stroke = color;
+      document.getElementById('gen-preview-rating').textContent = rating;
+      document.getElementById('gen-preview-rating').style.background = bgColor;
+      document.getElementById('gen-preview-rating').style.color = textColor;
+      
+      const badge = document.getElementById('gen-preview-badge');
+      badge.style.bottom = 'auto';
+      badge.style.top = 'auto';
+      badge.style.left = 'auto';
+      badge.style.right = 'auto';
+      
+      switch(position) {
+        case 'bottom-right':
+          badge.style.bottom = '20px';
+          badge.style.right = '20px';
+          break;
+        case 'bottom-left':
+          badge.style.bottom = '20px';
+          badge.style.left = '20px';
+          break;
+        case 'top-right':
+          badge.style.top = '20px';
+          badge.style.right = '20px';
+          break;
+        case 'top-left':
+          badge.style.top = '20px';
+          badge.style.left = '20px';
+          break;
+      }
+    }
+    
+    function genGenerateBadgeCode() {
+      const score = document.getElementById('gen-badge-score').value;
+      const position = document.getElementById('gen-badge-position').value;
+      const autoShow = document.getElementById('gen-badge-autoshow').checked;
+      const delay = document.getElementById('gen-badge-delay').value;
+      
+      const code = `<!-- ContentScale Verification Badge - Score: ${score} -->
+<style>
+  #csVerifyBadge{position:fixed;z-index:999999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+  .cs-badge-card{background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all 0.3s;border:2px solid #e5e7eb;max-width:320px}
+  .cs-badge-card:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,0,0,0.2);border-color:#8b5cf6}
+  @media(max-width:768px){#csVerifyBadge{bottom:10px!important;right:10px!important;left:10px!important}}
+</style>
+
+<div id="csVerifyBadge">
+  <div class="cs-badge-card" onclick="window.open('https://contentscale.site','_blank')">
+    <button onclick="event.stopPropagation();document.getElementById('csVerifyBadge').style.display='none'" style="position:absolute;top:8px;right:8px;background:#f3f4f6;border:none;border-radius:6px;width:24px;height:24px;cursor:pointer;color:#6b7280">×</button>
+    <div style="position:relative;width:70px;height:70px">
+      <svg width="70" height="70"><circle cx="35" cy="35" r="31" fill="none" stroke="#e5e7eb" stroke-width="6"></circle><circle cx="35" cy="35" r="31" fill="none" stroke="#22c55e" stroke-width="6" stroke-linecap="round" stroke-dasharray="194.78" stroke-dashoffset="194.78" style="transform:rotate(-90deg);transform-origin:center"></circle></svg>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:800;color:#1f2937">${score}</div>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700;color:#1f2937"><span style="color:#22c55e">✓</span> AI-Era SEO Verified</div>
+      <div style="font-size:11px;color:#6b7280">ContentScore: ${score >= 90 ? 'EXCELLENT' : score >= 80 ? 'GOOD' : score >= 70 ? 'AVERAGE' : score >= 60 ? 'FAIR' : 'POOR'}</div>
+      <div style="font-size:10px;color:#9ca3af;margin-top:4px">by <a href="https://contentscale.site" style="color:#8b5cf6;font-weight:600">ContentScale</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CS_BADGE_CONFIG={score:${score},position:'${position}',autoShow:${autoShow},showDelay:${parseInt(delay)*1000}};
+function csInitBadge(){const b=document.getElementById('csVerifyBadge');if(!b)return;const pos={'bottom-right':{bottom:'20px',right:'20px'},'bottom-left':{bottom:'20px',left:'20px'},'top-right':{top:'20px',right:'20px'},'top-left':{top:'20px',left:'20px'}};Object.assign(b.style,pos[CS_BADGE_CONFIG.position]||pos['bottom-right']);if(CS_BADGE_CONFIG.autoShow)setTimeout(()=>{b.style.display='block';const c=b.querySelector('circle:last-child'),circ=194.78,off=circ-(CS_BADGE_CONFIG.score/100)*circ;c.style.strokeDashoffset=off},CS_BADGE_CONFIG.showDelay)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',csInitBadge);else csInitBadge();
+<\/script>`;
+      
+      document.getElementById('gen-badge-code-output').classList.remove('hidden');
+      document.getElementById('gen-badge-code').textContent = code;
+    }
+    
+    function genCopyBadgeCode() {
+      const code = document.getElementById('gen-badge-code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('✅ Badge code copied to clipboard!');
+      }).catch(() => {
+        alert('❌ Copy failed. Please copy manually.');
+      });
+    }
+    
+    function genToggleScrollPreview() {
+      genScrollPreviewExpanded = !genScrollPreviewExpanded;
+      const content = document.getElementById('gen-scroll-preview-content');
+      const btn = document.getElementById('gen-scroll-toggle-btn');
+      
+      if (genScrollPreviewExpanded) {
+        content.style.height = '50px';
+        btn.textContent = '▲';
+      } else {
+        content.style.height = '0';
+        btn.textContent = '▼';
+      }
+    }
+    
+    function genUpdateScrollPreview() {
+      const score = parseInt(document.getElementById('gen-scroll-score').value) || 0;
+      const date = document.getElementById('gen-scroll-date').value;
+      
+      document.getElementById('gen-preview-scroll-score').textContent = score;
+      document.getElementById('gen-preview-scroll-date-display').textContent = date;
+      
+      let rating = '';
+      if (score >= 90) rating = score + ' EXCELLENT';
+      else if (score >= 80) rating = score + ' GOOD';
+      else if (score >= 70) rating = score + ' AVERAGE';
+      else if (score >= 60) rating = score + ' FAIR';
+      else rating = score + ' POOR';
+      
+      document.getElementById('gen-preview-scroll-rating').textContent = rating;
+    }
+    
+    function genGenerateScrollCode() {
+      const score = document.getElementById('gen-scroll-score').value;
+      const date = document.getElementById('gen-scroll-date').value;
+      const autoExpand = document.getElementById('gen-scroll-autoexpand').checked;
+      const delay = document.getElementById('gen-scroll-delay').value;
+      
+      const scoreNum = parseInt(score);
+      let rating = '';
+      if (scoreNum >= 90) rating = 'EXCELLENT';
+      else if (scoreNum >= 80) rating = 'GOOD';
+      else if (scoreNum >= 70) rating = 'AVERAGE';
+      else if (scoreNum >= 60) rating = 'FAIR';
+      else rating = 'POOR';
+      
+      const code = `<!-- ContentScale Scroll Banner - Score: ${score}, Date: ${date} -->
+<style>
+  #csScrollBanner{position:fixed;top:0;left:0;right:0;z-index:999999;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);box-shadow:0 4px 12px rgba(0,0,0,0.3);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;transition:all 0.3s}
+  #csScrollBanner.collapsed{height:45px!important}
+  #csScrollBanner.expanded{height:105px!important}
+  .cs-scroll-wrapper{height:0;overflow:hidden;transition:height 0.3s}
+  #csScrollBanner.expanded .cs-scroll-wrapper{height:60px}
+  body.has-cs-scroll{padding-top:45px!important}
+  body.has-cs-scroll.cs-scroll-expanded{padding-top:105px!important}
+</style>
+
+<div id="csScrollBanner" class="collapsed">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:45px;cursor:pointer" onclick="csToggleScroll()">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:20px;color:white">✓</span>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:white">AI-Era SEO Verified</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.9)">ContentScore: ${score} • Click details</div>
+      </div>
+    </div>
+    <button id="csScrollToggleBtn" onclick="event.stopPropagation();csToggleScroll()" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:6px;font-weight:bold">▼</button>
+  </div>
+  <div class="cs-scroll-wrapper">
+    <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:16px">
+      <div style="white-space:nowrap;color:white;font-weight:600;font-size:14px">
+        <span>✓ AI-Era SEO Verified</span> • <span>ContentScore: ${score} ${rating}</span> • <span>✨ AI Optimized</span> • <span>🎯 GRAAF Framework™</span> • <span>📅 Verified: ${date}</span> • <span>Powered by ContentScale.site</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CS_SCROLL_CONFIG={autoExpand:${autoExpand},expandDelay:${parseInt(delay)*1000}};
+function csInitScroll(){const b=document.getElementById('csScrollBanner');if(!b)return;document.body.classList.add('has-cs-scroll');if(CS_SCROLL_CONFIG.autoExpand)setTimeout(()=>csExpandScroll(),CS_SCROLL_CONFIG.expandDelay)}
+function csToggleScroll(){document.getElementById('csScrollBanner').classList.contains('expanded')?csCollapseScroll():csExpandScroll()}
+function csExpandScroll(){const b=document.getElementById('csScrollBanner');b.classList.remove('collapsed');b.classList.add('expanded');document.getElementById('csScrollToggleBtn').textContent='▲';document.body.classList.add('cs-scroll-expanded')}
+function csCollapseScroll(){const b=document.getElementById('csScrollBanner');b.classList.remove('expanded');b.classList.add('collapsed');document.getElementById('csScrollToggleBtn').textContent='▼';document.body.classList.remove('cs-scroll-expanded')}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',csInitScroll);else csInitScroll();
+<\/script>`;
+      
+      document.getElementById('gen-scroll-code-output').classList.remove('hidden');
+      document.getElementById('gen-scroll-code').textContent = code;
+    }
+    
+    function genCopyScrollCode() {
+      const code = document.getElementById('gen-scroll-code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('✅ Banner code copied to clipboard!');
+      }).catch(() => {
+        alert('❌ Copy failed. Please copy manually.');
+      });
     }
   </script>
 
