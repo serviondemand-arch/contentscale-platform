@@ -3,6 +3,7 @@
 // Hybrid AI Scoring System with Admin Management
 // + SHARE LINK SYSTEM
 // + WORD COUNT FIX
+// + ADMIN PASSWORD_HASH FIX
 // ==========================================
 
 require('dotenv').config();
@@ -630,14 +631,17 @@ app.post('/api/admins', authenticateSuperAdmin, async (req, res) => {
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    // FIX: Changed 'password' to 'password_hash'
     const result = await pool.query(`
       INSERT INTO admins (
-        username, password, role, full_name, email,
+        username, password_hash, role, full_name, email,
         is_active, created_at
       )
       VALUES ($1, $2, $3, $4, $5, true, NOW())
       RETURNING id, username, role, full_name, email, created_at
     `, [username, hashedPassword, role, full_name || null, email || null]);
+    
+    console.log(`✅ Admin created: ${username} (${role})`);
     
     res.json({
       success: true,
@@ -683,7 +687,8 @@ app.put('/api/admins/:id', authenticateSuperAdmin, async (req, res) => {
     
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
-      updates.push(`password = $${paramCount}`);
+      // FIX: Changed 'password' to 'password_hash'
+      updates.push(`password_hash = $${paramCount}`);
       values.push(hashedPassword);
       paramCount++;
     }
@@ -838,9 +843,10 @@ app.post('/api/admins/:id/reset-password', authenticateSuperAdmin, async (req, r
     
     const hashedPassword = await bcrypt.hash(new_password, 10);
     
+    // FIX: Changed 'password' to 'password_hash'
     const result = await pool.query(`
       UPDATE admins 
-      SET password = $1
+      SET password_hash = $1
       WHERE id = $2
       RETURNING id, username
     `, [hashedPassword, id]);
@@ -851,6 +857,8 @@ app.post('/api/admins/:id/reset-password', authenticateSuperAdmin, async (req, r
         error: 'Admin not found'
       });
     }
+    
+    console.log(`✅ Password reset for admin: ${result.rows[0].username}`);
     
     res.json({
       success: true,
@@ -1475,6 +1483,8 @@ app.post('/api/agencies', authenticateSuperAdmin, async (req, res) => {
       is_active !== false
     ]);
     
+    console.log(`✅ Agency created: ${name} with key ${adminKey}`);
+    
     res.json({
       success: true,
       message: 'Agency created successfully',
@@ -1873,6 +1883,7 @@ app.listen(PORT, '0.0.0.0', () => {
 ║ ✅ Share Links for Scans                                  ║
 ║ ✅ Lead Generation System                                 ║
 ║ ✅ Word Count Tracking                                    ║
+║ ✅ ADMIN PASSWORD_HASH FIX APPLIED                        ║
 ║                                                            ║
 ║ 📊 ALL ENDPOINTS OPERATIONAL!                             ║
 ╚═══════════════════════════════════════════════════════════╝
