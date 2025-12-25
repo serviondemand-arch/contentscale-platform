@@ -220,71 +220,31 @@
           </div>
         </div>
 
-        <!-- Circular Score Visualization -->
-        <div class="grid md:grid-cols-3 gap-6 mb-8">
-          <!-- Current Score Circle -->
-          <div class="text-center">
-            <div class="score-circle">
-              <svg width="200" height="200">
-                <circle class="score-circle-bg" cx="100" cy="100" r="90"></circle>
-                <circle id="currentScoreCircle" class="score-circle-progress" cx="100" cy="100" r="90" 
-                        stroke="#FBBF24" 
-                        stroke-dasharray="565.48" 
-                        stroke-dashoffset="565.48"></circle>
-              </svg>
-              <div class="score-circle-text">
-                <div class="text-5xl font-bold text-yellow-400" id="currentScoreDisplay">--</div>
-                <div class="text-sm text-gray-400">Current</div>
-              </div>
-            </div>
-            <div class="mt-3">
-              <span class="hybrid-badge deterministic">Backend Scan</span>
+        <!-- Single Big Score Circle -->
+        <div class="text-center mb-8">
+          <div style="width: 250px; height: 250px; position: relative; margin: 0 auto;">
+            <svg width="250" height="250" style="transform: rotate(-90deg);">
+              <circle cx="125" cy="125" r="110" stroke="#374151" stroke-width="25" fill="none"></circle>
+              <circle id="mainScoreCircle" cx="125" cy="125" r="110" 
+                      stroke="#A78BFA" 
+                      stroke-width="25" 
+                      fill="none"
+                      stroke-linecap="round"
+                      stroke-dasharray="691" 
+                      stroke-dashoffset="691"
+                      style="transition: stroke-dashoffset 1.5s ease-in-out;"></circle>
+            </svg>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+              <div class="text-7xl font-bold text-purple-400" id="mainScoreDisplay">--</div>
+              <div class="text-sm text-gray-400 mt-2">/ 100</div>
             </div>
           </div>
-
-          <!-- Calculated Potential Circle -->
-          <div class="text-center">
-            <div class="score-circle">
-              <svg width="200" height="200">
-                <circle class="score-circle-bg" cx="100" cy="100" r="90"></circle>
-                <circle id="calcPotentialCircle" class="score-circle-progress" cx="100" cy="100" r="90" 
-                        stroke="#60A5FA" 
-                        stroke-dasharray="565.48" 
-                        stroke-dashoffset="565.48"></circle>
-              </svg>
-              <div class="score-circle-text">
-                <div class="text-5xl font-bold text-blue-400" id="calcPotentialDisplay">--</div>
-                <div class="text-sm text-gray-400">Calculated</div>
-              </div>
-            </div>
-            <div class="mt-3">
-              <span class="hybrid-badge deterministic">Formulas</span>
-            </div>
-          </div>
-
-          <!-- AI-Validated Potential Circle -->
-          <div class="text-center">
-            <div class="score-circle">
-              <svg width="200" height="200">
-                <circle class="score-circle-bg" cx="100" cy="100" r="90"></circle>
-                <circle id="aiPotentialCircle" class="score-circle-progress" cx="100" cy="100" r="90" 
-                        stroke="#A78BFA" 
-                        stroke-dasharray="565.48" 
-                        stroke-dashoffset="565.48"></circle>
-              </svg>
-              <div class="score-circle-text">
-                <div class="text-5xl font-bold text-purple-400" id="aiPotentialDisplay">--</div>
-                <div class="text-sm text-gray-400">AI-Validated</div>
-              </div>
-            </div>
-            <div class="mt-3">
-              <span class="hybrid-badge ai-validated">Claude AI</span>
-            </div>
+          
+          <div class="mt-6">
+            <h3 class="text-2xl font-bold text-white mb-2">AI-Era SEO Content Score</h3>
+            <p class="text-gray-400">Powered by GRAAF + CRAFT frameworks with Claude AI validation</p>
           </div>
         </div>
-
-        <!-- Target Message -->
-        <div id="targetMessage" class="text-center pt-3 border-t border-gray-700 text-lg"></div>
       </div>
 
       <!-- Score Breakdown - ALWAYS OPEN -->
@@ -398,9 +358,10 @@
 
   <script>
     console.log('%c🎯 ContentScale Scanner - FIXED VERSION', 'color: #10b981; font-size: 16px; font-weight: bold');
-    console.log('%c✅ Score breakdown ALWAYS OPEN', 'color: #10b981');
+    console.log('%c✅ Single AI-Era score circle', 'color: #10b981');
+    console.log('%c✅ Recommendations AUTO-GENERATED from breakdown', 'color: #10b981');
     console.log('%c✅ Interactive progress bar', 'color: #10b981');
-    console.log('%c✅ Recommendations fixed', 'color: #10b981');
+    console.log('%c✅ Score breakdown ALWAYS OPEN', 'color: #10b981');
     
     let currentScanData = null;
     let currentScannedURL = '';
@@ -464,9 +425,8 @@
 
     function getShareText() {
       if (!currentScanData) return '';
-      const current = Math.round(currentScanData.score || 0);
-      const potential = document.getElementById('aiPotentialDisplay').textContent;
-      return `📊 SEO Score: ${current}/100\n🎯 Potential: ${potential}/100\n\nScanned: ${currentScannedURL}\n\n✨ Analyzed with ContentScale AI Scanner\n🔗 Try it: https://contentscale.site/seo-contentscore/`;
+      const score = Math.round(currentScanData.score || 0);
+      return `📊 My AI-Era SEO Content Score: ${score}/100\n\nScanned: ${currentScannedURL}\n\n✨ Analyzed with ContentScale AI Scanner\n🔗 Try it: https://contentscale.site/seo-contentscore/`;
     }
 
     function exportPDF() {
@@ -556,29 +516,227 @@
       document.getElementById('loadingIndicator').classList.add('hidden');
       document.getElementById('resultsContainer').classList.remove('hidden');
       
-      const current = Math.round(data.score || 0);
-      const calcPotential = calculateDeterministicPotential(data);
-      const aiPotential = data.validatedPotential || calcPotential;
+      const score = Math.round(data.score || 0);
       
-      document.getElementById('currentScoreDisplay').textContent = current;
-      document.getElementById('calcPotentialDisplay').textContent = calcPotential;
-      document.getElementById('aiPotentialDisplay').textContent = aiPotential;
+      // Update main score
+      document.getElementById('mainScoreDisplay').textContent = score;
       
+      // Animate circle
+      const circumference = 2 * Math.PI * 110; // r=110
+      const offset = circumference - (score / 100) * circumference;
+      const circle = document.getElementById('mainScoreCircle');
       setTimeout(() => {
-        animateCircle('currentScoreCircle', current);
-        animateCircle('calcPotentialCircle', calcPotential);
-        animateCircle('aiPotentialCircle', aiPotential);
+        circle.style.strokeDashoffset = offset;
+        
+        // Change color based on score
+        if (score >= 90) {
+          circle.setAttribute('stroke', '#10b981'); // green
+        } else if (score >= 80) {
+          circle.setAttribute('stroke', '#3b82f6'); // blue
+        } else if (score >= 70) {
+          circle.setAttribute('stroke', '#f59e0b'); // yellow
+        } else if (score >= 60) {
+          circle.setAttribute('stroke', '#f97316'); // orange
+        } else {
+          circle.setAttribute('stroke', '#ef4444'); // red
+        }
       }, 100);
       
-      const gain = aiPotential - current;
-      document.getElementById('targetMessage').innerHTML = `
-        <p class="text-2xl font-bold text-green-400">
-          You can gain ${gain} points to reach ${aiPotential}/100
-        </p>
-      `;
-      
       displayBreakdown(data.breakdown);
-      displayRecommendations(data.recommendations || []);
+      
+      // ALWAYS generate recommendations based on scores
+      const generatedRecs = generateRecommendations(data.breakdown);
+      displayRecommendations(generatedRecs);
+    }
+
+    function generateRecommendations(breakdown) {
+      const recommendations = [];
+      
+      if (!breakdown) {
+        return [{
+          title: 'Scan Complete',
+          impact: 0,
+          estimatedTime: 'N/A',
+          why: 'Unable to generate recommendations - no breakdown data available',
+          how: 'Please try scanning again',
+          realWorldBenefit: 'N/A'
+        }];
+      }
+      
+      // GRAAF Framework recommendations
+      if (breakdown.graaf) {
+        const graaf = breakdown.graaf;
+        
+        if ((graaf.credibility || 0) < 8) {
+          recommendations.push({
+            title: 'Improve Content Credibility',
+            impact: Math.round((10 - (graaf.credibility || 0)) * 2),
+            estimatedTime: '2-3 hours',
+            why: 'Search engines prioritize trustworthy content. Low credibility signals can hurt your rankings and click-through rates.',
+            how: 'Add authoritative sources, expert quotes, case studies, and verifiable data. Include author credentials and link to reputable external sources.',
+            realWorldBenefit: 'Increased trust from both search engines and readers, leading to higher rankings and better conversion rates.'
+          });
+        }
+        
+        if ((graaf.freshness || 0) < 7) {
+          recommendations.push({
+            title: 'Update Content with Recent Information',
+            impact: Math.round((10 - (graaf.freshness || 0)) * 1.5),
+            estimatedTime: '1-2 hours',
+            why: 'Google favors fresh, up-to-date content. Outdated statistics and examples can signal that your content is stale.',
+            how: 'Add 2024/2025 data, recent developments, current statistics, and update any outdated references. Include publication/update dates.',
+            realWorldBenefit: 'Better visibility for time-sensitive queries and improved relevance signals to search engines.'
+          });
+        }
+        
+        if ((graaf.actionability || 0) < 7) {
+          recommendations.push({
+            title: 'Add More Actionable Steps',
+            impact: Math.round((10 - (graaf.actionability || 0)) * 1.8),
+            estimatedTime: '2-4 hours',
+            why: 'Users and AI Overviews prefer content that provides clear, practical next steps. Actionable content increases engagement and dwell time.',
+            how: 'Include step-by-step guides, how-to instructions, practical examples, templates, and specific implementation advice.',
+            realWorldBenefit: 'Higher engagement, longer time on page, and better chances of being featured in AI Overviews and featured snippets.'
+          });
+        }
+        
+        if ((graaf.relevance || 0) < 8) {
+          recommendations.push({
+            title: 'Improve Topic Relevance',
+            impact: Math.round((10 - (graaf.relevance || 0)) * 1.5),
+            estimatedTime: '1-2 hours',
+            why: 'Content must directly address user intent. Irrelevant tangents dilute your topic focus and confuse search engines.',
+            how: 'Focus on your primary topic, remove off-topic sections, add relevant subtopics, and ensure every paragraph serves the main theme.',
+            realWorldBenefit: 'Better keyword rankings and improved topical authority in your niche.'
+          });
+        }
+        
+        if ((graaf.accuracy || 0) < 8) {
+          recommendations.push({
+            title: 'Ensure Factual Accuracy',
+            impact: Math.round((10 - (graaf.accuracy || 0)) * 2),
+            estimatedTime: '2-3 hours',
+            why: 'Inaccurate information damages credibility and can lead to loss of rankings if reported or flagged.',
+            how: 'Fact-check all claims, cite original sources, remove speculation, verify statistics, and ensure technical accuracy.',
+            realWorldBenefit: 'Protected reputation, sustained rankings, and increased user trust.'
+          });
+        }
+      }
+      
+      // CRAFT Framework recommendations
+      if (breakdown.craft) {
+        const craft = breakdown.craft;
+        
+        if ((craft.cutFluff || 0) < 6) {
+          recommendations.push({
+            title: 'Cut Unnecessary Fluff and Filler',
+            impact: Math.round((8 - (craft.cutFluff || 0)) * 1.5),
+            estimatedTime: '1-2 hours',
+            why: 'Users have short attention spans. Verbose content increases bounce rate and reduces engagement.',
+            how: 'Remove redundant sentences, cut introductory fluff, eliminate unnecessary adverbs, and get to the point faster.',
+            realWorldBenefit: 'Lower bounce rate, higher engagement, and better user satisfaction scores.'
+          });
+        }
+        
+        if ((craft.addVisuals || 0) < 4) {
+          recommendations.push({
+            title: 'Add More Visual Elements',
+            impact: Math.round((6 - (craft.addVisuals || 0)) * 2),
+            estimatedTime: '2-4 hours',
+            why: 'Visual content increases engagement by 94%. Images, charts, and diagrams improve understanding and retention.',
+            how: 'Add relevant images, create infographics, include charts/graphs, add screenshots, and ensure all images have descriptive alt text.',
+            realWorldBenefit: 'Increased time on page, better user experience, and potential for image search traffic.'
+          });
+        }
+        
+        if ((craft.faqIntegration || 0) < 4) {
+          recommendations.push({
+            title: 'Add FAQ Section',
+            impact: Math.round((5 - (craft.faqIntegration || 0)) * 2.5),
+            estimatedTime: '1-2 hours',
+            why: 'FAQ sections directly answer user questions, target "People Also Ask" features, and improve AI Overview eligibility.',
+            how: 'Research common questions in your niche, provide concise answers, use FAQ schema markup, and structure with clear Q&A format.',
+            realWorldBenefit: 'Featured snippet opportunities, AI Overview features, and direct answers to user queries.'
+          });
+        }
+        
+        if ((craft.trustBuilding || 0) < 3) {
+          recommendations.push({
+            title: 'Build Trust Signals',
+            impact: Math.round((4 - (craft.trustBuilding || 0)) * 2),
+            estimatedTime: '1-2 hours',
+            why: 'Trust signals reassure users and search engines about your authority and credibility.',
+            how: 'Add author bios with credentials, include customer testimonials, show certifications, add social proof, and display trust badges.',
+            realWorldBenefit: 'Higher conversion rates, improved E-E-A-T signals, and better brand perception.'
+          });
+        }
+      }
+      
+      // Technical SEO recommendations
+      if (breakdown.technical) {
+        const tech = breakdown.technical;
+        
+        if ((tech.schemaMarkup || 0) < 3) {
+          recommendations.push({
+            title: 'Implement Schema Markup',
+            impact: Math.round((4 - (tech.schemaMarkup || 0)) * 2.5),
+            estimatedTime: '1-3 hours',
+            why: 'Schema markup helps search engines understand your content structure and increases rich snippet eligibility.',
+            how: 'Add Article schema, FAQ schema, BreadcrumbList schema, and relevant structured data. Test with Google Rich Results Test.',
+            realWorldBenefit: 'Rich snippets in search results, better CTR, and improved visibility in AI Overviews.'
+          });
+        }
+        
+        if ((tech.metaOptimization || 0) < 3) {
+          recommendations.push({
+            title: 'Optimize Meta Tags',
+            impact: Math.round((4 - (tech.metaOptimization || 0)) * 2),
+            estimatedTime: '30 minutes',
+            why: 'Meta tags are the first thing users see in search results. Poor meta tags reduce click-through rates.',
+            how: 'Write compelling title tags (50-60 chars), descriptive meta descriptions (150-160 chars), and add Open Graph tags.',
+            realWorldBenefit: 'Improved CTR from search results, better social sharing previews, and clearer search intent matching.'
+          });
+        }
+        
+        if ((tech.internalLinking || 0) < 3) {
+          recommendations.push({
+            title: 'Improve Internal Linking Structure',
+            impact: Math.round((4 - (tech.internalLinking || 0)) * 1.5),
+            estimatedTime: '1-2 hours',
+            why: 'Internal links distribute page authority, help search engines discover content, and keep users engaged longer.',
+            how: 'Add 3-5 contextual internal links to related content, use descriptive anchor text, and link to both newer and older articles.',
+            realWorldBenefit: 'Better crawlability, distributed page authority, increased pageviews per session.'
+          });
+        }
+        
+        if ((tech.pageStructure || 0) < 3) {
+          recommendations.push({
+            title: 'Improve Page Structure',
+            impact: Math.round((4 - (tech.pageStructure || 0)) * 1.8),
+            estimatedTime: '2-3 hours',
+            why: 'Clear page structure helps both users and search engines understand your content hierarchy and main topics.',
+            how: 'Use proper H1-H6 hierarchy, ensure single H1, break content into logical sections, and use descriptive headings with keywords.',
+            realWorldBenefit: 'Better featured snippet eligibility, improved readability, and clearer topic signals to search engines.'
+          });
+        }
+        
+        if ((tech.mobileOptimization || 0) < 3) {
+          recommendations.push({
+            title: 'Optimize for Mobile',
+            impact: Math.round((4 - (tech.mobileOptimization || 0)) * 2),
+            estimatedTime: '2-4 hours',
+            why: 'Over 60% of searches are on mobile. Poor mobile experience directly impacts rankings and user satisfaction.',
+            how: 'Use responsive design, ensure readable font sizes, make buttons touch-friendly, optimize images, and improve mobile page speed.',
+            realWorldBenefit: 'Better mobile rankings, reduced bounce rate, and improved Core Web Vitals scores.'
+          });
+        }
+      }
+      
+      // Sort by impact (highest first)
+      recommendations.sort((a, b) => b.impact - a.impact);
+      
+      // Return top 10 recommendations
+      return recommendations.slice(0, 10);
     }
 
     function calculateDeterministicPotential(data) {
