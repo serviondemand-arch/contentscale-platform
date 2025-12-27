@@ -2412,9 +2412,128 @@ function extractCompanyName(url) {
 // ==========================================
 // END OF LEADERBOARD ADDITIONS
 // ==========================================
+
+// ==========================================
+// FREE AI CONTENT PROMPT GENERATOR
+// ==========================================
+
+const Anthropic = require('@anthropic-ai/sdk');
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
+});
+
+app.post('/api/generate-content-prompt', async (req, res) => {
+  try {
+    const { url, score, breakdown, wordCount } = req.body;
+    
+    if (!url || !score) {
+      return res.status(400).json({
+        success: false,
+        error: 'URL and score required'
+      });
+    }
+    
+    console.log(`[FREE PROMPT] Generating for ${url} (Score: ${score})`);
+    
+    // Identify main issues
+    const issues = [];
+    
+    if (breakdown?.graaf?.total < 40) {
+      issues.push('Low GRAAF score - lacks credibility');
+    }
+    if (breakdown?.craft?.total < 24) {
+      issues.push('Low CRAFT score - poor UX');
+    }
+    if (breakdown?.technical?.total < 16) {
+      issues.push('Low Technical SEO');
+    }
+    if (wordCount < 1500) {
+      issues.push(`Too short (${wordCount} words)`);
+    }
+    
+    // Generate AI prompt
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      messages: [{
+        role: 'user',
+        content: `Generate 3 specific, actionable content improvement prompts for this webpage:
+
+URL: ${url}
+Current Score: ${score}/100
+Issues: ${issues.join(', ')}
+
+For each prompt, provide:
+1. A specific section to improve
+2. What's wrong
+3. A concrete rewrite instruction
+
+Format as JSON:
+[
+  {
+    "section": "...",
+    "issue": "...",
+    "prompt": "Rewrite to..."
+  }
+]
+
+Keep prompts under 50 words each.`
+      }]
+    });
+    
+    const content = message.content[0].text;
+    let prompts;
+    
+    try {
+      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      prompts = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+    } catch {
+      prompts = [
+        {
+          section: "Main content",
+          issue: "Lacks AI optimization",
+          prompt: "Rewrite with clear steps and credible sources"
+        },
+        {
+          section: "Introduction",
+          issue: "Not engaging",
+          prompt: "Start with compelling hook addressing user pain"
+        },
+        {
+          section: "Structure",
+          issue: "Poor readability",
+          prompt: "Break into short paragraphs with H2/H3 subheadings"
+        }
+      ];
+    }
+    
+    console.log(`✅ Generated ${prompts.length} prompts`);
+    
+    res.json({
+      success: true,
+      url: url,
+      score: score,
+      prompts: prompts,
+      cta: "Apply these prompts, update content, and rescan!"
+    });
+    
+  } catch (error) {
+    console.error('[PROMPT ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate prompts'
+    });
+  }
+});
+
 // ==========================================
 // SERVE HTML FILES
 // ==========================================
+
+app.get('/leaderboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/leaderboard-scanner-page.html'));
+});
 
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/admin-dashboard.html'));
