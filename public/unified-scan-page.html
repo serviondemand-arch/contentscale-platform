@@ -407,14 +407,27 @@
         displayLeaderboard(data.entries);
         
         // Load stats
-        const statsResponse = await fetch(`${API_BASE}/api/leaderboard/stats`);
-        const statsData = await statsResponse.json();
-        
-        if (statsData.success) {
-          document.getElementById('total-entries').textContent = statsData.stats.total_entries || 0;
-          document.getElementById('average-score').textContent = statsData.stats.average_score || '-';
-          document.getElementById('highest-score').textContent = statsData.stats.highest_score || '-';
-        }
+       // Load stats
+try {
+  const statsResponse = await fetch(`${API_BASE}/api/leaderboard/stats`);
+  const statsData = await statsResponse.json();
+  
+  if (statsData && statsData.success && statsData.stats) {
+    document.getElementById('total-entries').textContent = statsData.stats.total_entries || 0;
+    document.getElementById('average-score').textContent = statsData.stats.average_score || '-';
+    document.getElementById('highest-score').textContent = statsData.stats.highest_score || '-';
+  } else {
+    // Fallback values
+    document.getElementById('total-entries').textContent = '0';
+    document.getElementById('average-score').textContent = '-';
+    document.getElementById('highest-score').textContent = '-';
+  }
+} catch (error) {
+  console.log('Stats not available yet');
+  document.getElementById('total-entries').textContent = '0';
+  document.getElementById('average-score').textContent = '-';
+  document.getElementById('highest-score').textContent = '-';
+}
         
       } catch (error) {
         console.error('Leaderboard error:', error);
