@@ -1846,7 +1846,572 @@ app.post('/api/client/scan', async (req, res) => {
     });
   }
 });
+// ==========================================
+// GLOBAL LEADERBOARD ADDITIONS
+// Add these endpoints to your existing server.js
+// ==========================================
 
+// Add this AFTER your existing endpoints, BEFORE app.listen()
+
+// ==========================================
+// GLOBAL LEADERBOARD ENDPOINTS
+// ==========================================
+
+// GET Global Leaderboard (All Industries)
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const { 
+      limit = 100, 
+      category = 'all',
+      country = 'all',
+      language = 'all'
+    } = req.query;
+    
+    let query = `
+      SELECT 
+        url,
+        score,
+        quality,
+        graaf_score,
+        craft_score,
+        technical_score,
+        word_count,
+        created_at as scanned_at,
+        company_name,
+        category,
+        country,
+        language
+      FROM public_leaderboard
+      WHERE is_public = true
+    `;
+    
+    const params = [];
+    let paramCount = 1;
+    
+    // Filter by category
+    if (category && category !== 'all') {
+      query += ` AND category = $${paramCount}`;
+      params.push(category);
+      paramCount++;
+    }
+    
+    // Filter by country
+    if (country && country !== 'all') {
+      query += ` AND country = $${paramCount}`;
+      params.push(country);
+      paramCount++;
+    }
+    
+    // Filter by language
+    if (language && language !== 'all') {
+      query += ` AND language = $${paramCount}`;
+      params.push(language);
+      paramCount++;
+    }
+    
+    query += ` ORDER BY score DESC, scanned_at DESC LIMIT $${paramCount}`;
+    params.push(limit);
+    
+    const result = await pool.query(query, params);
+    
+    // Add rank to each entry
+    const entries = result.rows.map((entry, index) => ({
+      ...entry,
+      rank: index + 1
+    }));
+    
+    console.log(`[LEADERBOARD] Fetched ${entries.length} entries (category: ${category}, country: ${country})`);
+    
+    res.json({
+      success: true,
+      total: entries.length,
+      filters: { category, country, language },
+      entries: entries
+    });
+    
+  } catch (error) {
+    console.error('[LEADERBOARD ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load leaderboard'
+    });
+  }
+});
+
+// POST Submit to Leaderboard (after scan)
+app.post('/api/leaderboard/submit', async (req, res) => {
+  try {
+    const {
+      url,
+      score,
+      quality,
+      graaf_score,
+      craft_score,
+      technical_score,
+      word_count,
+      company_name,
+      category,
+      country,
+      language
+    } = req.body;
+    
+    if (!url || score === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: 'URL and score required'
+      });
+    }
+    
+    // Check if URL already exists in leaderboard
+    const existing = await pool.query(
+      'SELECT id, score FROM public_leaderboard WHERE url = $1',
+      [url]
+    );
+    
+    if (existing.rows.length > 0) {
+      // Update if new score is better
+      if (score > existing.rows[0].score) {
+        await pool.query(`
+          UPDATE public_leaderboard
+          SET score = $1,
+              quality = $2,
+              graaf_score = $3,
+              craft_score = $4,
+              technical_score = $5,
+              word_count = $6,
+              company_name = $7,
+              category = $8,
+              country = $9,
+              language = $10,
+              updated_at = NOW()
+          WHERE url = $11
+        `, [
+          score, quality, graaf_score, craft_score, technical_score,
+          word_count, company_name, category, country, language, url
+        ]);
+        
+        console.log(`✅ Leaderboard updated: ${url} (${existing.rows[0].score} → ${score})`);
+        
+        return res.json({
+          success: true,
+          message: 'Leaderboard entry updated with better score!',
+          action: 'updated'
+        });
+      } else {
+        return res.json({
+          success: true,
+          message: 'Already on leaderboard with equal or better score',
+          action: 'existing'
+        });
+      }
+    }
+    
+    // Insert new entry
+    const result = await pool.query(`
+      INSERT INTO public_leaderboard (
+        url, score, quality,
+        graaf_score, craft_score, technical_score,
+        word_count, company_name, category, country, language,
+        is_public, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW())
+      RETURNING *
+    `, [
+      url, score, quality,
+      graaf_score, craft_score, technical_score,
+      word_count, company_name, category, country, language
+    ]);
+    
+    // Get rank
+    const rankResult = await pool.query(
+      'SELECT COUNT(*) + 1 as rank FROM public_leaderboard WHERE score > $1',
+      [score]
+    );
+    
+    const rank = rankResult.rows[0].rank;
+    
+    console.log(`✅ Added to leaderboard: ${url} - Rank #${rank} (${score}/100)`);
+    
+    res.json({
+      success: true,
+      message: 'Added to leaderboard!',
+      action: 'created',
+      rank: rank,
+      entry: result.rows[0]
+    });
+    
+  } catch (error) {
+    console.error('[LEADERBOARD SUBMIT ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to submit to leaderboard'
+    });
+  }
+});
+
+// GET Specific entry details
+app.get('/api/leaderboard/entry/:url_hash', async (req, res) => {
+  try {
+    const { url_hash } = req.params;
+    
+    const result = await pool.query(
+      'SELECT * FROM public_leaderboard WHERE url_hash = $1',
+      [url_hash]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Entry not found'
+      });
+    }
+    
+    // Get rank
+    const rankResult = await pool.query(
+      'SELECT COUNT(*) + 1 as rank FROM public_leaderboard WHERE score > $1',
+      [result.rows[0].score]
+    );
+    
+    res.json({
+      success: true,
+      entry: {
+        ...result.rows[0],
+        rank: rankResult.rows[0].rank
+      }
+    });
+    
+  } catch (error) {
+    console.error('[LEADERBOARD ENTRY ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load entry'
+    });
+  }
+});
+
+// DELETE Remove from leaderboard (admin only)
+app.delete('/api/leaderboard/:id', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await pool.query(
+      'DELETE FROM public_leaderboard WHERE id = $1 RETURNING url',
+      [id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Entry not found'
+      });
+    }
+    
+    console.log(`✅ Removed from leaderboard: ${result.rows[0].url}`);
+    
+    res.json({
+      success: true,
+      message: 'Entry removed from leaderboard'
+    });
+    
+  } catch (error) {
+    console.error('[LEADERBOARD DELETE ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete entry'
+    });
+  }
+});
+
+// GET Leaderboard stats
+app.get('/api/leaderboard/stats', async (req, res) => {
+  try {
+    const stats = await pool.query(`
+      SELECT 
+        COUNT(*) as total_entries,
+        ROUND(AVG(score), 1) as average_score,
+        MAX(score) as highest_score,
+        MIN(score) as lowest_score,
+        COUNT(DISTINCT country) as total_countries,
+        COUNT(DISTINCT category) as total_categories
+      FROM public_leaderboard
+      WHERE is_public = true
+    `);
+    
+    const topCountries = await pool.query(`
+      SELECT country, COUNT(*) as count
+      FROM public_leaderboard
+      WHERE is_public = true AND country IS NOT NULL
+      GROUP BY country
+      ORDER BY count DESC
+      LIMIT 5
+    `);
+    
+    const topCategories = await pool.query(`
+      SELECT category, COUNT(*) as count
+      FROM public_leaderboard
+      WHERE is_public = true AND category IS NOT NULL
+      GROUP BY category
+      ORDER BY count DESC
+      LIMIT 5
+    `);
+    
+    res.json({
+      success: true,
+      stats: stats.rows[0],
+      top_countries: topCountries.rows,
+      top_categories: topCategories.rows
+    });
+    
+  } catch (error) {
+    console.error('[LEADERBOARD STATS ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load stats'
+    });
+  }
+});
+
+// ==========================================
+// MODIFIED /api/scan-free TO SUPPORT LEADERBOARD
+// Replace your existing /api/scan-free with this:
+// ==========================================
+
+app.post('/api/scan-free', async (req, res) => {
+  try {
+    const { url, submit_to_leaderboard, company_name, category } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        error: 'URL is required'
+      });
+    }
+    
+    console.log(`[FREE SCAN] ${url}`);
+    
+    const urlHash = hashUrl(url);
+    const shareId = generateShareId();
+    
+    // Check for recent scan (1 hour cache)
+    const existingScan = await pool.query(
+      `SELECT * FROM scans 
+       WHERE url = $1 
+       AND scan_type = 'free'
+       AND created_at > NOW() - INTERVAL '1 hour'
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [url]
+    );
+    
+    let result;
+    
+    if (existingScan.rows.length > 0) {
+      console.log('✅ Using cached scan result');
+      const cached = existingScan.rows[0];
+      
+      result = {
+        success: true,
+        url: url,
+        score: cached.score,
+        quality: cached.quality,
+        breakdown: {
+          graaf: { total: cached.graaf_score || 0 },
+          craft: { total: cached.craft_score || 0 },
+          technical: { total: cached.technical_score || 0 }
+        },
+        validation: typeof cached.validation_data === 'string' 
+          ? JSON.parse(cached.validation_data) 
+          : cached.validation_data,
+        timestamp: cached.created_at,
+        share_id: cached.share_id || shareId,
+        wordCount: cached.word_count || 0,
+        cached: true
+      };
+      
+    } else {
+      // Perform new scan
+      result = await performHybridScan(url);
+      result.share_id = shareId;
+      result.cached = false;
+      
+      // Record in scans table
+      await pool.query(
+        `INSERT INTO scans (
+          url, score, quality, url_hash, share_id,
+          graaf_score, craft_score, technical_score,
+          validation_data, scan_type, ip_address, word_count
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        [
+          url, result.score, result.quality, urlHash, shareId,
+          result.breakdown.graaf.total,
+          result.breakdown.craft.total,
+          result.breakdown.technical.total,
+          JSON.stringify(result.validation || {}),
+          'free', req.ip, result.wordCount || 0
+        ]
+      );
+    }
+    
+    // If user wants to submit to leaderboard
+    if (submit_to_leaderboard) {
+      try {
+        // Auto-detect category and country if not provided
+        const detectedCategory = category || detectCategory(url, result);
+        const detectedCountry = detectCountry(url);
+        const detectedLanguage = detectLanguage(url);
+        
+        await pool.query(`
+          INSERT INTO public_leaderboard (
+            url, url_hash, score, quality,
+            graaf_score, craft_score, technical_score,
+            word_count, company_name, category, country, language,
+            is_public, created_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true, NOW())
+          ON CONFLICT (url) DO UPDATE
+          SET score = GREATEST(public_leaderboard.score, EXCLUDED.score),
+              updated_at = NOW()
+        `, [
+          url, urlHash, result.score, result.quality,
+          result.breakdown.graaf.total,
+          result.breakdown.craft.total,
+          result.breakdown.technical.total,
+          result.wordCount,
+          company_name || extractCompanyName(url),
+          detectedCategory,
+          detectedCountry,
+          detectedLanguage
+        ]);
+        
+        // Get rank
+        const rankResult = await pool.query(
+          'SELECT COUNT(*) + 1 as rank FROM public_leaderboard WHERE score > $1',
+          [result.score]
+        );
+        
+        result.leaderboard = {
+          submitted: true,
+          rank: rankResult.rows[0].rank
+        };
+        
+        console.log(`✅ Added to leaderboard: Rank #${rankResult.rows[0].rank}`);
+        
+      } catch (leaderboardError) {
+        console.error('Leaderboard submission failed:', leaderboardError);
+        // Don't fail the scan if leaderboard submission fails
+        result.leaderboard = {
+          submitted: false,
+          error: 'Failed to add to leaderboard'
+        };
+      }
+    }
+    
+    return res.json(result);
+    
+  } catch (error) {
+    console.error('[FREE SCAN ERROR]', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Scan failed'
+    });
+  }
+});
+
+// ==========================================
+// HELPER FUNCTIONS FOR AUTO-DETECTION
+// ==========================================
+
+function detectCategory(url, scanResult) {
+  const urlLower = url.toLowerCase();
+  const content = scanResult.metadata?.title || '';
+  const contentLower = content.toLowerCase();
+  
+  // SEO Agency
+  if (urlLower.includes('seo') || 
+      contentLower.includes('seo agency') ||
+      contentLower.includes('digital marketing agency') ||
+      contentLower.includes('seo services')) {
+    return 'agency';
+  }
+  
+  // SaaS
+  if (urlLower.includes('app') ||
+      contentLower.includes('software as a service') ||
+      contentLower.includes('saas') ||
+      contentLower.includes('pricing') ||
+      contentLower.includes('free trial')) {
+    return 'saas';
+  }
+  
+  // E-commerce
+  if (urlLower.includes('shop') ||
+      urlLower.includes('store') ||
+      contentLower.includes('add to cart') ||
+      contentLower.includes('buy now')) {
+    return 'ecommerce';
+  }
+  
+  // Blog
+  if (urlLower.includes('/blog/') ||
+      urlLower.includes('/article/') ||
+      urlLower.includes('/post/')) {
+    return 'blog';
+  }
+  
+  return 'other';
+}
+
+function detectCountry(url) {
+  const tld = url.split('.').pop().toLowerCase();
+  
+  const tldMap = {
+    'nl': 'NL',
+    'be': 'BE',
+    'de': 'DE',
+    'uk': 'UK',
+    'co.uk': 'UK',
+    'fr': 'FR',
+    'es': 'ES',
+    'it': 'IT',
+    'com': 'GLOBAL',
+    'org': 'GLOBAL',
+    'net': 'GLOBAL'
+  };
+  
+  return tldMap[tld] || 'OTHER';
+}
+
+function detectLanguage(url) {
+  const country = detectCountry(url);
+  
+  const countryLanguageMap = {
+    'NL': 'nl',
+    'BE': 'nl', // Could be 'fr' too, but default to 'nl'
+    'DE': 'de',
+    'UK': 'en',
+    'FR': 'fr',
+    'ES': 'es',
+    'IT': 'it',
+    'GLOBAL': 'en'
+  };
+  
+  return countryLanguageMap[country] || 'en';
+}
+
+function extractCompanyName(url) {
+  try {
+    const domain = new URL(url).hostname.replace('www.', '');
+    const parts = domain.split('.');
+    
+    // Take first part of domain and capitalize
+    const name = parts[0];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  } catch {
+    return 'Unknown';
+  }
+}
+
+// ==========================================
+// END OF LEADERBOARD ADDITIONS
+// ==========================================
 // ==========================================
 // SERVE HTML FILES
 // ==========================================
