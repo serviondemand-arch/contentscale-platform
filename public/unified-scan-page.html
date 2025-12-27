@@ -7,323 +7,71 @@
   <meta name="description" content="Global leaderboard of top websites ranked by AI-era content quality. Scan your site for free, get AI improvement prompts, and claim your spot!">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* LEADERBOARD STYLES */
-    .leaderboard-section {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border-radius: 16px;
-      padding: 32px;
-      margin-bottom: 32px;
-      border: 2px solid #334155;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .leaderboard-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #f59e0b 0%, #eab308 50%, #f59e0b 100%);
-      animation: shimmer 2s infinite;
-    }
-    
-    @keyframes shimmer {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    
-    .leaderboard-row {
-      background: #1e293b;
-      transition: all 0.3s;
-      cursor: pointer;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      padding: 16px;
-      border-left: 4px solid transparent;
-      position: relative;
-    }
-    
-    .leaderboard-row:hover {
-      background: #334155;
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-    
-    .leaderboard-row.rank-1 {
-      border-left-color: #fbbf24;
-      background: linear-gradient(135deg, #1e293b 0%, #2d1f08 100%);
-    }
-    
-    .leaderboard-row.rank-2 {
-      border-left-color: #9ca3af;
-      background: linear-gradient(135deg, #1e293b 0%, #25282e 100%);
-    }
-    
-    .leaderboard-row.rank-3 {
-      border-left-color: #f97316;
-      background: linear-gradient(135deg, #1e293b 0%, #2d1908 100%);
-    }
-    
-    .rank-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      font-weight: 800;
-      font-size: 18px;
-    }
-    
-    .rank-1 .rank-badge {
-      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-      color: #1e293b;
-      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
-      font-size: 24px;
-    }
-    
-    .rank-2 .rank-badge {
-      background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
-      color: #1e293b;
-      box-shadow: 0 4px 12px rgba(156, 163, 175, 0.4);
-    }
-    
-    .rank-3 .rank-badge {
-      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
-    }
-    
-    .rank-badge.default {
-      background: #334155;
-      color: #94a3b8;
-    }
-    
-    .score-display {
-      font-size: 32px;
-      font-weight: 800;
-    }
-    
+    .leaderboard-section { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; padding: 32px; margin-bottom: 32px; border: 2px solid #334155; position: relative; overflow: hidden; }
+    .leaderboard-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #f59e0b 0%, #eab308 50%, #f59e0b 100%); animation: shimmer 2s infinite; }
+    @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .leaderboard-row { background: #1e293b; transition: all 0.3s; cursor: pointer; border-radius: 8px; margin-bottom: 8px; padding: 16px; border-left: 4px solid transparent; }
+    .leaderboard-row:hover { background: #334155; transform: translateX(4px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+    .leaderboard-row.rank-1 { border-left-color: #fbbf24; background: linear-gradient(135deg, #1e293b 0%, #2d1f08 100%); }
+    .leaderboard-row.rank-2 { border-left-color: #9ca3af; background: linear-gradient(135deg, #1e293b 0%, #25282e 100%); }
+    .leaderboard-row.rank-3 { border-left-color: #f97316; background: linear-gradient(135deg, #1e293b 0%, #2d1908 100%); }
+    .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; font-weight: 800; font-size: 18px; }
+    .rank-1 .rank-badge { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1e293b; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4); font-size: 24px; }
+    .rank-2 .rank-badge { background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%); color: #1e293b; box-shadow: 0 4px 12px rgba(156, 163, 175, 0.4); }
+    .rank-3 .rank-badge { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4); }
+    .rank-badge.default { background: #334155; color: #94a3b8; }
+    .score-display { font-size: 32px; font-weight: 800; }
     .score-excellent { color: #10b981; }
     .score-very-good { color: #3b82f6; }
     .score-good { color: #8b5cf6; }
     .score-fair { color: #f59e0b; }
     .score-poor { color: #ef4444; }
-    
-    .live-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #065f46;
-      color: #d1fae5;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    
-    .live-dot {
-      width: 6px;
-      height: 6px;
-      background: #10b981;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
-    }
-    
-    /* FILTER STYLES */
-    .filter-section {
-      background: #1f2937;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-      border: 1px solid #374151;
-    }
-    
-    .filter-btn {
-      background: #374151;
-      color: #9ca3af;
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    
-    .filter-btn:hover {
-      background: #4b5563;
-      color: white;
-    }
-    
-    .filter-btn.active {
-      background: #8b5cf6;
-      color: white;
-      border-color: #a78bfa;
-    }
-    
-    /* SCANNER STYLES */
-    .scanner-section {
-      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-      border-radius: 16px;
-      padding: 32px;
-      border: 2px solid #374151;
-    }
-    
-    .scan-btn {
-      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-      padding: 16px 40px;
-      border-radius: 12px;
-      font-weight: 700;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-size: 18px;
-    }
-    
-    .scan-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
-    }
-    
-    .scan-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .prompt-btn {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 13px;
-    }
-    
-    .prompt-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    }
-    
-    /* CATEGORY BADGE */
-    .category-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    
+    .live-indicator { display: inline-flex; align-items: center; gap: 6px; background: #065f46; color: #d1fae5; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .live-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
+    .filter-section { background: #1f2937; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #374151; }
+    .filter-btn { background: #374151; color: #9ca3af; padding: 8px 16px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 600; }
+    .filter-btn:hover { background: #4b5563; color: white; }
+    .filter-btn.active { background: #8b5cf6; color: white; border-color: #a78bfa; }
+    .scanner-section { background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border-radius: 16px; padding: 32px; border: 2px solid #374151; }
+    .scan-btn { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 16px 40px; border-radius: 12px; font-weight: 700; color: white; border: none; cursor: pointer; transition: all 0.3s; font-size: 18px; }
+    .scan-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4); }
+    .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .prompt-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 16px; border-radius: 8px; font-weight: 600; color: white; border: none; cursor: pointer; transition: all 0.2s; font-size: 13px; }
+    .prompt-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
+    .category-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
     .category-agency { background: #7c3aed; color: white; }
     .category-saas { background: #3b82f6; color: white; }
     .category-blog { background: #f59e0b; color: white; }
     .category-ecommerce { background: #10b981; color: white; }
     .category-other { background: #6b7280; color: white; }
-    
-    /* MODAL STYLES */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .modal.active {
-      display: flex;
-    }
-    
-    .modal-content {
-      background: #1f2937;
-      border-radius: 16px;
-      padding: 32px;
-      max-width: 600px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-    }
-    
-    .modal-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: #374151;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      color: white;
-      font-size: 20px;
-    }
-    
-    .modal-close:hover {
-      background: #4b5563;
-    }
-    
-    /* MOBILE */
-    @media (max-width: 768px) {
-      .leaderboard-section, .scanner-section { padding: 20px; }
-      .rank-badge { width: 32px; height: 32px; font-size: 14px; }
-      .rank-1 .rank-badge { font-size: 18px; }
-      .score-display { font-size: 24px; }
-    }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-content { background: #1f2937; border-radius: 16px; padding: 32px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: #374151; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: white; font-size: 20px; }
+    .modal-close:hover { background: #4b5563; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    @media (max-width: 768px) { .leaderboard-section, .scanner-section { padding: 20px; } .rank-badge { width: 32px; height: 32px; font-size: 14px; } .rank-1 .rank-badge { font-size: 18px; } .score-display { font-size: 24px; } }
   </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen p-8">
   <div class="max-w-6xl mx-auto">
-    
-    <!-- HEADER -->
     <div class="text-center mb-8">
-      <h1 class="text-5xl font-bold mb-3 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-        🏆 Global AI SEO Leaderboard
-      </h1>
+      <h1 class="text-5xl font-bold mb-3 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">🏆 Global AI SEO Leaderboard</h1>
       <p class="text-xl text-gray-300 mb-4">The World's First AI-Era Content Quality Rankings</p>
-      <span class="live-indicator">
-        <span class="live-dot"></span>
-        Live Rankings
-      </span>
+      <span class="live-indicator"><span class="live-dot"></span>Live Rankings</span>
     </div>
-
-    <!-- LEADERBOARD SECTION -->
     <div class="leaderboard-section">
       <div class="flex justify-between items-center mb-6">
         <div>
           <h2 class="text-3xl font-bold text-yellow-400">Top 100 Websites</h2>
           <p class="text-sm text-gray-400 mt-1">Ranked by GRAAF + CRAFT + Technical SEO (100 points max)</p>
         </div>
-        <button onclick="refreshLeaderboard()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-semibold transition">
-          🔄 Refresh
-        </button>
+        <button onclick="refreshLeaderboard()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-semibold transition">🔄 Refresh</button>
       </div>
-      
-      <!-- FILTERS -->
       <div class="filter-section">
-        <div class="mb-4">
-          <h3 class="text-sm font-bold text-gray-400 mb-2">FILTER BY:</h3>
-        </div>
-        
-        <!-- Category Filter -->
+        <div class="mb-4"><h3 class="text-sm font-bold text-gray-400 mb-2">FILTER BY:</h3></div>
         <div class="mb-4">
           <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Category</label>
           <div class="flex flex-wrap gap-2">
@@ -335,8 +83,6 @@
             <button class="filter-btn" onclick="filterCategory('other')">📌 Other</button>
           </div>
         </div>
-        
-        <!-- Country Filter -->
         <div class="mb-4">
           <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Country</label>
           <div class="flex flex-wrap gap-2">
@@ -348,8 +94,6 @@
             <button class="filter-btn" onclick="filterCountry('GLOBAL')">🌐 .com/.org</button>
           </div>
         </div>
-        
-        <!-- Language Filter - UPDATED: Only EN, NL, ES -->
         <div>
           <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Language</label>
           <div class="flex flex-wrap gap-2">
@@ -360,1034 +104,145 @@
           </div>
         </div>
       </div>
-      
-      <!-- Stats Bar -->
       <div class="grid grid-cols-3 gap-4 mb-6 p-4 bg-gray-800 bg-opacity-50 rounded-lg">
-        <div class="text-center">
-          <div class="text-2xl font-bold text-green-400" id="total-entries">-</div>
-          <div class="text-xs text-gray-400">Total Entries</div>
-        </div>
-        <div class="text-center">
-          <div class="text-2xl font-bold text-blue-400" id="average-score">-</div>
-          <div class="text-xs text-gray-400">Average Score</div>
-        </div>
-        <div class="text-center">
-          <div class="text-2xl font-bold text-yellow-400" id="highest-score">-</div>
-          <div class="text-xs text-gray-400">Highest Score</div>
-        </div>
+        <div class="text-center"><div class="text-2xl font-bold text-green-400" id="total-entries">-</div><div class="text-xs text-gray-400">Total Entries</div></div>
+        <div class="text-center"><div class="text-2xl font-bold text-blue-400" id="average-score">-</div><div class="text-xs text-gray-400">Average Score</div></div>
+        <div class="text-center"><div class="text-2xl font-bold text-yellow-400" id="highest-score">-</div><div class="text-xs text-gray-400">Highest Score</div></div>
       </div>
-      
-      <!-- Current Filter Display -->
-      <div id="current-filter" class="text-sm text-gray-400 mb-4 hidden">
-        Showing: <span id="filter-display" class="text-white font-bold"></span>
-      </div>
-      
-      <!-- Leaderboard Table -->
-      <div id="leaderboard-container">
-        <div class="text-center py-12">
-          <div class="text-5xl mb-4">🔍</div>
-          <div class="text-gray-400">Loading leaderboard...</div>
-        </div>
-      </div>
+      <div id="current-filter" class="text-sm text-gray-400 mb-4 hidden">Showing: <span id="filter-display" class="text-white font-bold"></span></div>
+      <div id="leaderboard-container"><div class="text-center py-12"><div class="text-5xl mb-4">🔍</div><div class="text-gray-400">Loading leaderboard...</div></div></div>
     </div>
-
-    <!-- SCAN YOUR SITE SECTION -->
     <div class="scanner-section mb-8">
       <div class="text-center mb-8">
         <h2 class="text-4xl font-bold mb-3">🚀 Scan Your Website</h2>
         <p class="text-gray-300">Get your AI-Era SEO score, FREE improvement prompts, and claim your spot!</p>
       </div>
-      
       <div class="max-w-3xl mx-auto">
         <div class="flex gap-3 mb-5">
-          <input 
-            type="text" 
-            id="scanInput" 
-            placeholder="https://yourwebsite.com"
-            class="flex-1 bg-gray-700 text-white px-6 py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg"
-          >
-          <button 
-            onclick="performScan()"
-            id="scanButton"
-            class="scan-btn"
-          >
-            Scan Now
-          </button>
+          <input type="text" id="scanInput" placeholder="https://yourwebsite.com" class="flex-1 bg-gray-700 text-white px-6 py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg">
+          <button onclick="performScan()" id="scanButton" class="scan-btn">Scan Now</button>
         </div>
-        
         <div class="bg-gray-800 bg-opacity-70 rounded-lg p-4 text-sm text-gray-400">
           <div class="font-bold text-green-400 mb-2">✅ Free Analysis Includes:</div>
           <div class="grid md:grid-cols-2 gap-2 text-xs">
-            <div>• GRAAF Framework Score (50 pts)</div>
-            <div>• CRAFT Methodology (30 pts)</div>
-            <div>• Technical SEO (20 pts)</div>
-            <div>• AI Improvement Prompts 🎁</div>
+            <div>• GRAAF Framework Score (50 pts)</div><div>• CRAFT Methodology (30 pts)</div><div>• Technical SEO (20 pts)</div><div>• AI Improvement Prompts 🎁</div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- RESULTS MODAL -->
     <div id="resultsModal" class="modal">
       <div class="modal-content">
         <button class="modal-close" onclick="closeResultsModal()">×</button>
-        
         <div class="text-center mb-6">
           <div class="text-6xl mb-3" id="modal-emoji">🎯</div>
           <div class="text-5xl font-bold mb-2" id="modal-score">--/100</div>
           <div class="text-lg text-gray-400" id="modal-quality">Analyzing...</div>
         </div>
-        
         <div class="mb-6">
           <h3 class="font-bold text-lg mb-3">Breakdown:</h3>
           <div class="space-y-2">
-            <div class="flex justify-between">
-              <span>GRAAF Framework:</span>
-              <span class="font-bold" id="modal-graaf">-/50</span>
-            </div>
-            <div class="flex justify-between">
-              <span>CRAFT Methodology:</span>
-              <span class="font-bold" id="modal-craft">-/30</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Technical SEO:</span>
-              <span class="font-bold" id="modal-technical">-/20</span>
-            </div>
+            <div class="flex justify-between"><span>GRAAF Framework:</span><span class="font-bold" id="modal-graaf">-/50</span></div>
+            <div class="flex justify-between"><span>CRAFT Methodology:</span><span class="font-bold" id="modal-craft">-/30</span></div>
+            <div class="flex justify-between"><span>Technical SEO:</span><span class="font-bold" id="modal-technical">-/20</span></div>
           </div>
         </div>
-        
-        <!-- Add to Leaderboard -->
         <div id="leaderboard-prompt" class="mb-4">
           <div class="bg-purple-900 bg-opacity-30 border border-purple-700 rounded-lg p-4 mb-4">
             <h3 class="font-bold text-purple-400 mb-2">🏆 Claim Your Spot!</h3>
             <p class="text-sm text-gray-300 mb-3">Add your site to the public leaderboard?</p>
-            
-            <input 
-              type="text" 
-              id="company-name" 
-              placeholder="Company/Site Name (optional)"
-              class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-            
-            <select 
-              id="category-select"
-              class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Auto-detect category</option>
-              <option value="agency">🎯 SEO Agency</option>
-              <option value="saas">💻 SaaS</option>
-              <option value="blog">📝 Blog</option>
-              <option value="ecommerce">🛒 E-commerce</option>
-              <option value="other">📌 Other</option>
+            <input type="text" id="company-name" placeholder="Company/Site Name (optional)" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <select id="category-select" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+              <option value="">Auto-detect category</option><option value="agency">🎯 SEO Agency</option><option value="saas">💻 SaaS</option><option value="blog">📝 Blog</option><option value="ecommerce">🛒 E-commerce</option><option value="other">📌 Other</option>
             </select>
-            
             <div class="flex gap-2">
-              <button onclick="submitToLeaderboard()" class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-bold transition">
-                Yes, Add Me!
-              </button>
-              <button onclick="skipLeaderboard()" class="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-bold transition">
-                No Thanks
-              </button>
+              <button onclick="submitToLeaderboard()" class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-bold transition">Yes, Add Me!</button>
+              <button onclick="skipLeaderboard()" class="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-bold transition">No Thanks</button>
             </div>
           </div>
         </div>
-        
         <div id="leaderboard-result" class="hidden text-center mb-4">
           <div class="bg-green-900 bg-opacity-30 border border-green-700 rounded-lg p-4">
             <div class="text-green-400 font-bold text-2xl mb-2" id="rank-display">🎉 Rank #-</div>
             <p class="text-sm text-gray-300">You're now on the global leaderboard!</p>
           </div>
         </div>
-        
-        <!-- FREE PROMPTS BUTTON -->
-        <button onclick="getPrompts()" id="get-prompts-btn" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-6 py-4 rounded-lg font-bold text-lg transition mb-4">
-          🎁 Get FREE AI Improvement Prompts
-        </button>
-        
-        <button onclick="closeResultsModal()" class="w-full bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg font-bold transition">
-          Close
-        </button>
+        <button onclick="getPrompts()" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-6 py-4 rounded-lg font-bold text-lg transition mb-4">🎁 Get FREE AI Improvement Prompts</button>
+        <button onclick="closeResultsModal()" class="w-full bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg font-bold transition">Close</button>
       </div>
     </div>
-
-    <!-- PROMPTS MODAL -->
-   <!-- ==========================================
-     PROMPTS MODAL - 100% INLINE STYLES
-     
-     GEEN EXTERNE CSS NODIG!
-     
-     INSTALLATIE:
-     1. Open: public/leaderboard-scanner-page.html
-     2. Zoek: <div id="promptsModal" class="modal">
-     3. Selecteer HELE modal (tot sluitende </div>)
-     4. DELETE
-     5. PASTE deze code
-     6. KLAAR!
-     ========================================== -->
-
-<div id="promptsModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; overflow-y: auto; padding: 20px;">
-  <div style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border-radius: 20px; max-width: 900px; margin: 40px auto; padding: 40px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.8);">
-    
-    <!-- Close Button -->
-    <button onclick="closePromptsModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 32px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.2s; line-height: 1;" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='rotate(0deg)'">
-      ×
-    </button>
-    
-    <!-- Header -->
-    <div style="text-align: center; margin-bottom: 32px;">
-      <div style="font-size: 64px; margin-bottom: 16px;">🏆</div>
-      <h2 style="font-size: 32px; font-weight: 700; margin: 0 0 12px 0; background: linear-gradient(to right, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-        Your ELITE AI Content Prompts
-      </h2>
-      <p style="color: #9ca3af; font-size: 15px; margin: 0 0 16px 0;">
-        Professional-grade prompts for 95-100/100 scores
-      </p>
-      <div style="display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 13px; font-weight: 600;">
-        <span style="color: #10b981;">✅ Claude AI</span>
-        <span style="color: #3b82f6;">✅ ChatGPT</span>
-        <span style="color: #a78bfa;">✅ Perplexity</span>
-      </div>
-    </div>
-    
-    <!-- Instructions Box -->
-    <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; border-radius: 12px; padding: 24px; margin-bottom: 28px;">
-      <div style="display: flex; gap: 16px;">
-        <div style="font-size: 32px; flex-shrink: 0;">💡</div>
-        <div style="flex: 1;">
-          <div style="font-weight: 700; color: #60a5fa; margin-bottom: 12px; font-size: 16px;">
-            How to Use (5 Simple Steps):
+    <div id="promptsModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;overflow-y:auto;padding:20px">
+      <div style="background:linear-gradient(135deg,#1f2937 0%,#111827 100%);border-radius:20px;max-width:900px;margin:40px auto;padding:40px;position:relative;box-shadow:0 25px 50px rgba(0,0,0,0.8)">
+        <button onclick="closePromptsModal()" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.1);border:none;color:white;font-size:32px;width:50px;height:50px;border-radius:50%;cursor:pointer;line-height:1" onmouseover="this.style.background='rgba(255,255,255,0.2)';this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.transform='rotate(0deg)'">×</button>
+        <div style="text-align:center;margin-bottom:32px">
+          <div style="font-size:64px;margin-bottom:16px">🏆</div>
+          <h2 style="font-size:32px;font-weight:700;margin:0 0 12px 0;background:linear-gradient(to right,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Your ELITE AI Content Prompts</h2>
+          <p style="color:#9ca3af;font-size:15px;margin:0 0 16px 0">Professional-grade prompts for 95-100/100 scores</p>
+          <div style="display:flex;align-items:center;justify-content:center;gap:20px;font-size:13px;font-weight:600">
+            <span style="color:#10b981">✅ Claude AI</span><span style="color:#3b82f6">✅ ChatGPT</span><span style="color:#a78bfa">✅ Perplexity</span>
           </div>
-          <ol id="usage-instructions" style="color: #d1d5db; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 24px;">
-            <li><strong>1.</strong> Click "📋 Copy ELITE Prompt" below</li>
-            <li><strong>2.</strong> Open Claude.ai, ChatGPT, or Perplexity</li>
-            <li><strong>3.</strong> Paste the entire prompt (Ctrl+V)</li>
-            <li><strong>4.</strong> AI generates complete 2500+ word article</li>
-            <li><strong>5.</strong> Copy result → Update your page → Rescan! 📈</li>
-          </ol>
         </div>
-      </div>
-    </div>
-    
-    <!-- Prompts Container -->
-    <div id="prompts-container" style="margin-bottom: 28px;">
-      <div style="text-align: center; padding: 60px 20px;">
-        <div style="font-size: 56px; margin-bottom: 16px;">⏳</div>
-        <div style="color: #9ca3af; font-size: 16px;">Generating elite prompts...</div>
-      </div>
-    </div>
-    
-    <!-- Export Buttons -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 20px;">
-      <button onclick="exportPromptsToFile()" style="background: #374151; color: white; padding: 14px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s;" onmouseover="this.style.background='#4b5563'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#374151'; this.style.transform='translateY(0)'">
-        <span style="font-size: 20px;">📥</span>
-        <span>Export to File</span>
-      </button>
-      
-      <button onclick="sharePromptsOnLinkedIn()" style="background: #2563eb; color: white; padding: 14px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s;" onmouseover="this.style.background='#1d4ed8'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#2563eb'; this.style.transform='translateY(0)'">
-        <span style="font-size: 20px;">🔗</span>
-        <span>Share on LinkedIn</span>
-      </button>
-      
-      <button onclick="emailPrompts()" style="background: #7c3aed; color: white; padding: 14px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s;" onmouseover="this.style.background='#6d28d9'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#7c3aed'; this.style.transform='translateY(0)'">
-        <span style="font-size: 20px;">📧</span>
-        <span>Email to Me</span>
-      </button>
-    </div>
-    
-    <!-- Close Button -->
-    <button onclick="closePromptsModal()" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 18px 32px; border-radius: 12px; border: none; cursor: pointer; font-weight: 700; font-size: 17px; transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
-      Got It! Let's Create Elite Content 🚀
-    </button>
-    
-  </div>
-</div>
-
-<script>
-// Display Prompts with INLINE STYLES
-function displayPrompts(promptData) {
-  const prompts = promptData.prompts || [];
-  const usageInstructions = promptData.usage_instructions || [];
-  
-  if (prompts.length === 0) {
-    document.getElementById('prompts-container').innerHTML = `
-      <div style="text-align: center; padding: 40px 20px;">
-        <div style="color: #ef4444; font-size: 16px; margin-bottom: 12px;">Failed to generate prompts</div>
-        <button onclick="getPrompts()" style="color: #a78bfa; text-decoration: underline; background: none; border: none; cursor: pointer; font-size: 14px;">
-          Try again
-        </button>
-      </div>
-    `;
-    return;
-  }
-  
-  // Update instructions
-  if (usageInstructions.length > 0) {
-    const list = document.getElementById('usage-instructions');
-    if (list) {
-      list.innerHTML = usageInstructions.map(instr => `<li>${instr}</li>`).join('');
-    }
-  }
-  
-  let html = '';
-  
-  prompts.forEach((prompt, index) => {
-    const isElite = prompt.type === 'elite';
-    const promptId = `prompt-full-${index}`;
-    const previewId = `prompt-preview-${index}`;
-    const preview = prompt.prompt.substring(0, 500) + '...';
-    
-    html += `
-      <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 3px solid ${isElite ? '#8b5cf6' : '#4b5563'}; border-radius: 16px; padding: 28px; margin-bottom: 24px; position: relative; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: all 0.3s;" onmouseover="this.style.borderColor='${isElite ? '#a78bfa' : '#6b7280'}'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.5)'" onmouseout="this.style.borderColor='${isElite ? '#8b5cf6' : '#4b5563'}'; this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.4)'">
-        
-        ${isElite ? `
-          <div style="position: absolute; top: -14px; right: 24px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1e293b; padding: 8px 20px; border-radius: 24px; font-size: 11px; font-weight: 800; text-transform: uppercase; box-shadow: 0 6px 16px rgba(251, 191, 36, 0.6); letter-spacing: 1px;">
-            🏆 RECOMMENDED
-          </div>
-        ` : ''}
-        
-        <!-- Title -->
-        <div style="margin-bottom: 20px;">
-          <h3 style="font-size: 20px; font-weight: 700; color: #a78bfa; margin: 0 0 8px 0;">
-            ${prompt.title}
-          </h3>
-          <p style="font-size: 13px; color: #9ca3af; margin: 0 0 12px 0; line-height: 1.5;">
-            ${prompt.description || ''}
-          </p>
-          ${prompt.estimated_score ? `
-            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(5, 150, 105, 0.2); border: 1px solid #10b981; color: #d1fae5; padding: 6px 16px; border-radius: 24px; font-size: 12px; font-weight: 700;">
-              <span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span>
-              Target: ${prompt.estimated_score}
+        <div style="background:rgba(59,130,246,0.1);border:2px solid #3b82f6;border-radius:12px;padding:24px;margin-bottom:28px">
+          <div style="display:flex;gap:16px">
+            <div style="font-size:32px;flex-shrink:0">💡</div>
+            <div style="flex:1">
+              <div style="font-weight:700;color:#60a5fa;margin-bottom:12px;font-size:16px">How to Use (5 Simple Steps):</div>
+              <ol id="usage-instructions" style="color:#d1d5db;font-size:14px;line-height:1.8;margin:0;padding-left:24px">
+                <li><strong>1.</strong> Click "📋 Copy ELITE Prompt" below</li><li><strong>2.</strong> Open Claude.ai, ChatGPT, or Perplexity</li><li><strong>3.</strong> Paste the entire prompt (Ctrl+V)</li><li><strong>4.</strong> AI generates complete 2500+ word article</li><li><strong>5.</strong> Copy result → Update your page → Rescan! 📈</li>
+              </ol>
             </div>
-          ` : ''}
-        </div>
-        
-        <!-- Preview -->
-        <div id="${previewId}" style="background: #0f172a; padding: 20px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; color: #cbd5e1; max-height: 250px; overflow-y: auto; border: 1px solid #334155; margin-bottom: 16px; white-space: pre-wrap; word-wrap: break-word;">
-${preview}
-        </div>
-        
-        <!-- Full Prompt (Hidden) -->
-        <div id="${promptId}" style="display: none; background: #0f172a; padding: 24px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; color: #e2e8f0; max-height: 600px; overflow-y: auto; border: 2px solid #334155; margin-bottom: 16px; white-space: pre-wrap; word-wrap: break-word;">
-${prompt.prompt}
-        </div>
-        
-        <!-- Buttons -->
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button 
-            id="copy-btn-${index}"
-            onclick="copyPromptInline('${promptId}', ${index})" 
-            style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; padding: 14px 24px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4); transition: all 0.3s;"
-            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(139, 92, 246, 0.6)'"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.4)'"
-          >
-            📋 Copy ${isElite ? 'ELITE' : ''} Prompt
-          </button>
-          
-          <button 
-            id="expand-btn-${index}"
-            onclick="toggleExpandInline('${promptId}', '${previewId}', ${index})"
-            style="background: #374151; color: #9ca3af; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;"
-            onmouseover="this.style.background='#4b5563'; this.style.color='white'"
-            onmouseout="this.style.background='#374151'; this.style.color='#9ca3af'"
-          >
-            👁️ View Full
-          </button>
-        </div>
-        
-        ${isElite ? `
-          <div style="font-size: 11px; color: #6b7280; margin-top: 12px;">
-            💡 ${(prompt.prompt.length / 1000).toFixed(1)}K characters - Complete framework for 95-100/100 score
-          </div>
-        ` : ''}
-        
-      </div>
-    `;
-  });
-  
-  document.getElementById('prompts-container').innerHTML = html;
-  
-  // Store globally
-  window.currentPrompts = prompts;
-  window.currentPromptData = promptData;
-}
-
-function toggleExpandInline(promptId, previewId, index) {
-  const full = document.getElementById(promptId);
-  const preview = document.getElementById(previewId);
-  const btn = document.getElementById('expand-btn-' + index);
-  
-  if (full.style.display === 'none') {
-    full.style.display = 'block';
-    preview.style.display = 'none';
-    btn.textContent = '👁️ Hide Full';
-  } else {
-    full.style.display = 'none';
-    preview.style.display = 'block';
-    btn.textContent = '👁️ View Full';
-  }
-}
-
-function copyPromptInline(promptId, index) {
-  const elem = document.getElementById(promptId);
-  const btn = document.getElementById('copy-btn-' + index);
-  const text = elem.textContent;
-  
-  navigator.clipboard.writeText(text).then(() => {
-    btn.innerHTML = '✅ Copied! Paste in AI';
-    btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-    
-    setTimeout(() => {
-      btn.innerHTML = '📋 Copy Prompt';
-      btn.style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
-    }, 3000);
-    
-    showToastInline('✅ Prompt copied! Now paste in Claude AI or ChatGPT');
-  }).catch(err => {
-    alert('Copy failed. Please select and copy manually.');
-  });
-}
-
-function showToastInline(message) {
-  const toast = document.createElement('div');
-  toast.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #10b981;
-    color: white;
-    padding: 16px 24px;
-    border-radius: 12px;
-    font-weight: 600;
-    z-index: 99999;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    animation: slideIn 0.3s ease-out;
-  `;
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.style.animation = 'slideOut 0.3s ease-in';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
-
-function exportPromptsToFile() {
-  if (!window.currentPrompts) {
-    alert('No prompts to export');
-    return;
-  }
-  
-  const { url, topic, keyword, score } = window.currentPromptData;
-  let content = `ELITE AI CONTENT PROMPTS - ContentScale
-URL: ${currentUrl}
-Score: ${score}/100
-Generated: ${new Date().toLocaleString()}
-
-HOW TO USE:
-1. Copy the ELITE prompt below
-2. Paste into Claude.ai, ChatGPT, or Perplexity
-3. AI generates complete article
-4. Update your page
-5. Rescan!
-
-${'='.repeat(60)}\n\n`;
-  
-  window.currentPrompts.forEach((prompt, i) => {
-    content += `PROMPT ${i + 1}: ${prompt.title}\n`;
-    content += `${'='.repeat(60)}\n${prompt.prompt}\n\n${'='.repeat(60)}\n\n`;
-  });
-  
-  const blob = new Blob([content], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `contentscale-prompts-${Date.now()}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-  
-  showToastInline('✅ Prompts exported!');
-}
-
-function sharePromptsOnLinkedIn() {
-  const score = currentScanResult?.score || 'XX';
-  const text = `🚀 Got ELITE AI Prompts from ContentScale! Score: ${score}/100. Try it: contentscale.site/leaderboard`;
-  navigator.clipboard.writeText(text);
-  window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent('https://contentscale.site/leaderboard'), '_blank');
-  showToastInline('✅ Post text copied!');
-}
-
-function emailPrompts() {
-  alert('📧 Email feature coming soon! Use Export button for now.');
-}
-</script>
-
-<style>
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.2); }
-}
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-@keyframes slideOut {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(100%); opacity: 0; }
-}
-</style>
-        
-        <div id="prompts-container" class="space-y-4 mb-6">
-          <div class="text-center py-8">
-            <div class="text-4xl mb-3">⏳</div>
-            <div class="text-gray-400">Generating prompts...</div>
           </div>
         </div>
-        
-        <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded-lg p-4 mb-4">
-          <div class="font-bold text-blue-400 mb-2">💡 How to use:</div>
-          <ol class="text-sm text-gray-300 list-decimal list-inside space-y-1">
-            <li>Apply these prompts to your content</li>
-            <li>Update your page</li>
-            <li>Rescan to see your score improve!</li>
-            <li>Share your improvement on LinkedIn 🚀</li>
-          </ol>
+        <div id="prompts-container" style="margin-bottom:28px">
+          <div style="text-align:center;padding:60px 20px">
+            <div style="font-size:56px;margin-bottom:16px">⏳</div>
+            <div style="color:#9ca3af;font-size:16px">Generating elite prompts...</div>
+          </div>
         </div>
-        
-        <button onclick="closePromptsModal()" class="w-full bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-bold transition">
-          Got It! Let's Improve 💪
-        </button>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-bottom:20px">
+          <button onclick="exportPromptsToFile()" style="background:#374151;color:white;padding:14px 20px;border-radius:10px;border:none;cursor:pointer;font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;gap:10px" onmouseover="this.style.background='#4b5563';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#374151';this.style.transform='translateY(0)'"><span style="font-size:20px">📥</span><span>Export to File</span></button>
+          <button onclick="sharePromptsOnLinkedIn()" style="background:#2563eb;color:white;padding:14px 20px;border-radius:10px;border:none;cursor:pointer;font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;gap:10px" onmouseover="this.style.background='#1d4ed8';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#2563eb';this.style.transform='translateY(0)'"><span style="font-size:20px">🔗</span><span>Share on LinkedIn</span></button>
+          <button onclick="emailPrompts()" style="background:#7c3aed;color:white;padding:14px 20px;border-radius:10px;border:none;cursor:pointer;font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;gap:10px" onmouseover="this.style.background='#6d28d9';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#7c3aed';this.style.transform='translateY(0)'"><span style="font-size:20px">📧</span><span>Email to Me</span></button>
+        </div>
+        <button onclick="closePromptsModal()" style="width:100%;background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;padding:18px 32px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:17px;box-shadow:0 4px 12px rgba(16,185,129,0.3)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(16,185,129,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 12px rgba(16,185,129,0.3)'">Got It! Let's Create Elite Content 🚀</button>
       </div>
     </div>
-
-    <!-- FOOTER -->
     <div class="text-center text-gray-500 text-sm mt-12">
       <p class="mb-2">Powered by ContentScale AI • GRAAF + CRAFT Frameworks • Claude Sonnet 4</p>
-      <p>
-        <a href="https://contentscale.site" class="text-purple-400 hover:text-purple-300">contentscale.site</a>
-        •
-        <a href="https://wa.me/31628073996" class="text-green-400 hover:text-green-300">WhatsApp</a>
-      </p>
+      <p><a href="https://contentscale.site" class="text-purple-400 hover:text-purple-300">contentscale.site</a> • <a href="https://wa.me/31628073996" class="text-green-400 hover:text-green-300">WhatsApp</a></p>
     </div>
   </div>
-
   <script>
-    console.log('%c🏆 ContentScale Global Leaderboard', 'color: #f59e0b; font-size: 16px; font-weight: bold');
-    
-    const API_BASE = '';
-    let currentScanResult = null;
-    let currentUrl = '';
-    let currentFilters = {
-      category: 'all',
-      country: 'all',
-      language: 'all'
-    };
-    
-    // FILTER FUNCTIONS
-    function filterCategory(cat) {
-      currentFilters.category = cat;
-      updateFilterButtons('category', cat);
-      loadLeaderboard();
-    }
-    
-    function filterCountry(country) {
-      currentFilters.country = country;
-      updateFilterButtons('country', country);
-      loadLeaderboard();
-    }
-    
-    function filterLanguage(lang) {
-      currentFilters.language = lang;
-      updateFilterButtons('language', lang);
-      loadLeaderboard();
-    }
-    
-    function updateFilterButtons(type, value) {
-      const buttons = document.querySelectorAll('.filter-btn');
-      buttons.forEach(btn => {
-        const onClick = btn.getAttribute('onclick');
-        if (onClick && onClick.includes(`filter${type.charAt(0).toUpperCase() + type.slice(1)}`)) {
-          if (onClick.includes(`'${value}'`)) {
-            btn.classList.add('active');
-          } else {
-            btn.classList.remove('active');
-          }
-        }
-      });
-      
-      const filterDisplay = document.getElementById('filter-display');
-      const currentFilterDiv = document.getElementById('current-filter');
-      
-      let filterText = [];
-      if (currentFilters.category !== 'all') filterText.push(currentFilters.category.toUpperCase());
-      if (currentFilters.country !== 'all') filterText.push(currentFilters.country);
-      if (currentFilters.language !== 'all') filterText.push(currentFilters.language.toUpperCase());
-      
-      if (filterText.length > 0) {
-        filterDisplay.textContent = filterText.join(' • ');
-        currentFilterDiv.classList.remove('hidden');
-      } else {
-        currentFilterDiv.classList.add('hidden');
-      }
-    }
-    
-    // LOAD LEADERBOARD
-    async function loadLeaderboard() {
-      try {
-        const params = new URLSearchParams({
-          limit: 100,
-          category: currentFilters.category,
-          country: currentFilters.country,
-          language: currentFilters.language
-        });
-        
-        const response = await fetch(`${API_BASE}/api/leaderboard?${params}`);
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error(data.error || 'Failed to load');
-        }
-        
-        displayLeaderboard(data.entries);
-        
-        try {
-          const statsResponse = await fetch(`${API_BASE}/api/leaderboard/stats`);
-          const statsData = await statsResponse.json();
-          
-          if (statsData && statsData.success && statsData.stats) {
-            document.getElementById('total-entries').textContent = statsData.stats.total_entries || 0;
-            document.getElementById('average-score').textContent = statsData.stats.average_score || '-';
-            document.getElementById('highest-score').textContent = statsData.stats.highest_score || '-';
-          }
-        } catch (statsError) {
-          console.log('Stats not available');
-        }
-        
-      } catch (error) {
-        console.error('Leaderboard error:', error);
-        document.getElementById('leaderboard-container').innerHTML = `
-          <div class="text-center py-12">
-            <div class="text-red-400 mb-2">Failed to load leaderboard</div>
-            <button onclick="loadLeaderboard()" class="text-purple-400 hover:text-purple-300 underline">Try again</button>
-          </div>
-        `;
-      }
-    }
-    
-    function displayLeaderboard(entries) {
-      if (!entries || entries.length === 0) {
-        document.getElementById('leaderboard-container').innerHTML = `
-          <div class="text-center py-12">
-            <div class="text-gray-400">No entries found. Try different filters or be the first to scan!</div>
-          </div>
-        `;
-        return;
-      }
-      
-      let html = '';
-      
-      entries.forEach(entry => {
-        const scoreClass = getScoreClass(entry.score);
-        const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
-        const categoryClass = `category-${entry.category || 'other'}`;
-        
-        html += `
-          <div class="leaderboard-row ${rankClass}">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-4 flex-1">
-                <div class="rank-badge ${entry.rank > 3 ? 'default' : ''}">${entry.rank}</div>
-                <div class="flex-1">
-                  <div class="font-bold text-white text-lg">${entry.company_name || 'Unknown'}</div>
-                  <div class="text-sm text-gray-400">${truncateUrl(entry.url)}</div>
-                  ${entry.category ? `<span class="category-badge ${categoryClass}">${entry.category}</span>` : ''}
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="score-display ${scoreClass}">${entry.score}</div>
-                <div class="text-xs text-gray-400">/100</div>
-              </div>
-            </div>
-            <div class="flex justify-end">
-              <button onclick="getPromptsForUrl('${entry.url}', ${entry.score}, ${JSON.stringify(entry).replace(/'/g, "\\'")})" class="prompt-btn">
-                🎁 Get FREE Prompts
-              </button>
-            </div>
-          </div>
-        `;
-      });
-      
-      document.getElementById('leaderboard-container').innerHTML = html;
-    }
-    
-    function getScoreClass(score) {
-      if (score >= 90) return 'score-excellent';
-      if (score >= 80) return 'score-very-good';
-      if (score >= 70) return 'score-good';
-      if (score >= 60) return 'score-fair';
-      return 'score-poor';
-    }
-    
-    function truncateUrl(url) {
-      try {
-        const urlObj = new URL(url);
-        return urlObj.hostname.replace('www.', '');
-      } catch {
-        return url.substring(0, 50) + '...';
-      }
-    }
-    
-    function refreshLeaderboard() {
-      document.getElementById('leaderboard-container').innerHTML = `
-        <div class="text-center py-12">
-          <div class="text-5xl mb-4">🔄</div>
-          <div class="text-gray-400">Refreshing...</div>
-        </div>
-      `;
-      loadLeaderboard();
-    }
-    
-    // SCAN FUNCTION
-    async function performScan() {
-      const url = document.getElementById('scanInput').value.trim();
-      
-      if (!url) {
-        alert('Please enter a URL');
-        return;
-      }
-      
-      if (!url.startsWith('http')) {
-        document.getElementById('scanInput').value = 'https://' + url;
-        return performScan();
-      }
-      
-      currentUrl = url;
-      
-      const btn = document.getElementById('scanButton');
-      btn.disabled = true;
-      btn.textContent = 'Scanning...';
-      
-      try {
-        const response = await fetch(`${API_BASE}/api/scan-free`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
-        });
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error(data.error || 'Scan failed');
-        }
-        
-        currentScanResult = data;
-        showResults(data);
-        
-      } catch (error) {
-        console.error('Scan error:', error);
-        alert('Scan failed: ' + error.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Scan Now';
-      }
-    }
-    
-    function showResults(data) {
-      document.getElementById('modal-score').textContent = data.score + '/100';
-      document.getElementById('modal-quality').textContent = getQualityText(data.score);
-      document.getElementById('modal-emoji').textContent = getQualityEmoji(data.score);
-      
-      document.getElementById('modal-graaf').textContent = `${data.breakdown.graaf.total}/50`;
-      document.getElementById('modal-craft').textContent = `${data.breakdown.craft.total}/30`;
-      document.getElementById('modal-technical').textContent = `${data.breakdown.technical.total}/20`;
-      
-      document.getElementById('leaderboard-prompt').classList.remove('hidden');
-      document.getElementById('leaderboard-result').classList.add('hidden');
-      
-      document.getElementById('resultsModal').classList.add('active');
-    }
-    
-    function getQualityText(score) {
-      if (score >= 90) return 'Excellent! 🌟';
-      if (score >= 80) return 'Very Good! 👍';
-      if (score >= 70) return 'Good ✓';
-      if (score >= 60) return 'Fair ⚠️';
-      return 'Needs Improvement ❌';
-    }
-    
-    function getQualityEmoji(score) {
-      if (score >= 90) return '🌟';
-      if (score >= 80) return '👍';
-      if (score >= 70) return '✓';
-      if (score >= 60) return '⚠️';
-      return '❌';
-    }
-    
-    async function submitToLeaderboard() {
-      const companyName = document.getElementById('company-name').value.trim();
-      const category = document.getElementById('category-select').value;
-      
-      try {
-        const response = await fetch(`${API_BASE}/api/leaderboard/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: currentUrl,
-            score: currentScanResult.score,
-            quality: currentScanResult.quality,
-            graaf_score: currentScanResult.breakdown.graaf.total,
-            craft_score: currentScanResult.breakdown.craft.total,
-            technical_score: currentScanResult.breakdown.technical.total,
-            word_count: currentScanResult.wordCount,
-            company_name: companyName || null,
-            category: category || null,
-            country: null,
-            language: null
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          document.getElementById('leaderboard-prompt').classList.add('hidden');
-          
-          let rank = data.rank;
-          if (!rank || rank === undefined) {
-            const allEntries = document.querySelectorAll('.leaderboard-row');
-            rank = allEntries.length + 1;
-          }
-          
-          document.getElementById('rank-display').textContent = `🎉 Rank #${rank}`;
-          document.getElementById('leaderboard-result').classList.remove('hidden');
-          
-          setTimeout(() => {
-            refreshLeaderboard();
-          }, 1000);
-        } else {
-          alert('Failed to add to leaderboard: ' + (data.error || 'Unknown error'));
-        }
-        
-      } catch (error) {
-        console.error('Submit error:', error);
-        alert('Failed to submit: ' + error.message);
-      }
-    }
-    
-    function skipLeaderboard() {
-      document.getElementById('leaderboard-prompt').classList.add('hidden');
-    }
-    
-    function closeResultsModal() {
-      document.getElementById('resultsModal').classList.remove('active');
-    }
-    
-    // GET PROMPTS
-    async function getPrompts() {
-      if (!currentScanResult) return;
-      
-      document.getElementById('promptsModal').classList.add('active');
-      
-      try {
-        const response = await fetch(`${API_BASE}/api/generate-content-prompt`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: currentUrl,
-            score: currentScanResult.score,
-            breakdown: currentScanResult.breakdown,
-            wordCount: currentScanResult.wordCount
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success && data.prompts) {
-          displayPrompts(data);
-        } else {
-          throw new Error('Failed to generate prompts');
-        }
-        
-      } catch (error) {
-        console.error('Prompts error:', error);
-        document.getElementById('prompts-container').innerHTML = `
-          <div class="text-center py-8">
-            <div class="text-red-400">Failed to generate prompts</div>
-          </div>
-        `;
-      }
-    }
-    
-    async function getPromptsForUrl(url, score, entry) {
-      currentUrl = url;
-      currentScanResult = {
-        score: score,
-        breakdown: {
-          graaf: { total: entry.graaf_score || 0 },
-          craft: { total: entry.craft_score || 0 },
-          technical: { total: entry.technical_score || 0 }
-        },
-        wordCount: entry.word_count || 0
-      };
-      
-      getPrompts();
-    }
-    
-    // DISPLAY PROMPTS WITH INLINE STYLES
-    function displayPrompts(promptData) {
-      const prompts = promptData.prompts || [];
-      const usageInstructions = promptData.usage_instructions || [];
-      
-      if (prompts.length === 0) {
-        document.getElementById('prompts-container').innerHTML = `
-          <div style="text-align: center; padding: 40px 20px;">
-            <div style="color: #ef4444; font-size: 16px; margin-bottom: 12px;">Failed to generate prompts</div>
-            <button onclick="getPrompts()" style="color: #a78bfa; text-decoration: underline; background: none; border: none; cursor: pointer; font-size: 14px;">
-              Try again
-            </button>
-          </div>
-        `;
-        return;
-      }
-      
-      if (usageInstructions.length > 0) {
-        const list = document.getElementById('usage-instructions');
-        if (list) {
-          list.innerHTML = usageInstructions.map(instr => `<li>${instr}</li>`).join('');
-        }
-      }
-      
-      let html = '';
-      
-      prompts.forEach((prompt, index) => {
-        const isElite = prompt.type === 'elite';
-        const promptId = `prompt-full-${index}`;
-        const previewId = `prompt-preview-${index}`;
-        const preview = prompt.prompt.substring(0, 500) + '...';
-        
-        html += `
-          <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 3px solid ${isElite ? '#8b5cf6' : '#4b5563'}; border-radius: 16px; padding: 28px; margin-bottom: 24px; position: relative;">
-            
-            ${isElite ? `
-              <div style="position: absolute; top: -14px; right: 24px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1e293b; padding: 8px 20px; border-radius: 24px; font-size: 11px; font-weight: 800; text-transform: uppercase; box-shadow: 0 6px 16px rgba(251, 191, 36, 0.6);">
-                🏆 RECOMMENDED
-              </div>
-            ` : ''}
-            
-            <div style="margin-bottom: 20px;">
-              <h3 style="font-size: 20px; font-weight: 700; color: #a78bfa; margin: 0 0 8px 0;">
-                ${prompt.title}
-              </h3>
-              <p style="font-size: 13px; color: #9ca3af; margin: 0 0 12px 0;">
-                ${prompt.description || ''}
-              </p>
-              ${prompt.estimated_score ? `
-                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(5, 150, 105, 0.2); border: 1px solid #10b981; color: #d1fae5; padding: 6px 16px; border-radius: 24px; font-size: 12px; font-weight: 700;">
-                  <span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
-                  Target: ${prompt.estimated_score}
-                </div>
-              ` : ''}
-            </div>
-            
-            <div id="${previewId}" style="background: #0f172a; padding: 20px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; color: #cbd5e1; max-height: 250px; overflow-y: auto; border: 1px solid #334155; margin-bottom: 16px; white-space: pre-wrap;">${preview}</div>
-            
-            <div id="${promptId}" style="display: none; background: #0f172a; padding: 24px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; color: #e2e8f0; max-height: 600px; overflow-y: auto; border: 2px solid #334155; margin-bottom: 16px; white-space: pre-wrap;">${prompt.prompt}</div>
-            
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <button 
-                id="copy-btn-${index}"
-                onclick="copyPromptInline('${promptId}', ${index})" 
-                style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; padding: 14px 24px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 14px;"
-              >
-                📋 Copy ${isElite ? 'ELITE' : ''} Prompt
-              </button>
-              
-              <button 
-                id="expand-btn-${index}"
-                onclick="toggleExpandInline('${promptId}', '${previewId}', ${index})"
-                style="background: #374151; color: #9ca3af; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600;"
-              >
-                👁️ View Full
-              </button>
-            </div>
-            
-            ${isElite ? `
-              <div style="font-size: 11px; color: #6b7280; margin-top: 12px;">
-                💡 ${(prompt.prompt.length / 1000).toFixed(1)}K characters - Complete framework
-              </div>
-            ` : ''}
-            
-          </div>
-        `;
-      });
-      
-      document.getElementById('prompts-container').innerHTML = html;
-      window.currentPrompts = prompts;
-      window.currentPromptData = promptData;
-    }
-    
-    function toggleExpandInline(promptId, previewId, index) {
-      const full = document.getElementById(promptId);
-      const preview = document.getElementById(previewId);
-      const btn = document.getElementById('expand-btn-' + index);
-      
-      if (full.style.display === 'none') {
-        full.style.display = 'block';
-        preview.style.display = 'none';
-        btn.textContent = '👁️ Hide Full';
-      } else {
-        full.style.display = 'none';
-        preview.style.display = 'block';
-        btn.textContent = '👁️ View Full';
-      }
-    }
-    
-    function copyPromptInline(promptId, index) {
-      const elem = document.getElementById(promptId);
-      const btn = document.getElementById('copy-btn-' + index);
-      const text = elem.textContent;
-      
-      navigator.clipboard.writeText(text).then(() => {
-        btn.innerHTML = '✅ Copied!';
-        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-        
-        setTimeout(() => {
-          btn.innerHTML = '📋 Copy Prompt';
-          btn.style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
-        }, 3000);
-        
-        showToastInline('✅ Prompt copied! Paste in Claude AI');
-      }).catch(err => {
-        alert('Copy failed');
-      });
-    }
-    
-    function showToastInline(message) {
-      const toast = document.createElement('div');
-      toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 16px 24px; border-radius: 12px; font-weight: 600; z-index: 99999; box-shadow: 0 8px 24px rgba(0,0,0,0.4);';
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => toast.remove(), 3000);
-    }
-    
-    // Enter key to scan
-    document.getElementById('scanInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') performScan();
-    });
-    
-    // Load leaderboard on page load
+    console.log('%c🏆 ContentScale Global Leaderboard','color:#f59e0b;font-size:16px;font-weight:bold');
+    const API_BASE='';let currentScanResult=null;let currentUrl='';let currentFilters={category:'all',country:'all',language:'all'};
+    function filterCategory(cat){currentFilters.category=cat;updateFilterButtons('category',cat);loadLeaderboard()}
+    function filterCountry(country){currentFilters.country=country;updateFilterButtons('country',country);loadLeaderboard()}
+    function filterLanguage(lang){currentFilters.language=lang;updateFilterButtons('language',lang);loadLeaderboard()}
+    function updateFilterButtons(type,value){const buttons=document.querySelectorAll('.filter-btn');buttons.forEach(btn=>{const onClick=btn.getAttribute('onclick');if(onClick&&onClick.includes(`filter${type.charAt(0).toUpperCase()+type.slice(1)}`)){onClick.includes(`'${value}'`)?btn.classList.add('active'):btn.classList.remove('active')}});const filterDisplay=document.getElementById('filter-display');const currentFilterDiv=document.getElementById('current-filter');let filterText=[];if(currentFilters.category!=='all')filterText.push(currentFilters.category.toUpperCase());if(currentFilters.country!=='all')filterText.push(currentFilters.country);if(currentFilters.language!=='all')filterText.push(currentFilters.language.toUpperCase());if(filterText.length>0){filterDisplay.textContent=filterText.join(' • ');currentFilterDiv.classList.remove('hidden')}else{currentFilterDiv.classList.add('hidden')}}
+    async function loadLeaderboard(){try{const params=new URLSearchParams({limit:100,category:currentFilters.category,country:currentFilters.country,language:currentFilters.language});const response=await fetch(`${API_BASE}/api/leaderboard?${params}`);const data=await response.json();if(!data.success)throw new Error(data.error||'Failed to load');displayLeaderboard(data.entries);try{const statsResponse=await fetch(`${API_BASE}/api/leaderboard/stats`);const statsData=await statsResponse.json();if(statsData&&statsData.success&&statsData.stats){document.getElementById('total-entries').textContent=statsData.stats.total_entries||0;document.getElementById('average-score').textContent=statsData.stats.average_score||'-';document.getElementById('highest-score').textContent=statsData.stats.highest_score||'-'}}catch(statsError){console.log('Stats not available')}}catch(error){console.error('Leaderboard error:',error);document.getElementById('leaderboard-container').innerHTML='<div class="text-center py-12"><div class="text-red-400 mb-2">Failed to load leaderboard</div><button onclick="loadLeaderboard()" class="text-purple-400 hover:text-purple-300 underline">Try again</button></div>'}}
+    function displayLeaderboard(entries){if(!entries||entries.length===0){document.getElementById('leaderboard-container').innerHTML='<div class="text-center py-12"><div class="text-gray-400">No entries found. Try different filters or be the first to scan!</div></div>';return}let html='';entries.forEach(entry=>{const scoreClass=getScoreClass(entry.score);const rankClass=entry.rank<=3?`rank-${entry.rank}`:'';const categoryClass=`category-${entry.category||'other'}`;html+=`<div class="leaderboard-row ${rankClass}"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-4 flex-1"><div class="rank-badge ${entry.rank>3?'default':''}">${entry.rank}</div><div class="flex-1"><div class="font-bold text-white text-lg">${entry.company_name||'Unknown'}</div><div class="text-sm text-gray-400">${truncateUrl(entry.url)}</div>${entry.category?`<span class="category-badge ${categoryClass}">${entry.category}</span>`:''}</div></div><div class="text-right"><div class="score-display ${scoreClass}">${entry.score}</div><div class="text-xs text-gray-400">/100</div></div></div><div class="flex justify-end"><button onclick="getPromptsForUrl('${entry.url}',${entry.score},${JSON.stringify(entry).replace(/'/g,"\\'")})" class="prompt-btn">🎁 Get FREE Prompts</button></div></div>`});document.getElementById('leaderboard-container').innerHTML=html}
+    function getScoreClass(score){if(score>=90)return'score-excellent';if(score>=80)return'score-very-good';if(score>=70)return'score-good';if(score>=60)return'score-fair';return'score-poor'}
+    function truncateUrl(url){try{const urlObj=new URL(url);return urlObj.hostname.replace('www.','')}catch{return url.substring(0,50)+'...'}}
+    function refreshLeaderboard(){document.getElementById('leaderboard-container').innerHTML='<div class="text-center py-12"><div class="text-5xl mb-4">🔄</div><div class="text-gray-400">Refreshing...</div></div>';loadLeaderboard()}
+    async function performScan(){const url=document.getElementById('scanInput').value.trim();if(!url){alert('Please enter a URL');return}if(!url.startsWith('http')){document.getElementById('scanInput').value='https://'+url;return performScan()}currentUrl=url;const btn=document.getElementById('scanButton');btn.disabled=true;btn.textContent='Scanning...';try{const response=await fetch(`${API_BASE}/api/scan-free`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});const data=await response.json();if(!data.success)throw new Error(data.error||'Scan failed');currentScanResult=data;showResults(data)}catch(error){console.error('Scan error:',error);alert('Scan failed: '+error.message)}finally{btn.disabled=false;btn.textContent='Scan Now'}}
+    function showResults(data){document.getElementById('modal-score').textContent=data.score+'/100';document.getElementById('modal-quality').textContent=getQualityText(data.score);document.getElementById('modal-emoji').textContent=getQualityEmoji(data.score);document.getElementById('modal-graaf').textContent=`${data.breakdown.graaf.total}/50`;document.getElementById('modal-craft').textContent=`${data.breakdown.craft.total}/30`;document.getElementById('modal-technical').textContent=`${data.breakdown.technical.total}/20`;document.getElementById('leaderboard-prompt').classList.remove('hidden');document.getElementById('leaderboard-result').classList.add('hidden');document.getElementById('resultsModal').classList.add('active')}
+    function getQualityText(score){if(score>=90)return'Excellent! 🌟';if(score>=80)return'Very Good! 👍';if(score>=70)return'Good ✓';if(score>=60)return'Fair ⚠️';return'Needs Improvement ❌'}
+    function getQualityEmoji(score){if(score>=90)return'🌟';if(score>=80)return'👍';if(score>=70)return'✓';if(score>=60)return'⚠️';return'❌'}
+    async function submitToLeaderboard(){const companyName=document.getElementById('company-name').value.trim();const category=document.getElementById('category-select').value;try{const response=await fetch(`${API_BASE}/api/leaderboard/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:currentUrl,score:currentScanResult.score,quality:currentScanResult.quality,graaf_score:currentScanResult.breakdown.graaf.total,craft_score:currentScanResult.breakdown.craft.total,technical_score:currentScanResult.breakdown.technical.total,word_count:currentScanResult.wordCount,company_name:companyName||null,category:category||null,country:null,language:null})});const data=await response.json();if(data.success){document.getElementById('leaderboard-prompt').classList.add('hidden');let rank=data.rank;if(!rank||rank===undefined){const allEntries=document.querySelectorAll('.leaderboard-row');rank=allEntries.length+1}document.getElementById('rank-display').textContent=`🎉 Rank #${rank}`;document.getElementById('leaderboard-result').classList.remove('hidden');setTimeout(()=>{refreshLeaderboard()},1000)}else{alert('Failed to add to leaderboard: '+(data.error||'Unknown error'))}}catch(error){console.error('Submit error:',error);alert('Failed to submit: '+error.message)}}
+    function skipLeaderboard(){document.getElementById('leaderboard-prompt').classList.add('hidden')}
+    function closeResultsModal(){document.getElementById('resultsModal').classList.remove('active')}
+    async function getPrompts(){if(!currentScanResult)return;document.getElementById('promptsModal').classList.add('active');document.getElementById('promptsModal').style.display='block';try{const response=await fetch(`${API_BASE}/api/generate-content-prompt`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:currentUrl,score:currentScanResult.score,breakdown:currentScanResult.breakdown,wordCount:currentScanResult.wordCount})});const data=await response.json();if(data.success&&data.prompts){displayPrompts(data)}else{throw new Error('Failed to generate prompts')}}catch(error){console.error('Prompts error:',error);document.getElementById('prompts-container').innerHTML='<div class="text-center py-8"><div class="text-red-400">Failed to generate prompts</div></div>'}}
+    async function getPromptsForUrl(url,score,entry){currentUrl=url;currentScanResult={score:score,breakdown:{graaf:{total:entry.graaf_score||0},craft:{total:entry.craft_score||0},technical:{total:entry.technical_score||0}},wordCount:entry.word_count||0};getPrompts()}
+    function displayPrompts(promptData){const prompts=promptData.prompts||[];const usageInstructions=promptData.usage_instructions||[];if(prompts.length===0){document.getElementById('prompts-container').innerHTML='<div style="text-align:center;padding:40px 20px"><div style="color:#ef4444;font-size:16px;margin-bottom:12px">Failed to generate prompts</div><button onclick="getPrompts()" style="color:#a78bfa;text-decoration:underline;background:none;border:none;cursor:pointer;font-size:14px">Try again</button></div>';return}if(usageInstructions.length>0){const list=document.getElementById('usage-instructions');if(list){list.innerHTML=usageInstructions.map(instr=>`<li>${instr}</li>`).join('')}}let html='';prompts.forEach((prompt,index)=>{const isElite=prompt.type==='elite';const promptId=`prompt-full-${index}`;const previewId=`prompt-preview-${index}`;const preview=prompt.prompt.substring(0,500)+'...';html+=`<div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:3px solid ${isElite?'#8b5cf6':'#4b5563'};border-radius:16px;padding:28px;margin-bottom:24px;position:relative">${isElite?'<div style="position:absolute;top:-14px;right:24px;background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%);color:#1e293b;padding:8px 20px;border-radius:24px;font-size:11px;font-weight:800;text-transform:uppercase;box-shadow:0 6px 16px rgba(251,191,36,0.6)">🏆 RECOMMENDED</div>':''}<div style="margin-bottom:20px"><h3 style="font-size:20px;font-weight:700;color:#a78bfa;margin:0 0 8px 0">${prompt.title}</h3><p style="font-size:13px;color:#9ca3af;margin:0 0 12px 0">${prompt.description||''}</p>${prompt.estimated_score?`<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(5,150,105,0.2);border:1px solid #10b981;color:#d1fae5;padding:6px 16px;border-radius:24px;font-size:12px;font-weight:700"><span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%"></span>Target: ${prompt.estimated_score}</div>`:''}</div><div id="${previewId}" style="background:#0f172a;padding:20px;border-radius:12px;font-family:'Courier New',monospace;font-size:12px;line-height:1.7;color:#cbd5e1;max-height:250px;overflow-y:auto;border:1px solid #334155;margin-bottom:16px;white-space:pre-wrap">${preview}</div><div id="${promptId}" style="display:none;background:#0f172a;padding:24px;border-radius:12px;font-family:'Courier New',monospace;font-size:13px;line-height:1.8;color:#e2e8f0;max-height:600px;overflow-y:auto;border:2px solid #334155;margin-bottom:16px;white-space:pre-wrap">${prompt.prompt}</div><div style="display:flex;gap:12px;flex-wrap:wrap"><button id="copy-btn-${index}" onclick="copyPromptInline('${promptId}',${index})" style="flex:1;min-width:200px;background:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);color:white;border:none;padding:14px 24px;border-radius:10px;cursor:pointer;font-weight:700;font-size:14px">📋 Copy ${isElite?'ELITE':''} Prompt</button><button id="expand-btn-${index}" onclick="toggleExpandInline('${promptId}','${previewId}',${index})" style="background:#374151;color:#9ca3af;border:none;padding:12px 24px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600">👁️ View Full</button></div>${isElite?`<div style="font-size:11px;color:#6b7280;margin-top:12px">💡 ${(prompt.prompt.length/1000).toFixed(1)}K characters - Complete framework</div>`:''}</div>`});document.getElementById('prompts-container').innerHTML=html;window.currentPrompts=prompts;window.currentPromptData=promptData}
+    function toggleExpandInline(promptId,previewId,index){const full=document.getElementById(promptId);const preview=document.getElementById(previewId);const btn=document.getElementById('expand-btn-'+index);if(full.style.display==='none'){full.style.display='block';preview.style.display='none';btn.textContent='👁️ Hide Full'}else{full.style.display='none';preview.style.display='block';btn.textContent='👁️ View Full'}}
+    function copyPromptInline(promptId,index){const elem=document.getElementById(promptId);const btn=document.getElementById('copy-btn-'+index);const text=elem.textContent;navigator.clipboard.writeText(text).then(()=>{btn.innerHTML='✅ Copied!';btn.style.background='linear-gradient(135deg,#10b981 0%,#059669 100%)';setTimeout(()=>{btn.innerHTML='📋 Copy Prompt';btn.style.background='linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)'},3000);showToastInline('✅ Prompt copied! Paste in Claude AI')}).catch(err=>{alert('Copy failed')})}
+    function showToastInline(message){const toast=document.createElement('div');toast.style.cssText='position:fixed;top:20px;right:20px;background:#10b981;color:white;padding:16px 24px;border-radius:12px;font-weight:600;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,0.4)';toast.textContent=message;document.body.appendChild(toast);setTimeout(()=>toast.remove(),3000)}
+    function exportPromptsToFile(){if(!window.currentPrompts){alert('No prompts to export');return}const{topic,keyword,score}=window.currentPromptData||{};let content=`ELITE AI CONTENT PROMPTS - ContentScale\nURL: ${currentUrl}\nScore: ${score}/100\nGenerated: ${new Date().toLocaleString()}\n\nHOW TO USE:\n1. Copy the ELITE prompt below\n2. Paste into Claude.ai, ChatGPT, or Perplexity\n3. AI generates complete article\n4. Update your page\n5. Rescan!\n\n${'='.repeat(60)}\n\n`;window.currentPrompts.forEach((prompt,i)=>{content+=`PROMPT ${i+1}: ${prompt.title}\n`;content+=`${'='.repeat(60)}\n${prompt.prompt}\n\n${'='.repeat(60)}\n\n`});const blob=new Blob([content],{type:'text/plain'});const downloadUrl=URL.createObjectURL(blob);const a=document.createElement('a');a.href=downloadUrl;a.download=`contentscale-prompts-${Date.now()}.txt`;a.click();URL.revokeObjectURL(downloadUrl);showToastInline('✅ Prompts exported!')}
+    function sharePromptsOnLinkedIn(){const score=currentScanResult?.score||'XX';const text=`🚀 Got ELITE AI Prompts from ContentScale! Score: ${score}/100. Try it: contentscale.site/leaderboard`;navigator.clipboard.writeText(text);window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent('https://contentscale.site/leaderboard'),'_blank');showToastInline('✅ Post text copied!')}
+    function emailPrompts(){alert('📧 Email feature coming soon! Use Export button for now.')}
+    document.getElementById('scanInput').addEventListener('keypress',(e)=>{if(e.key==='Enter')performScan()});
     loadLeaderboard();
-    
-    // Auto-refresh every 5 minutes
-    setInterval(loadLeaderboard, 300000);
-    
-    // Close Prompts Modal
-    window.closePromptsModal = function() {
-      const modal = document.getElementById('promptsModal');
-      if (modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('active');
-      }
-    };
-    
+    setInterval(loadLeaderboard,300000);
+    window.closePromptsModal=function(){const modal=document.getElementById('promptsModal');if(modal){modal.style.display='none';modal.classList.remove('active')}};
   </script>
 </body>
 </html>
