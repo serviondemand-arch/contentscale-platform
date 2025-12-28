@@ -776,6 +776,190 @@ app.get('/api/leaderboard/stats', async (req, res) => {
   }
 });
 
+
+// ==========================================
+// ADMIN: SCAN ALL AGENCIES
+// ==========================================
+
+app.post('/api/admin/scan-all-agencies', authenticateSuperAdmin, async (req, res) => {
+  try {
+    console.log('[ADMIN SCAN ALL] Starting scan of all agencies...');
+    
+    // Get all active agencies
+    const agenciesResult = await pool.query(`
+      SELECT id, name, domain, country
+      FROM agencies
+      WHERE is_active = true
+      ORDER BY created_at DESC
+    `);
+    
+    const agencies = agenciesResult.rows;
+    
+    if (agencies.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No active agencies to scan',
+        scanned: 0,
+        results: []
+      });
+    }
+    
+    console.log(`[ADMIN SCAN ALL] Found ${agencies.length} active agencies`);
+    
+    const results = [];
+    let successCount = 0;
+    let failCount = 0;
+    
+    // Scan each agency
+    for (const agency of agencies) {
+      try {
+        console.log(`[ADMIN SCAN] Scanning ${agency.name} (${agency.domain})...`);
+        
+        // Build full URL
+        const url = agency.domain.startsWith('http') 
+          ? agency.domain 
+          : `https://${agency.domain}`;
+        
+        // Perform hybrid scan
+        const scanResult = await performHybridScan(url);
+        
+        if (!scanResult.success) {
+          throw new Error(scanResult.error || 'Scan failed');
+        }
+        
+        // Generate URL hash
+        const urlHash = crypto.createHash('md5').update(url).digest('hex');
+        
+        // Check if entry exists
+        const existing = await pool.query(
+          'SELECT id, score FROM public_leaderboard WHERE url_hash = $1',
+          [urlHash]
+        );
+        
+        // Update or insert
+        if (existing.rows.length > 0) {
+          // Update if new score is higher
+          if (scanResult.score > existing.rows[0].score) {
+            await pool.query(`
+              UPDATE public_leaderboard
+              SET score = $1,
+                  quality = $2,
+                  graaf_score = $3,
+                  craft_score = $4,
+                  technical_score = $5,
+                  word_count = $6,
+                  updated_at = NOW()
+              WHERE url_hash = $7
+            `, [
+              scanResult.score,
+              scanResult.quality,
+              scanResult.breakdown.graaf.total,
+              scanResult.breakdown.craft.total,
+              scanResult.breakdown.technical.total,
+              scanResult.wordCount || 0,
+              urlHash
+            ]);
+            
+            console.log(`✅ Updated ${agency.name}: ${scanResult.score}/100`);
+          } else {
+            console.log(`⏭️ Skipped ${agency.name}: Existing score higher`);
+          }
+        } else {
+          // Insert new entry
+          await pool.query(`
+            INSERT INTO public_leaderboard (
+              url,
+              url_hash,
+              score,
+              quality,
+              graaf_score,
+              craft_score,
+              technical_score,
+              word_count,
+              company_name,
+              category,
+              country,
+              language,
+              is_public
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true)
+          `, [
+            url,
+            urlHash,
+            scanResult.score,
+            scanResult.quality,
+            scanResult.breakdown.graaf.total,
+            scanResult.breakdown.craft.total,
+            scanResult.breakdown.technical.total,
+            scanResult.wordCount || 0,
+            agency.name,
+            'agency',
+            agency.country || 'other',
+            'en'
+          ]);
+          
+          console.log(`✅ Added ${agency.name}: ${scanResult.score}/100`);
+        }
+        
+        results.push({
+          agency: agency.name,
+          url: url,
+          score: scanResult.score,
+          status: 'success'
+        });
+        
+        successCount++;
+        
+      } catch (error) {
+        console.error(`❌ Failed to scan ${agency.name}:`, error.message);
+        
+        results.push({
+          agency: agency.name,
+          url: agency.domain,
+          error: error.message,
+          status: 'failed'
+        });
+        
+        failCount++;
+      }
+    }
+    
+    console.log(`[ADMIN SCAN ALL] Complete: ${successCount} success, ${failCount} failed`);
+    
+    res.json({
+      success: true,
+      message: `Scanned ${agencies.length} agencies: ${successCount} success, ${failCount} failed`,
+      total: agencies.length,
+      successCount,
+      failCount,
+      results
+    });
+    
+  } catch (error) {
+    console.error('[ADMIN SCAN ALL ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to scan agencies',
+      details: error.message
+    });
+  }
+});
+
+// Get scan progress (for future real-time updates)
+app.get('/api/admin/scan-progress', authenticateSuperAdmin, async (req, res) => {
+  // For now, return mock data
+  // In future: track actual progress in Redis or database
+  res.json({
+    success: true,
+    scanning: false,
+    progress: {
+      total: 0,
+      completed: 0,
+      current: null
+    }
+  });
+});
+
+
 // ==========================================
 // SUPER ADMIN: LEADERBOARD MANAGEMENT
 // ==========================================
