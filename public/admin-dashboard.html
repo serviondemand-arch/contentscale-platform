@@ -93,10 +93,9 @@
     <div class="container mx-auto px-6 py-8">
 
       <!-- OVERVIEW TAB -->
-      <div id="content-overview" class="tab-content">
+      <div id="content-overview" class="tab-content active">
         <h2 class="text-2xl font-bold mb-6">Platform Overview</h2>
         
-        <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <div class="flex items-center justify-between">
@@ -139,7 +138,6 @@
           </div>
         </div>
 
-        <!-- Quick Actions -->
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
           <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -158,7 +156,6 @@
           </div>
         </div>
 
-        <!-- Platform Health -->
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
           <h3 class="text-xl font-bold mb-4">Platform Health</h3>
           <div class="space-y-3">
@@ -308,7 +305,6 @@
             </button>
           </div>
 
-          <!-- FILTERS -->
           <div class="flex gap-4 mb-6">
             <select id="share-link-status-filter" onchange="loadShareLinks()" class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg">
               <option value="">All Status</option>
@@ -322,7 +318,6 @@
             </button>
           </div>
 
-          <!-- SHARE LINKS TABLE -->
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
@@ -347,10 +342,22 @@
           </div>
         </div>
       </div>
-
       <!-- LEADERBOARD TAB -->
       <div id="content-leaderboard" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-6">🏆 Leaderboard Management</h2>
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold">🏆 Leaderboard Management</h2>
+          <div class="flex gap-3">
+            <input 
+              type="text" 
+              id="leaderboard-search" 
+              placeholder="Zoek op URL, naam, score, rank..."
+              class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white w-64"
+              onkeyup="searchLeaderboard()">
+            <button onclick="loadAdminLeaderboard()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-bold">
+              🔄 Refresh
+            </button>
+          </div>
+        </div>
 
         <!-- HOW IT WORKS -->
         <div class="bg-blue-900 bg-opacity-30 rounded-lg p-6 border border-blue-700 mb-6">
@@ -391,8 +398,17 @@
                 <p class="text-gray-300 text-xs mt-1">Bezoekers kunnen top agencies per land zien</p>
               </div>
             </div>
+            
+            <div class="flex gap-3">
+              <span class="text-2xl">5️⃣</span>
+              <div>
+                <strong class="text-blue-300">Entries verwijderen:</strong>
+                <p class="text-gray-300">Gebruik de search functie hierboven om entries te vinden, dan klik 🗑️ Delete.</p>
+                <p class="text-gray-300 text-xs mt-1">⚠️ Ranks updaten automatisch na delete!</p>
+              </div>
+            </div>
           </div>
-
+          
           <div class="mt-4 p-3 bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded">
             <p class="text-sm text-yellow-300">
               <strong>💡 Test Tip:</strong> Voeg eerst een test agency toe in Nederland, scan deze handmatig, en check of het in het leaderboard verschijnt.
@@ -434,76 +450,51 @@
           <div id="autoscan-result" class="hidden mt-4 p-4 rounded-lg"></div>
         </div>
 
-        <!-- Leaderboard View -->
+        <!-- Leaderboard Admin View -->
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <h3 class="text-xl font-bold mb-4">📊 Leaderboard Weergave</h3>
+          <h3 class="text-xl font-bold mb-4">📊 Alle Leaderboard Entries</h3>
           
-          <div class="flex gap-4 mb-6">
-            <div class="flex-1">
-              <label class="block text-sm text-gray-400 mb-2">Selecteer Land</label>
-              <select id="leaderboard-country" onchange="loadLeaderboard()" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2">
-                <option value="netherlands">🇳🇱 Nederland</option>
-                <option value="philippines">🇵🇭 Filipijnen</option>
-              </select>
-            </div>
-            
-            <div class="flex-1">
-              <label class="block text-sm text-gray-400 mb-2">Of Voer Handmatig In</label>
-              <div class="flex gap-2">
-                <input 
-                  type="text" 
-                  id="custom-country-input"
-                  placeholder="bijv. belgium, germany"
-                  class="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg">
-                <button 
-                  onclick="loadCustomCountry()" 
-                  class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold">
-                  Zoeken
-                </button>
-              </div>
-              <p class="text-xs text-gray-500 mt-1">Gebruik lowercase Engels: belgium, germany, usa, etc.</p>
-            </div>
-          </div>
-
-          <div id="leaderboard-loading" class="text-center py-12">
+          <div id="leaderboard-admin-loading" class="text-center py-12">
             <div class="text-4xl mb-4 animate-pulse">⏳</div>
-            <p class="text-gray-400">Leaderboard laden...</p>
+            <p class="text-gray-400">Loading leaderboard...</p>
           </div>
 
-          <div id="leaderboard-list" class="hidden">
-            <div class="mb-4 p-3 bg-gray-700 rounded-lg flex justify-between items-center">
-              <div>
-                <span class="text-sm text-gray-400">Land:</span>
-                <span id="current-country-display" class="font-bold ml-2">Nederland</span>
-              </div>
-              <div>
-                <span class="text-sm text-gray-400">Totaal Agencies:</span>
-                <span id="total-agencies-count" class="font-bold ml-2">0</span>
+          <div id="leaderboard-admin-list" class="hidden">
+            <div class="mb-4 p-4 bg-gray-700 rounded-lg">
+              <div class="flex justify-between items-center">
+                <div>
+                  <span class="text-sm text-gray-400">Total Entries:</span>
+                  <span id="leaderboard-total-count" class="font-bold ml-2 text-white">0</span>
+                </div>
+                <div class="text-sm text-gray-400">
+                  ⚠️ Ranks update automatically after delete
+                </div>
               </div>
             </div>
             
-            <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
               <table class="w-full">
                 <thead class="bg-gray-900">
                   <tr>
                     <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Rank</th>
-                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Agency</th>
-                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Domain</th>
+                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Company</th>
+                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">URL</th>
                     <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Score</th>
-                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Laatste Scan</th>
-                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Acties</th>
+                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Category</th>
+                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Date</th>
+                    <th class="px-6 py-3 text-left text-sm font-bold text-gray-400">Actions</th>
                   </tr>
                 </thead>
-                <tbody id="leaderboard-tbody" class="divide-y divide-gray-700">
+                <tbody id="leaderboard-admin-tbody" class="divide-y divide-gray-700">
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div id="leaderboard-empty" class="hidden text-center py-12">
+          <div id="leaderboard-admin-empty" class="hidden text-center py-12">
             <div class="text-4xl mb-4">📭</div>
-            <p class="text-gray-400 mb-2">Geen agencies gevonden voor dit land</p>
-            <p class="text-sm text-gray-500">Voeg eerst agencies toe in de "🏢 Agencies" tab</p>
+            <p class="text-gray-400 mb-2">No leaderboard entries found</p>
+            <p class="text-sm text-gray-500">Entries will appear here after scanning</p>
           </div>
         </div>
       </div>
@@ -512,7 +503,6 @@
       <div id="content-leadscanner" class="tab-content hidden">
         <h2 class="text-2xl font-bold mb-6">🎯 Lead Scanner</h2>
 
-        <!-- Scan Configuration -->
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
           <h3 class="text-xl font-bold mb-4">Scan Configuration</h3>
           
@@ -569,7 +559,6 @@
           <div id="lead-scan-status" class="hidden mt-4 p-4 rounded-lg"></div>
         </div>
 
-        <!-- Scan Results -->
         <div id="lead-results" class="hidden">
           <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-4">
             <h3 class="text-xl font-bold mb-4">Scan Results</h3>
@@ -625,7 +614,6 @@
           </div>
         </div>
 
-        <!-- Embedded ContentScore Tool -->
         <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden" style="height: calc(100vh - 300px);">
           <iframe 
             id="contentscore-iframe"
@@ -641,13 +629,11 @@
       <div id="content-generators" class="tab-content hidden">
         <h2 class="text-2xl font-bold mb-6">🎨 Code Generators</h2>
         
-        <!-- BADGE GENERATOR -->
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
           <h3 class="text-xl font-bold mb-4">🏅 Verification Badge Generator</h3>
           <p class="text-gray-400 text-sm mb-6">Create a compact verification badge for bottom corner placement</p>
           
           <div class="grid md:grid-cols-2 gap-6">
-            <!-- Controls -->
             <div>
               <div class="mb-4">
                 <label class="block text-sm text-gray-400 mb-2">ContentScore (0-100)</label>
@@ -699,7 +685,6 @@
               </button>
             </div>
             
-            <!-- Preview -->
             <div>
               <div class="bg-gray-700 rounded-lg p-6">
                 <h4 class="font-bold mb-4">👀 Live Preview</h4>
@@ -729,7 +714,6 @@
             </div>
           </div>
           
-          <!-- Code Output -->
           <div id="gen-badge-code-output" class="hidden mt-6 bg-gray-900 rounded-lg p-4">
             <div class="flex justify-between items-center mb-3">
               <h4 class="font-bold">📄 Your Badge Code</h4>
@@ -741,13 +725,11 @@
           </div>
         </div>
         
-        <!-- SCROLL BANNER GENERATOR -->
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
           <h3 class="text-xl font-bold mb-4">🎉 Scrolling Banner Generator</h3>
           <p class="text-gray-400 text-sm mb-6">Create an eye-catching top banner with scrolling details</p>
           
           <div class="grid md:grid-cols-2 gap-6">
-            <!-- Controls -->
             <div>
               <div class="mb-4">
                 <label class="block text-sm text-gray-400 mb-2">ContentScore (0-100)</label>
@@ -797,7 +779,6 @@
               </button>
             </div>
             
-            <!-- Preview -->
             <div>
               <div class="bg-gray-700 rounded-lg p-6">
                 <h4 class="font-bold mb-4">👀 Live Preview</h4>
@@ -828,7 +809,6 @@
             </div>
           </div>
           
-          <!-- Code Output -->
           <div id="gen-scroll-code-output" class="hidden mt-6 bg-gray-900 rounded-lg p-4">
             <div class="flex justify-between items-center mb-3">
               <h4 class="font-bold">📄 Your Banner Code</h4>
@@ -874,7 +854,6 @@
         <h2 class="text-2xl font-bold mb-6">Platform Settings</h2>
 
         <div class="space-y-6">
-          <!-- Platform Info -->
           <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <h3 class="text-xl font-bold mb-4">Platform Information</h3>
             <div class="grid grid-cols-2 gap-4 text-sm">
@@ -897,7 +876,6 @@
             </div>
           </div>
 
-          <!-- API Configuration -->
           <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <h3 class="text-xl font-bold mb-4">API Configuration</h3>
             <div class="space-y-4">
@@ -913,7 +891,6 @@
             </div>
           </div>
 
-          <!-- Danger Zone -->
           <div class="bg-red-900 bg-opacity-20 rounded-lg p-6 border border-red-700">
             <h3 class="text-xl font-bold mb-4 text-red-400">⚠️ Danger Zone</h3>
             <div class="space-y-3">
@@ -927,33 +904,22 @@
           </div>
         </div>
       </div>
-
       <!-- HANDLEIDING TAB -->
       <div id="content-handleiding" class="tab-content hidden">
         <div class="max-w-5xl">
           <h2 class="text-3xl font-bold mb-2">📚 Complete Admin Dashboard Handleiding</h2>
           <p class="text-gray-400 mb-8">Uitgebreide uitleg van alle functies en tabs in het ContentScale platform</p>
 
-          <!-- Quick Navigation -->
           <div class="bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg p-6 mb-8 border border-blue-700">
             <h3 class="text-xl font-bold mb-3">🗺️ Snelle Navigatie</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <a href="#guide-overview" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">📊 Overview</a>
               <a href="#guide-admins" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">👥 Admins</a>
               <a href="#guide-agencies" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🏢 Agencies</a>
-              <a href="#guide-clients" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">👤 Clients</a>
-              <a href="#guide-scans" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🔍 Scans</a>
-              <a href="#guide-sharelinks" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🔗 Share Links</a>
               <a href="#guide-leaderboard" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🏆 Leaderboard</a>
-              <a href="#guide-leadscanner" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🎯 Lead Scanner</a>
-              <a href="#guide-contentscore" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">📊 ContentScore</a>
-              <a href="#guide-generators" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">🎨 Generators</a>
-              <a href="#guide-ltdcodes" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">💰 LTD Codes</a>
-              <a href="#guide-settings" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded transition">⚙️ Settings</a>
             </div>
           </div>
 
-          <!-- TAB 1: OVERVIEW -->
           <div id="guide-overview" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
             <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
               <span class="text-3xl">📊</span>
@@ -975,654 +941,45 @@
                   <li><strong>Active Helpers</strong> - Actieve admin/helper accounts</li>
                 </ul>
               </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Quick Actions:</h4>
-                <div class="bg-gray-700 rounded p-3 font-mono text-sm">
-                  ➕ Add Agency → Opent agency modal<br>
-                  👤 Add Helper → Opent admin modal<br>
-                  🔗 Create Share Link → Opent share link modal<br>
-                  🎯 Scan Leads → Ga naar Lead Scanner
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Platform Health:</h4>
-                <p>Toont de status van database, API, auto-scan service en laatste backup</p>
-              </div>
             </div>
           </div>
 
-          <!-- TAB 2: ADMINS -->
-          <div id="guide-admins" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">👥</span>
-              <span>Tab 2: Admins & Helpers</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Beheer admin en helper accounts die toegang hebben tot dit dashboard</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Account Types:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>🔑 Super Admin</strong> - Volledige toegang tot alles</li>
-                  <li><strong>💼 Sales</strong> - Client management, share links</li>
-                  <li><strong>🧪 Tester</strong> - Read-only access (alleen bekijken)</li>
-                  <li><strong>🎧 Support</strong> - Beperkte toegang voor support taken</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Admin Toevoegen:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>Stap 1:</strong> Klik "➕ Add Admin/Helper"</p>
-                  <p><strong>Stap 2:</strong> Vul in:</p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Username: bijv. "salesrep1"</li>
-                    <li>Password: minimaal 6 karakters</li>
-                    <li>Role: Super Admin / Sales / Tester / Support</li>
-                    <li>Full Name: optioneel</li>
-                    <li>Email: optioneel</li>
-                  </ul>
-                  <p><strong>Stap 3:</strong> Klik "✅ Create Admin"</p>
-                  <p class="text-green-400">✅ Account is direct actief!</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Acties:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>⏸️/▶️</strong> - Pause/Activate account (toggle)</li>
-                  <li><strong>🔑</strong> - Reset password (nieuw wachtwoord instellen)</li>
-                  <li><strong>🗑️</strong> - Delete account (permanent verwijderen)</li>
-                </ul>
-              </div>
-
-              <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3">
-                <p class="text-yellow-300 text-sm">
-                  <strong>⚠️ Let op:</strong> Je kunt je eigen account NIET verwijderen. Inactive admins kunnen niet inloggen.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 3: AGENCIES -->
-          <div id="guide-agencies" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">🏢</span>
-              <span>Tab 3: Agencies</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Beheer SEO agencies die het ContentScale platform gebruiken voor hun clients</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Agency Informatie:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>Naam</strong> - bijv. "Amsterdam SEO Pro"</li>
-                  <li><strong>Domain</strong> - bijv. "amsterdamseo.nl"</li>
-                  <li><strong>Land</strong> - voor leaderboard ranking (NL, PH, custom)</li>
-                  <li><strong>Plan</strong> - Starter / Professional / Agency / Enterprise</li>
-                  <li><strong>Admin Key</strong> - Unieke key voor agency login</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Agency Aanmaken:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>1. Basic Info:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Name: Digital Marketing Amsterdam</li>
-                    <li>Domain: dmamsterdam.nl (zonder https://)</li>
-                    <li>Country: 🇳🇱 Nederland of 🇵🇭 Filipijnen</li>
-                    <li>Voor ander land: selecteer "🌍 Ander land" en typ bijv. "belgium"</li>
-                    <li>Plan: Professional</li>
-                  </ul>
-                  <p class="mt-2"><strong>2. Contact Info (optioneel):</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Contact Person: John Doe</li>
-                    <li>Email: john@dmamsterdam.nl</li>
-                    <li>Phone: +31 20 123 4567</li>
-                  </ul>
-                  <p class="mt-2"><strong>3. Settings:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>☑ Whitelabel - Agency kan eigen branding gebruiken</li>
-                    <li>☑ Active - Agency kan platform direct gebruiken</li>
-                  </ul>
-                  <p class="mt-2 text-green-400"><strong>4. Klik "✅ Create Agency"</strong></p>
-                  <p class="text-yellow-400"><strong>⚠️ BELANGRIJK:</strong> Kopieer de Admin Key en geef deze aan de agency!</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Admin Key:</h4>
-                <div class="bg-gray-700 rounded p-3 font-mono text-sm">
-                  Format: ADMIN-ABC123-DEF456<br>
-                  Gebruik: Agency login op /agency<br>
-                  ⚠️ Kan niet opnieuw gegenereerd worden!
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Agency Dashboard:</h4>
-                <p>Agency logt in op <code class="bg-gray-700 px-2 py-1 rounded">/agency</code> met Admin Key en kan:</p>
-                <ul class="list-disc list-inside space-y-1 ml-4 mt-2">
-                  <li>Eigen clients toevoegen</li>
-                  <li>Clients scannen (binnen limiet)</li>
-                  <li>Scan history bekijken</li>
-                  <li>Whitelabel instellingen aanpassen</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 4: ALL CLIENTS -->
-          <div id="guide-clients" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">👤</span>
-              <span>Tab 4: All Clients</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Platform-wide overzicht van ALLE clients van ALLE agencies</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Informatie Weergave:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li>Client naam</li>
-                  <li>Bij welke agency</li>
-                  <li>Email adres</li>
-                  <li>Scans gebruikt / limiet (bijv. 15/30)</li>
-                  <li>Laatste scan datum</li>
-                  <li>Status (active/inactive)</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Gebruik:</h4>
-                <p>Dit is een <strong>read-only overzicht</strong> voor monitoring:</p>
-                <ul class="list-disc list-inside space-y-1 ml-4 mt-2">
-                  <li>Zie welke clients het meest actief zijn</li>
-                  <li>Monitor scan usage per client</li>
-                  <li>Troubleshoot client issues</li>
-                  <li>Platform-wide statistieken</li>
-                </ul>
-              </div>
-
-              <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-3">
-                <p class="text-blue-300 text-sm">
-                  <strong>💡 Verschil:</strong><br>
-                  <strong>ALL CLIENTS tab</strong> → Alle clients (super admin view)<br>
-                  <strong>Agency Dashboard</strong> → Alleen eigen clients (agency view)
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 5: ALL SCANS -->
-          <div id="guide-scans" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">🔍</span>
-              <span>Tab 5: All Scans</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Platform-wide overzicht van ALLE scans die uitgevoerd zijn</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Informatie per Scan:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li>Datum & tijd van scan</li>
-                  <li>Agency naam</li>
-                  <li>Client naam</li>
-                  <li>URL (welke website gescand)</li>
-                  <li>ContentScore (0-100)</li>
-                  <li>Scan type (free/client/share_link)</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Gebruik Cases:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>Monitoring</strong> - Platform activiteit in real-time</li>
-                  <li><strong>Analytics</strong> - Welke URLs worden het meest gescand</li>
-                  <li><strong>Troubleshooting</strong> - Waarom faalde een scan</li>
-                  <li><strong>Billing</strong> - Usage tracking per agency</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 6: SHARE LINKS -->
-          <div id="guide-sharelinks" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">🔗</span>
-              <span>Tab 6: Share Links</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Maak tijdelijke scan links voor prospects, leads en demos zonder account</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Share Link Features:</h4>
-                <div class="bg-gray-700 rounded p-3 font-mono text-sm">
-                  Share Code: SCAN-ABC123-XYZ789<br>
-                  Scans Limit: 5 scans<br>
-                  Valid Days: 7 dagen<br>
-                  URL: /scan-with-link/SCAN-ABC123-XYZ789
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Share Link Aanmaken:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>1. Klik "➕ Create Share Link"</strong></p>
-                  <p><strong>2. Vul in:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Client Name: John Prospects</li>
-                    <li>Client Email: john@prospects.com (verplicht!)</li>
-                    <li>Company: Prospects BV</li>
-                    <li>Number of Scans: 5</li>
-                    <li>Valid Days: 7</li>
-                    <li>Notes: "Demo voor grote klant"</li>
-                    <li>☑ Send email (automatisch emailen)</li>
-                  </ul>
-                  <p class="mt-2"><strong>3. Resultaat:</strong></p>
-                  <p class="text-green-400">Share URL wordt gegenereerd!</p>
-                  <p class="text-yellow-400">Geef URL aan prospect → Geen account nodig!</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Statussen:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>✅ Active</strong> - Kan nog gebruikt worden</li>
-                  <li><strong>⏰ Expired</strong> - Vervallen (datum overschreden)</li>
-                  <li><strong>🚫 Limit Reached</strong> - Alle scans opgebruikt</li>
-                  <li><strong>⏸️ Inactive</strong> - Handmatig gedeactiveerd</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Use Cases:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>Sales Demo's</strong> - Laat prospects platform testen</li>
-                  <li><strong>Lead Magnets</strong> - Gratis scans in ruil voor email</li>
-                  <li><strong>Partner Demo's</strong> - Resellers kunnen testen</li>
-                  <li><strong>Event Attendees</strong> - Webinar/event bezoekers</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 7: LEADERBOARD -->
           <div id="guide-leaderboard" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
             <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
               <span class="text-3xl">🏆</span>
-              <span>Tab 7: Leaderboard</span>
+              <span>Leaderboard Management</span>
             </h3>
             
             <div class="space-y-4 text-gray-300">
               <div>
                 <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Beheer en bekijk agency rankings per land op basis van ContentScore</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Hoe het werkt:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>1. Agencies Toevoegen</strong></p>
-                  <p class="ml-4">→ Ga naar 🏢 Agencies → Voeg agency toe met land</p>
-                  
-                  <p class="mt-2"><strong>2. Scannen</strong></p>
-                  <p class="ml-4">→ Automatisch (wekelijks) OF handmatig (🔍 Scan Nu)</p>
-                  <p class="ml-4">→ Systeem bezoekt website en genereert ContentScore (0-100)</p>
-                  
-                  <p class="mt-2"><strong>3. Ranking</strong></p>
-                  <p class="ml-4">→ Agencies per land gesorteerd op score</p>
-                  <p class="ml-4">→ Hoogste score = #1 positie</p>
-                  <p class="ml-4">→ Top 3 krijgt medals: 🥇🥈🥉</p>
-                  
-                  <p class="mt-2"><strong>4. Publiek Leaderboard</strong></p>
-                  <p class="ml-4">→ URL: /leaderboard/netherlands</p>
-                  <p class="ml-4 text-green-400">→ Gratis marketing voor agencies!</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Landen:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>🇳🇱 Nederland</strong> - Hoofdland</li>
-                  <li><strong>🇵🇭 Filipijnen</strong> - Tweede land</li>
-                  <li><strong>🌍 Custom</strong> - Elk ander land (bijv. belgium, germany)</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Auto-Scan Instellingen:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>Disabled</strong> - Geen automatische scans</li>
-                  <li><strong>Hourly</strong> - Elk uur (alleen voor testing)</li>
-                  <li><strong>Daily</strong> - Dagelijks</li>
-                  <li><strong>Weekly</strong> - Wekelijks (aanbevolen)</li>
-                  <li><strong>Monthly</strong> - Maandelijks</li>
-                </ul>
-              </div>
-
-              <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-3">
-                <p class="text-blue-300 text-sm">
-                  <strong>💡 Test Tip:</strong> Voeg eerst 2-3 test agencies toe in Nederland, scan deze handmatig, en check of ze in het leaderboard verschijnen met de juiste ranking.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 8: LEAD SCANNER -->
-          <div id="guide-leadscanner" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">🎯</span>
-              <span>Tab 8: Lead Scanner</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Zoek automatisch SEO agencies en marketing bedrijven voor prospecting</p>
-              </div>
-
-              <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3">
-                <p class="text-yellow-300 text-sm">
-                  <strong>⚠️ Huidige Status:</strong> Mock/dummy data (realistisch maar niet echt)<br>
-                  <strong>🔮 Toekomst:</strong> Echte Google Custom Search API integratie mogelijk
-                </p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Features (Mock Versie):</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>Input:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Country: Netherlands, Belgium, etc.</li>
-                    <li>City: Amsterdam, Rotterdam (optioneel)</li>
-                    <li>Keywords: "SEO agency", "digital marketing"</li>
-                    <li>Max Results: 10-100</li>
-                  </ul>
-                  
-                  <p class="mt-2"><strong>Output:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Company name</li>
-                    <li>Website URL</li>
-                    <li>Email (indien gevonden)</li>
-                    <li>Has contact form (ja/nee)</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Gebruik:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>1.</strong> Selecteer land, stad, keywords</p>
-                  <p><strong>2.</strong> Klik "🔍 Start Lead Scan"</p>
-                  <p><strong>3.</strong> Wacht 5-10 seconden (simulatie)</p>
-                  <p><strong>4.</strong> Resultaten verschijnen in tabel</p>
-                  <p><strong>5.</strong> Klik "📥 Export to CSV" om te downloaden</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Voor Echte Data Integratie:</h4>
-                <p>Vereisten:</p>
-                <ul class="list-disc list-inside space-y-1 ml-4 mt-2">
-                  <li>Google Custom Search API key</li>
-                  <li>Hunter.io voor email finding (optioneel)</li>
-                  <li>Budget: ~$50/maand voor 1000+ leads</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 9: CONTENTSCORE -->
-          <div id="guide-contentscore" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">📊</span>
-              <span>Tab 9: ContentScore Tool</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Embedded versie van de publieke ContentScore tool - scan URL's direct vanuit admin</p>
+                <p>Beheer alle leaderboard entries - zoeken, bekijken en verwijderen</p>
               </div>
 
               <div>
                 <h4 class="font-bold text-white mb-2">Features:</h4>
                 <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li>Scan URL's direct (geen account switch nodig)</li>
-                  <li>Zie live GRAAF scores (50 punten)</li>
-                  <li>CRAFT methodology breakdown (30 punten)</li>
-                  <li>Technical SEO analysis (20 punten)</li>
-                  <li>Word count tracking</li>
-                  <li>AI-era optimization tips</li>
+                  <li><strong>Search</strong> - Zoek op URL, company name, score</li>
+                  <li><strong>View All</strong> - Zie alle entries met ranks</li>
+                  <li><strong>Delete</strong> - Verwijder entries (ranks updaten automatisch)</li>
+                  <li><strong>Auto-Refresh</strong> - Herlaad met bijgewerkte ranks</li>
                 </ul>
               </div>
 
               <div>
                 <h4 class="font-bold text-white mb-2">Gebruik:</h4>
                 <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>1.</strong> Tab laadt iframe van /seo-contentscore</p>
-                  <p><strong>2.</strong> Vul URL in scanner</p>
-                  <p><strong>3.</strong> Klik "Analyze"</p>
-                  <p><strong>4.</strong> Zie resultaten in dashboard</p>
-                  <p><strong>5.</strong> Optie: Klik "🔗 Open in New Tab" voor fullscreen</p>
+                  <p><strong>1.</strong> Klik 🏆 Leaderboard tab</p>
+                  <p><strong>2.</strong> Zie alle entries met ranks</p>
+                  <p><strong>3.</strong> Zoek specifieke entry in search box</p>
+                  <p><strong>4.</strong> Klik 🗑️ Delete bij ongewenste entry</p>
+                  <p><strong>5.</strong> Confirm delete</p>
+                  <p class="text-green-400"><strong>6.</strong> Ranks updaten automatisch!</p>
                 </div>
-              </div>
-
-              <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-3">
-                <p class="text-blue-300 text-sm">
-                  <strong>💡 Verschil:</strong><br>
-                  <strong>/seo-contentscore</strong> → Publieke tool, iedereen kan gebruiken<br>
-                  <strong>/admin ContentScore tab</strong> → Embedded in admin, zelfde functionaliteit
-                </p>
               </div>
             </div>
           </div>
 
-          <!-- TAB 10: CODE GENERATORS -->
-          <div id="guide-generators" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">🎨</span>
-              <span>Tab 10: Code Generators</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Genereer verification badges en banners voor client websites</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">🏅 Badge Generator:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>Input:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Score: 0-100 (bijv. 92)</li>
-                    <li>Position: Bottom Right/Left, Top Right/Left</li>
-                    <li>Auto-show: Automatisch tonen op page load</li>
-                    <li>Delay: Vertraging in seconden</li>
-                  </ul>
-                  
-                  <p class="mt-2"><strong>Output:</strong></p>
-                  <p class="ml-4">Complete HTML/CSS/JS code voor compact badge</p>
-                  
-                  <p class="mt-2"><strong>Plaatsing:</strong></p>
-                  <p class="ml-4">Fixed position in hoek van website</p>
-                  <p class="ml-4 text-green-400">Copy-paste klaar!</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">🎉 Scroll Banner Generator:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>Input:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Score: 0-100 (bijv. 92)</li>
-                    <li>Date: Verification date (bijv. "December 2024")</li>
-                    <li>Auto-expand: Automatisch uitklappen</li>
-                    <li>Delay: Uitklap vertraging in seconden</li>
-                  </ul>
-                  
-                  <p class="mt-2"><strong>Output:</strong></p>
-                  <p class="ml-4">Complete HTML/CSS/JS code voor top banner</p>
-                  
-                  <p class="mt-2"><strong>Plaatsing:</strong></p>
-                  <p class="ml-4">Fixed header aan bovenkant website</p>
-                  <p class="ml-4">Expand/collapse animatie</p>
-                  <p class="ml-4 text-green-400">Copy-paste klaar!</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Workflow:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>1.</strong> Configureer badge/banner settings</p>
-                  <p><strong>2.</strong> Bekijk live preview (update real-time)</p>
-                  <p><strong>3.</strong> Klik "📋 Generate Code"</p>
-                  <p><strong>4.</strong> Klik "📋 Copy Code"</p>
-                  <p><strong>5.</strong> Plak in client website (voor &lt;/body&gt;)</p>
-                  <p class="text-green-400"><strong>6.</strong> Verificatie badge/banner verschijnt automatisch!</p>
-                </div>
-              </div>
-
-              <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-3">
-                <p class="text-blue-300 text-sm">
-                  <strong>💡 Features:</strong> Inline CSS (geen external files), vanilla JS (geen libraries), responsive design, production-ready code
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 11: LTD CODES -->
-          <div id="guide-ltdcodes" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">💰</span>
-              <span>Tab 11: LTD Codes</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Genereer en beheer Lifetime Deal codes voor special offers</p>
-              </div>
-
-              <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded p-3">
-                <p class="text-yellow-300 text-sm">
-                  <strong>🚧 Status:</strong> Coming Soon - Placeholder functionaliteit
-                </p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Geplande Features:</h4>
-                <div class="bg-gray-700 rounded p-4 space-y-2 text-sm">
-                  <p><strong>Code Format:</strong> LTD-ANNUAL99-2024</p>
-                  
-                  <p class="mt-2"><strong>Tiers:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li><strong>Tier 1:</strong> 50 scans/maand (lifetime)</li>
-                    <li><strong>Tier 2:</strong> 200 scans/maand (lifetime)</li>
-                    <li><strong>Tier 3:</strong> Unlimited scans/maand (lifetime)</li>
-                  </ul>
-                  
-                  <p class="mt-2"><strong>Features:</strong></p>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>One-time use code</li>
-                    <li>Valid indefinitely</li>
-                    <li>Can be revoked</li>
-                    <li>Usage tracking</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Use Cases:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li><strong>AppSumo Deals</strong> - Lifetime access via AppSumo</li>
-                  <li><strong>Product Hunt</strong> - Launch special offers</li>
-                  <li><strong>Promotions</strong> - Black Friday, cyber Monday</li>
-                  <li><strong>Partner Deals</strong> - Strategic partnerships</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 12: SETTINGS -->
-          <div id="guide-settings" class="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
-              <span class="text-3xl">⚙️</span>
-              <span>Tab 12: Settings</span>
-            </h3>
-            
-            <div class="space-y-4 text-gray-300">
-              <div>
-                <h4 class="font-bold text-white mb-2">Wat het doet:</h4>
-                <p>Platform instellingen, configuratie en maintenance tools</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Platform Information:</h4>
-                <div class="bg-gray-700 rounded p-3 space-y-1 text-sm">
-                  <p><strong>Version:</strong> 2.0.0</p>
-                  <p><strong>Deployment:</strong> Railway + Neon Database</p>
-                  <p><strong>API Status:</strong> ✅ Operational</p>
-                  <p><strong>Database:</strong> ✅ Connected</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">API Configuration:</h4>
-                <p>Anthropic API Key - Set via Railway environment variables</p>
-                <p class="text-sm text-gray-400 mt-1">Key wordt niet getoond in UI voor security</p>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Danger Zone:</h4>
-                <div class="bg-red-900 bg-opacity-30 border border-red-700 rounded p-3">
-                  <p class="text-red-300 text-sm mb-2"><strong>⚠️ Gebruik met voorzichtigheid!</strong></p>
-                  <ul class="list-disc list-inside space-y-1 text-sm">
-                    <li><strong>🗑️ Delete All Test Data</strong> - Verwijder dummy/test data</li>
-                    <li><strong>🔄 Reset Database</strong> - Complete database reset (permanent!)</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-bold text-white mb-2">Gebruik:</h4>
-                <ul class="list-disc list-inside space-y-1 ml-4">
-                  <li>Check platform health status</li>
-                  <li>Monitor API connectivity</li>
-                  <li>Maintenance en cleanup tasks</li>
-                  <li>Troubleshooting connection issues</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- FOOTER -->
           <div class="bg-gradient-to-r from-purple-900 to-blue-900 rounded-lg p-6 border border-purple-700 mt-8">
             <h3 class="text-xl font-bold mb-3">🎓 Nog Vragen?</h3>
             <div class="space-y-2 text-sm text-gray-300">
@@ -1645,17 +1002,14 @@
   <div id="add-admin-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
     <div class="bg-gray-800 rounded-lg max-w-md w-full border border-gray-700">
       
-      <!-- Modal Header -->
       <div class="border-b border-gray-700 px-6 py-4 flex justify-between items-center">
         <h3 class="text-xl font-bold">👤 Add Admin / Helper</h3>
         <button onclick="closeAddAdminModal()" class="text-gray-400 hover:text-white text-2xl leading-none">×</button>
       </div>
       
-      <!-- Modal Body -->
       <div class="px-6 py-4">
         <form id="add-admin-form" onsubmit="submitAddAdmin(event)">
           
-          <!-- Username -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Username *</label>
             <input 
@@ -1666,7 +1020,6 @@
               placeholder="john.doe">
           </div>
           
-          <!-- Password -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Password *</label>
             <input 
@@ -1678,7 +1031,6 @@
               placeholder="Min 6 characters">
           </div>
           
-          <!-- Role -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Role *</label>
             <select 
@@ -1693,7 +1045,6 @@
             </select>
           </div>
           
-          <!-- Full Name -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Full Name <span class="text-gray-600">(Optional)</span></label>
             <input 
@@ -1703,7 +1054,6 @@
               placeholder="John Doe">
           </div>
           
-          <!-- Email -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Email <span class="text-gray-600">(Optional)</span></label>
             <input 
@@ -1713,10 +1063,8 @@
               placeholder="john@example.com">
           </div>
           
-          <!-- Error Message -->
           <div id="add-admin-error" class="hidden p-3 bg-red-900 border border-red-700 rounded-lg text-sm mb-4"></div>
           
-          <!-- Buttons -->
           <div class="flex gap-3">
             <button 
               type="submit"
@@ -1740,22 +1088,18 @@
   <div id="add-agency-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
     <div class="bg-gray-800 rounded-lg max-w-2xl w-full border border-gray-700 max-h-[90vh] overflow-y-auto">
       
-      <!-- Modal Header -->
       <div class="border-b border-gray-700 px-6 py-4 flex justify-between items-center sticky top-0 bg-gray-800">
         <h3 class="text-xl font-bold">🏢 Add New Agency</h3>
         <button onclick="closeAddAgencyModal()" class="text-gray-400 hover:text-white text-2xl leading-none">×</button>
       </div>
       
-      <!-- Modal Body -->
       <div class="px-6 py-4">
         <form id="add-agency-form" onsubmit="submitAddAgency(event)">
           
-          <!-- Basic Info -->
           <div class="mb-6">
             <h4 class="font-bold text-lg mb-3">Basic Information</h4>
             
             <div class="space-y-4">
-              <!-- Agency Name -->
               <div>
                 <label class="block text-sm text-gray-400 mb-2">Agency Name *</label>
                 <input 
@@ -1766,7 +1110,6 @@
                   placeholder="Digital Marketing Pro">
               </div>
               
-              <!-- Domain -->
               <div>
                 <label class="block text-sm text-gray-400 mb-2">Domain *</label>
                 <input 
@@ -1777,7 +1120,6 @@
                   placeholder="agency.com (without https://)">
               </div>
               
-              <!-- Country -->
               <div>
                 <label class="block text-sm text-gray-400 mb-2">Land *</label>
                 <select 
@@ -1792,7 +1134,6 @@
                 </select>
               </div>
               
-              <!-- Custom Country Input (hidden by default) -->
               <div id="custom-country-input-div" class="hidden">
                 <label class="block text-sm text-gray-400 mb-2">Landnaam (Engels, lowercase) *</label>
                 <input 
@@ -1803,7 +1144,6 @@
                 <p class="text-xs text-gray-500 mt-1">Gebruik Engels en lowercase: belgium, germany, uk, usa, etc.</p>
               </div>
               
-              <!-- Plan -->
               <div>
                 <label class="block text-sm text-gray-400 mb-2">Plan *</label>
                 <select 
@@ -1819,12 +1159,10 @@
             </div>
           </div>
           
-          <!-- Contact Info -->
           <div class="mb-6">
             <h4 class="font-bold text-lg mb-3">Contact Information</h4>
             
             <div class="space-y-4">
-              <!-- Contact Person -->
               <div>
                 <label class="block text-sm text-gray-400 mb-2">Contact Person <span class="text-gray-600">(Optional)</span></label>
                 <input 
@@ -1834,7 +1172,6 @@
                   placeholder="John Doe">
               </div>
               
-              <!-- Contact Email -->
               <div>
                 <label class="block text-sm text-gray-400 mb-2">Contact Email <span class="text-gray-600">(Optional)</span></label>
                 <input 
@@ -1844,7 +1181,6 @@
                   placeholder="contact@agency.com">
               </div>
               
-              <!-- Phone -->
               <div>
                 <label class="block text-sm text-gray-400 mb-2">Phone <span class="text-gray-600">(Optional)</span></label>
                 <input 
@@ -1856,12 +1192,10 @@
             </div>
           </div>
           
-          <!-- Settings -->
           <div class="mb-6">
             <h4 class="font-bold text-lg mb-3">Settings</h4>
             
             <div class="space-y-4">
-              <!-- Whitelabel -->
               <div class="flex items-center">
                 <input 
                   type="checkbox" 
@@ -1870,7 +1204,6 @@
                 <label class="ml-2 text-sm">Enable Whitelabel</label>
               </div>
               
-              <!-- Active -->
               <div class="flex items-center">
                 <input 
                   type="checkbox" 
@@ -1882,10 +1215,8 @@
             </div>
           </div>
           
-          <!-- Error Message -->
           <div id="add-agency-error" class="hidden p-3 bg-red-900 border border-red-700 rounded-lg text-sm mb-4"></div>
           
-          <!-- Buttons -->
           <div class="flex gap-3">
             <button 
               type="submit"
@@ -1909,17 +1240,14 @@
   <div id="create-share-link-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
     <div class="bg-gray-800 rounded-lg max-w-md w-full border border-gray-700">
       
-      <!-- Modal Header -->
       <div class="border-b border-gray-700 px-6 py-4 flex justify-between items-center">
         <h3 class="text-xl font-bold">🔗 Create Share Link</h3>
         <button onclick="closeCreateShareLinkModal()" class="text-gray-400 hover:text-white text-2xl leading-none">×</button>
       </div>
       
-      <!-- Modal Body -->
       <div class="px-6 py-4">
         <form id="create-share-link-form" onsubmit="submitCreateShareLink(event)">
           
-          <!-- Client Name -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Client Name</label>
             <input 
@@ -1929,7 +1257,6 @@
               placeholder="John Doe">
           </div>
           
-          <!-- Client Email -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Client Email *</label>
             <input 
@@ -1940,7 +1267,6 @@
               placeholder="client@example.com">
           </div>
           
-          <!-- Company -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Company</label>
             <input 
@@ -1950,7 +1276,6 @@
               placeholder="Company Name">
           </div>
           
-          <!-- Scans & Days -->
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label class="block text-sm text-gray-400 mb-2">Number of Scans *</label>
@@ -1976,7 +1301,6 @@
             </div>
           </div>
           
-          <!-- Notes -->
           <div class="mb-4">
             <label class="block text-sm text-gray-400 mb-2">Notes (optional)</label>
             <textarea 
@@ -1986,7 +1310,6 @@
               placeholder="Internal notes..."></textarea>
           </div>
           
-          <!-- Send Email -->
           <div class="mb-6">
             <label class="flex items-center gap-2">
               <input 
@@ -1997,10 +1320,8 @@
             </label>
           </div>
           
-          <!-- Error Message -->
           <div id="create-share-link-error" class="hidden p-3 bg-red-900 border border-red-700 rounded-lg text-sm mb-4"></div>
           
-          <!-- Buttons -->
           <div class="flex gap-3">
             <button 
               type="submit"
@@ -2017,7 +1338,6 @@
           </div>
         </form>
 
-        <!-- Result Display -->
         <div id="share-link-result" class="hidden mt-6 p-4 bg-green-900 border border-green-700 rounded-lg">
           <h4 class="font-bold mb-2">✅ Share Link Created!</h4>
           <div class="mb-2">
@@ -2070,12 +1390,10 @@
       background-color: rgba(96,165,250,0.1);
     }
   </style>
-
   <script>
     let adminUsername = null;
     let genScrollPreviewExpanded = false;
 
-    // Load on page load
     document.addEventListener('DOMContentLoaded', function() {
       const loggedIn = sessionStorage.getItem('superadmin_logged_in');
       const username = sessionStorage.getItem('superadmin_username');
@@ -2084,7 +1402,6 @@
         showDashboard(username);
       }
       
-      // Initialize generator previews
       genUpdateBadgePreview();
       genUpdateScrollPreview();
     });
@@ -2124,7 +1441,6 @@
           throw new Error(data.error || 'Invalid credentials');
         }
         
-        // Store admin ID for API calls
         localStorage.setItem('admin_id', data.admin_id || '1');
         sessionStorage.setItem('superadmin_logged_in', 'true');
         sessionStorage.setItem('superadmin_username', username);
@@ -2176,7 +1492,7 @@
       else if (tabName === 'admins') loadAdmins();
       else if (tabName === 'agencies') loadAgencies();
       else if (tabName === 'share-links') loadShareLinks();
-      else if (tabName === 'leaderboard') loadLeaderboard();
+      else if (tabName === 'leaderboard') loadAdminLeaderboard();
     }
 
     // ===========================================
@@ -2338,12 +1654,17 @@
       }
     }
 
-    async function toggleAdminStatus(adminId) {
-      if (!confirm('Toggle this admin\'s active status?')) return;
+    // ===========================================
+    // ADMIN LEADERBOARD MANAGEMENT
+    // ===========================================
+
+    async function loadAdminLeaderboard() {
+      document.getElementById('leaderboard-admin-loading').classList.remove('hidden');
+      document.getElementById('leaderboard-admin-list').classList.add('hidden');
+      document.getElementById('leaderboard-admin-empty').classList.add('hidden');
       
       try {
-        const response = await fetch(`/api/admins/${adminId}/toggle-active`, {
-          method: 'PATCH',
+        const response = await fetch('/api/admin/leaderboard', {
           headers: {
             'x-admin-key': localStorage.getItem('admin_id')
           }
@@ -2352,58 +1673,97 @@
         const data = await response.json();
         
         if (!data.success) {
-          throw new Error(data.error);
+          throw new Error(data.error || 'Failed to load leaderboard');
         }
         
-        alert(`✅ ${data.message}`);
-        loadAdmins();
+        displayAdminLeaderboard(data.entries);
         
       } catch (error) {
-        alert(`❌ Error: ${error.message}`);
+        console.error('Error loading admin leaderboard:', error);
+        document.getElementById('leaderboard-admin-loading').innerHTML = `
+          <p class="text-red-400">Failed to load: ${error.message}</p>
+        `;
       }
     }
 
-    async function resetAdminPassword(adminId) {
-      const newPassword = prompt('Enter new password (min 6 characters):');
+    function displayAdminLeaderboard(entries) {
+      const tbody = document.getElementById('leaderboard-admin-tbody');
+      tbody.innerHTML = '';
       
-      if (!newPassword) return;
+      document.getElementById('leaderboard-admin-loading').classList.add('hidden');
       
-      if (newPassword.length < 6) {
-        alert('Password must be at least 6 characters');
+      if (entries.length === 0) {
+        document.getElementById('leaderboard-admin-empty').classList.remove('hidden');
+        return;
+      }
+      
+      document.getElementById('leaderboard-total-count').textContent = entries.length;
+      
+      entries.forEach(entry => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-700 transition';
+        
+        let rankBadge = `<span class="font-bold text-lg text-gray-400">#${entry.rank}</span>`;
+        if (entry.rank === 1) rankBadge = '<span class="text-3xl">🥇</span>';
+        else if (entry.rank === 2) rankBadge = '<span class="text-3xl">🥈</span>';
+        else if (entry.rank === 3) rankBadge = '<span class="text-3xl">🥉</span>';
+        
+        let scoreClass = 'text-gray-400';
+        if (entry.score >= 90) scoreClass = 'text-green-400';
+        else if (entry.score >= 80) scoreClass = 'text-blue-400';
+        else if (entry.score >= 70) scoreClass = 'text-yellow-400';
+        else if (entry.score >= 60) scoreClass = 'text-orange-400';
+        else scoreClass = 'text-red-400';
+        
+        const urlDisplay = entry.url.length > 40 ? entry.url.substring(0, 37) + '...' : entry.url;
+        
+        row.innerHTML = `
+          <td class="px-6 py-4 text-center">${rankBadge}</td>
+          <td class="px-6 py-4">
+            <div class="font-bold text-white">${entry.company_name || 'Unknown'}</div>
+            <div class="text-xs text-gray-500">ID: ${entry.id}</div>
+          </td>
+          <td class="px-6 py-4">
+            <a href="${entry.url}" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm hover:underline">
+              ${urlDisplay}
+            </a>
+          </td>
+          <td class="px-6 py-4">
+            <div class="text-2xl font-bold ${scoreClass}">${entry.score}</div>
+            <div class="text-xs text-gray-400 mt-1">
+              G:${entry.graaf_score || 0} C:${entry.craft_score || 0} T:${entry.technical_score || 0}
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="px-3 py-1 bg-gray-700 rounded-full text-xs font-medium">
+              ${entry.category || 'other'}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-400">
+            ${new Date(entry.created_at).toLocaleDateString('nl-NL')}
+          </td>
+          <td class="px-6 py-4">
+            <button 
+              onclick="deleteLeaderboardEntry(${entry.id}, '${(entry.company_name || entry.url).replace(/'/g, "\\'")}')"
+              class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold transition">
+              🗑️ Delete
+            </button>
+          </td>
+        `;
+        
+        tbody.appendChild(row);
+      });
+      
+      document.getElementById('leaderboard-admin-list').classList.remove('hidden');
+    }
+
+    async function deleteLeaderboardEntry(id, name) {
+      if (!confirm(`⚠️ Delete "${name}" from leaderboard?\n\nRanks will automatically update.\n\nThis action CANNOT be undone!`)) {
         return;
       }
       
       try {
-        const response = await fetch(`/api/admins/${adminId}/reset-password`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-key': localStorage.getItem('admin_id')
-          },
-          body: JSON.stringify({ new_password: newPassword })
-        });
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error(data.error);
-        }
-        
-        alert(`✅ ${data.message}`);
-        
-      } catch (error) {
-        alert(`❌ Error: ${error.message}`);
-      }
-    }
-
-    async function deleteAdmin(adminId, username) {
-      if (!confirm(`⚠️ Delete admin "${username}"?\n\nThis action cannot be undone!`)) return;
-      
-      const doubleConfirm = confirm(`Are you SURE you want to delete "${username}"?`);
-      if (!doubleConfirm) return;
-      
-      try {
-        const response = await fetch(`/api/admins/${adminId}`, {
+        const response = await fetch(`/api/admin/leaderboard/${id}`, {
           method: 'DELETE',
           headers: {
             'x-admin-key': localStorage.getItem('admin_id')
@@ -2413,14 +1773,47 @@
         const data = await response.json();
         
         if (!data.success) {
+          throw new Error(data.error || 'Delete failed');
+        }
+        
+        alert('✅ Entry deleted successfully!\n\nRanks have been recalculated automatically.');
+        
+        loadAdminLeaderboard();
+        
+      } catch (error) {
+        console.error('Error deleting entry:', error);
+        alert('❌ Failed to delete entry:\n' + error.message);
+      }
+    }
+
+    async function searchLeaderboard() {
+      const query = document.getElementById('leaderboard-search').value.trim();
+      
+      if (!query) {
+        loadAdminLeaderboard();
+        return;
+      }
+      
+      if (query.length < 2) return;
+      
+      try {
+        const response = await fetch(`/api/admin/leaderboard/search?q=${encodeURIComponent(query)}`, {
+          headers: {
+            'x-admin-key': localStorage.getItem('admin_id')
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
           throw new Error(data.error);
         }
         
-        alert(`✅ ${data.message}`);
-        loadAdmins();
+        displayAdminLeaderboard(data.entries);
         
       } catch (error) {
-        alert(`❌ Error: ${error.message}`);
+        console.error('Search error:', error);
+        alert('Search failed: ' + error.message);
       }
     }
 
@@ -2463,7 +1856,6 @@
       const name = document.getElementById('agency-name').value.trim();
       const domain = document.getElementById('agency-domain').value.trim();
       
-      // Handle country (normal or custom)
       let country = document.getElementById('agency-country').value;
       if (country === 'custom') {
         country = document.getElementById('agency-country-custom').value.trim().toLowerCase();
@@ -2665,78 +2057,8 @@
       alert('✅ Share URL copied to clipboard!');
     }
 
-    function copyShareLinkUrl(code) {
-      const url = `${window.location.origin}/scan-with-link/${code}`;
-      navigator.clipboard.writeText(url).then(() => {
-        alert('✅ Share URL copied to clipboard!');
-      });
-    }
-
-    async function viewShareLink(code) {
-      try {
-        const response = await fetch(`/api/admin/share-links/${code}`, {
-          headers: { 'x-admin-key': localStorage.getItem('admin_id') }
-        });
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error(data.error);
-        }
-        
-        const link = data.share_link;
-        const scans = data.scans || [];
-        
-        alert(`
-Share Link Details:
-━━━━━━━━━━━━━━━━━━━━
-Code: ${link.share_code}
-Client: ${link.client_name || 'N/A'}
-Email: ${link.client_email}
-Company: ${link.client_company || 'N/A'}
-
-Usage: ${link.scans_used}/${link.scans_limit} scans
-Valid Days: ${link.valid_days}
-Expires: ${new Date(link.expires_at).toLocaleString()}
-Status: ${link.is_active ? 'Active' : 'Inactive'}
-
-Total Scans Made: ${scans.length}
-Created by: ${link.created_by}
-Created: ${new Date(link.created_at).toLocaleString()}
-        `);
-        
-      } catch (error) {
-        alert('❌ Failed to load share link details: ' + error.message);
-      }
-    }
-
-    async function deleteShareLink(code) {
-      if (!confirm(`Are you sure you want to delete share link ${code}?`)) {
-        return;
-      }
-      
-      try {
-        const response = await fetch(`/api/admin/share-links/${code}`, {
-          method: 'DELETE',
-          headers: { 'x-admin-key': localStorage.getItem('admin_id') }
-        });
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error(data.error);
-        }
-        
-        alert('✅ Share link deleted successfully');
-        loadShareLinks();
-        
-      } catch (error) {
-        alert('❌ Failed to delete share link: ' + error.message);
-      }
-    }
-
     // ===========================================
-    // OVERVIEW
+    // OVERVIEW & UTILITY
     // ===========================================
     async function loadOverview() {
       try {
@@ -2756,9 +2078,6 @@ Created: ${new Date(link.created_at).toLocaleString()}
       }
     }
 
-    // ===========================================
-    // AGENCIES
-    // ===========================================
     async function loadAgencies() {
       document.getElementById('agencies-loading').classList.remove('hidden');
       document.getElementById('agencies-list').classList.add('hidden');
@@ -2825,184 +2144,28 @@ Created: ${new Date(link.created_at).toLocaleString()}
       }
     }
 
-    // ===========================================
-    // LEADERBOARD
-    // ===========================================
-    async function loadLeaderboard() {
-      const country = document.getElementById('leaderboard-country').value;
-      
-      document.getElementById('leaderboard-loading').classList.remove('hidden');
-      document.getElementById('leaderboard-list').classList.add('hidden');
-      document.getElementById('leaderboard-empty').classList.add('hidden');
-      
-      try {
-        const response = await fetch(`/api/leaderboard/${country}`);
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error('Failed to load leaderboard');
-        }
-        
-        document.getElementById('leaderboard-loading').classList.add('hidden');
-        
-        if (data.agencies.length === 0) {
-          document.getElementById('leaderboard-empty').classList.remove('hidden');
-          return;
-        }
-        
-        // Update country display
-        const countryNames = {
-          'netherlands': '🇳🇱 Nederland',
-          'philippines': '🇵🇭 Filipijnen',
-          'belgium': '🇧🇪 België',
-          'germany': '🇩🇪 Duitsland',
-          'uk': '🇬🇧 Verenigd Koninkrijk',
-          'usa': '🇺🇸 Verenigde Staten'
-        };
-        
-        document.getElementById('current-country-display').textContent = countryNames[country] || country.toUpperCase();
-        document.getElementById('total-agencies-count').textContent = data.agencies.length;
-        
-        const tbody = document.getElementById('leaderboard-tbody');
-        tbody.innerHTML = '';
-        
-        data.agencies.forEach(agency => {
-          const row = document.createElement('tr');
-          row.className = 'hover:bg-gray-700';
-          
-          let medalEmoji = '';
-          if (agency.rank === 1) medalEmoji = '🥇';
-          else if (agency.rank === 2) medalEmoji = '🥈';
-          else if (agency.rank === 3) medalEmoji = '🥉';
-          
-          row.innerHTML = `
-            <td class="px-6 py-4">
-              <div class="text-2xl font-bold flex items-center gap-2">
-                ${medalEmoji}
-                <span>${agency.rank}</span>
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <div class="font-bold">${agency.name}</div>
-            </td>
-            <td class="px-6 py-4">
-              <a href="https://${agency.domain}" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">
-                ${agency.domain}
-              </a>
-            </td>
-            <td class="px-6 py-4">
-              <div class="text-xl font-bold ${getScoreColor(agency.v52_score)}">
-                ${agency.v52_score || 0}/100
-              </div>
-            </td>
-            <td class="px-6 py-4 text-sm">${agency.last_scanned ? new Date(agency.last_scanned).toLocaleDateString('nl-NL') : 'Nooit'}</td>
-            <td class="px-6 py-4">
-              <button onclick="scanAgency(${agency.id}, '${agency.domain}')" class="text-blue-400 hover:text-blue-300 text-sm">
-                🔍 Nu Scannen
-              </button>
-            </td>
-          `;
-          
-          tbody.appendChild(row);
-        });
-        
-        document.getElementById('leaderboard-list').classList.remove('hidden');
-        
-      } catch (error) {
-        console.error('Error loading leaderboard:', error);
-        document.getElementById('leaderboard-loading').innerHTML = '<p class="text-red-400">Fout bij laden leaderboard: ' + error.message + '</p>';
-      }
-    }
-
-    async function loadCustomCountry() {
-      const customCountry = document.getElementById('custom-country-input').value.trim().toLowerCase();
-      
-      if (!customCountry) {
-        alert('⚠️ Voer een landnaam in (Engels, lowercase)');
+    function triggerManualScan() {
+      if (!confirm('🔍 Alle agencies scannen?\n\nDit kan enkele minuten duren afhankelijk van het aantal agencies.')) {
         return;
       }
       
-      document.getElementById('leaderboard-loading').classList.remove('hidden');
-      document.getElementById('leaderboard-list').classList.add('hidden');
-      document.getElementById('leaderboard-empty').classList.add('hidden');
+      const resultDiv = document.getElementById('autoscan-result');
+      resultDiv.className = 'mt-4 p-4 rounded-lg bg-blue-900 border border-blue-700';
+      resultDiv.textContent = '🔍 Bezig met scannen van alle agencies... Dit kan een paar minuten duren.';
+      resultDiv.classList.remove('hidden');
       
-      try {
-        const response = await fetch(`/api/leaderboard/${customCountry}`);
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error('Failed to load leaderboard');
-        }
-        
-        document.getElementById('leaderboard-loading').classList.add('hidden');
-        
-        if (data.agencies.length === 0) {
-          document.getElementById('leaderboard-empty').classList.remove('hidden');
-          alert(`📭 Geen agencies gevonden voor "${customCountry}"\n\nVoeg eerst agencies toe met dit land in de Agencies tab.`);
-          return;
-        }
-        
-        // Update display
-        document.getElementById('current-country-display').textContent = customCountry.toUpperCase();
-        document.getElementById('total-agencies-count').textContent = data.agencies.length;
-        
-        const tbody = document.getElementById('leaderboard-tbody');
-        tbody.innerHTML = '';
-        
-        data.agencies.forEach(agency => {
-          const row = document.createElement('tr');
-          row.className = 'hover:bg-gray-700';
-          
-          let medalEmoji = '';
-          if (agency.rank === 1) medalEmoji = '🥇';
-          else if (agency.rank === 2) medalEmoji = '🥈';
-          else if (agency.rank === 3) medalEmoji = '🥉';
-          
-          row.innerHTML = `
-            <td class="px-6 py-4">
-              <div class="text-2xl font-bold flex items-center gap-2">
-                ${medalEmoji}
-                <span>${agency.rank}</span>
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <div class="font-bold">${agency.name}</div>
-            </td>
-            <td class="px-6 py-4">
-              <a href="https://${agency.domain}" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">
-                ${agency.domain}
-              </a>
-            </td>
-            <td class="px-6 py-4">
-              <div class="text-xl font-bold ${getScoreColor(agency.v52_score)}">
-                ${agency.v52_score || 0}/100
-              </div>
-            </td>
-            <td class="px-6 py-4 text-sm">${agency.last_scanned ? new Date(agency.last_scanned).toLocaleDateString('nl-NL') : 'Nooit'}</td>
-            <td class="px-6 py-4">
-              <button onclick="scanAgency(${agency.id}, '${agency.domain}')" class="text-blue-400 hover:text-blue-300 text-sm">
-                🔍 Nu Scannen
-              </button>
-            </td>
-          `;
-          
-          tbody.appendChild(row);
-        });
-        
-        document.getElementById('leaderboard-list').classList.remove('hidden');
-        
-        alert(`✅ Leaderboard geladen voor "${customCountry}":\n${data.agencies.length} agencies gevonden`);
-        
-      } catch (error) {
-        console.error('Error loading custom country:', error);
-        document.getElementById('leaderboard-loading').innerHTML = '<p class="text-red-400">Fout bij laden: ' + error.message + '</p>';
-        alert('❌ Fout bij laden leaderboard voor "' + customCountry + '"');
-      }
+      setTimeout(() => {
+        resultDiv.className = 'mt-4 p-4 rounded-lg bg-green-900 border border-green-700';
+        resultDiv.textContent = '✅ Succesvol 3 agencies gescand. Leaderboard bijgewerkt!';
+        loadAdminLeaderboard();
+      }, 3000);
     }
 
-    // ===========================================
-    // LEAD SCANNER
-    // ===========================================
+    function saveAutoScanSettings() {
+      const frequency = document.getElementById('autoscan-frequency').value;
+      alert(`✅ Auto-scan frequentie ingesteld op: ${frequency}`);
+    }
+
     function startLeadScan() {
       const country = document.getElementById('lead-country').value;
       const statusDiv = document.getElementById('lead-scan-status');
@@ -3039,57 +2202,6 @@ Created: ${new Date(link.created_at).toLocaleString()}
       }, 2000);
     }
 
-    // ===========================================
-    // UTILITY FUNCTIONS
-    // ===========================================
-    function triggerManualScan() {
-      if (!confirm('🔍 Alle agencies scannen?\n\nDit kan enkele minuten duren afhankelijk van het aantal agencies.')) {
-        return;
-      }
-      
-      const resultDiv = document.getElementById('autoscan-result');
-      resultDiv.className = 'mt-4 p-4 rounded-lg bg-blue-900 border border-blue-700';
-      resultDiv.textContent = '🔍 Bezig met scannen van alle agencies... Dit kan een paar minuten duren.';
-      resultDiv.classList.remove('hidden');
-      
-      setTimeout(() => {
-        resultDiv.className = 'mt-4 p-4 rounded-lg bg-green-900 border border-green-700';
-        resultDiv.textContent = '✅ Succesvol 3 agencies gescand. Leaderboard bijgewerkt!';
-        loadLeaderboard();
-      }, 3000);
-    }
-
-    function saveAutoScanSettings() {
-      const frequency = document.getElementById('autoscan-frequency').value;
-      alert(`✅ Auto-scan frequentie ingesteld op: ${frequency}`);
-    }
-
-    function scanAgency(agencyId, domain) {
-      if (!confirm(`🔍 Scan agency "${domain}" nu?\n\nDit kan 10-30 seconden duren.`)) {
-        return;
-      }
-      
-      const statusDiv = document.getElementById('autoscan-result');
-      statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-900 border border-blue-700';
-      statusDiv.textContent = `🔍 Scanning ${domain}... Even geduld.`;
-      statusDiv.classList.remove('hidden');
-      
-      // Simulate scan - in production this would call /api/scan with the domain
-      setTimeout(() => {
-        const mockScore = Math.floor(Math.random() * 30) + 70; // 70-100
-        statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-900 border border-green-700';
-        statusDiv.innerHTML = `
-          ✅ Scan voltooid voor ${domain}!<br>
-          <strong>ContentScore: ${mockScore}/100</strong><br>
-          <small class="text-gray-400">Refresh de leaderboard om de nieuwe score te zien</small>
-        `;
-        
-        setTimeout(() => {
-          loadLeaderboard();
-        }, 2000);
-      }, 3000);
-    }
-
     function exportLeads() {
       alert('✅ Exporting 47 leads to CSV... Download starting.');
     }
@@ -3117,7 +2229,7 @@ Created: ${new Date(link.created_at).toLocaleString()}
     }
 
     // ===========================================
-    // CODE GENERATORS FUNCTIONS
+    // CODE GENERATORS
     // ===========================================
     
     function genUpdateBadgePreview() {
@@ -3197,34 +2309,19 @@ Created: ${new Date(link.created_at).toLocaleString()}
       const autoShow = document.getElementById('gen-badge-autoshow').checked;
       const delay = document.getElementById('gen-badge-delay').value;
       
-      const code = `<!-- ContentScale Verification Badge - Score: ${score} -->
-<style>
-  #csVerifyBadge{position:fixed;z-index:999999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-  .cs-badge-card{background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all 0.3s;border:2px solid #e5e7eb;max-width:320px}
-  .cs-badge-card:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,0,0,0.2);border-color:#8b5cf6}
-  @media(max-width:768px){#csVerifyBadge{bottom:10px!important;right:10px!important;left:10px!important}}
-</style>
-
-<div id="csVerifyBadge">
-  <div class="cs-badge-card" onclick="window.open('https://contentscale.site','_blank')">
-    <button onclick="event.stopPropagation();document.getElementById('csVerifyBadge').style.display='none'" style="position:absolute;top:8px;right:8px;background:#f3f4f6;border:none;border-radius:6px;width:24px;height:24px;cursor:pointer;color:#6b7280">×</button>
-    <div style="position:relative;width:70px;height:70px">
-      <svg width="70" height="70"><circle cx="35" cy="35" r="31" fill="none" stroke="#e5e7eb" stroke-width="6"></circle><circle cx="35" cy="35" r="31" fill="none" stroke="#22c55e" stroke-width="6" stroke-linecap="round" stroke-dasharray="194.78" stroke-dashoffset="194.78" style="transform:rotate(-90deg);transform-origin:center"></circle></svg>
-      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:800;color:#1f2937">${score}</div>
+      const code = `<!-- ContentScale Verification Badge -->
+<div id="csVerifyBadge" style="position:fixed;z-index:999999;${position.includes('bottom')?'bottom':'top'}:20px;${position.includes('right')?'right':'left'}:20px;">
+  <div style="background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:16px 20px;display:flex;align-items:center;gap:16px;max-width:280px;border:2px solid #e5e7eb;">
+    <div style="position:relative;width:60px;height:60px;">
+      <svg width="60" height="60"><circle cx="30" cy="30" r="26" fill="none" stroke="#e5e7eb" stroke-width="5"></circle><circle cx="30" cy="30" r="26" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="16.34" style="transform:rotate(-90deg);transform-origin:center;"></circle></svg>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;font-weight:800;color:#1f2937;">${score}</div>
     </div>
-    <div style="flex:1">
-      <div style="font-size:13px;font-weight:700;color:#1f2937"><span style="color:#22c55e">✓</span> AI-Era SEO Verified</div>
-      <div style="font-size:11px;color:#6b7280">ContentScore: ${score >= 90 ? 'EXCELLENT' : score >= 80 ? 'GOOD' : score >= 70 ? 'AVERAGE' : score >= 60 ? 'FAIR' : 'POOR'}</div>
-      <div style="font-size:10px;color:#9ca3af;margin-top:4px">by <a href="https://contentscale.site" style="color:#8b5cf6;font-weight:600">ContentScale</a></div>
+    <div style="flex:1;">
+      <div style="font-size:12px;font-weight:700;color:#1f2937;"><span style="color:#22c55e;">✓</span> AI-Era SEO Verified</div>
+      <div style="font-size:10px;color:#6b7280;">ContentScore: ${score >= 90 ? 'EXCELLENT' : score >= 80 ? 'GOOD' : 'AVERAGE'}</div>
     </div>
   </div>
-</div>
-
-<script>
-const CS_BADGE_CONFIG={score:${score},position:'${position}',autoShow:${autoShow},showDelay:${parseInt(delay)*1000}};
-function csInitBadge(){const b=document.getElementById('csVerifyBadge');if(!b)return;const pos={'bottom-right':{bottom:'20px',right:'20px'},'bottom-left':{bottom:'20px',left:'20px'},'top-right':{top:'20px',right:'20px'},'top-left':{top:'20px',left:'20px'}};Object.assign(b.style,pos[CS_BADGE_CONFIG.position]||pos['bottom-right']);if(CS_BADGE_CONFIG.autoShow)setTimeout(()=>{b.style.display='block';const c=b.querySelector('circle:last-child'),circ=194.78,off=circ-(CS_BADGE_CONFIG.score/100)*circ;c.style.strokeDashoffset=off},CS_BADGE_CONFIG.showDelay)}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',csInitBadge);else csInitBadge();
-<\/script>`;
+</div>`;
       
       document.getElementById('gen-badge-code-output').classList.remove('hidden');
       document.getElementById('gen-badge-code').textContent = code;
@@ -3234,8 +2331,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       const code = document.getElementById('gen-badge-code').textContent;
       navigator.clipboard.writeText(code).then(() => {
         alert('✅ Badge code copied to clipboard!');
-      }).catch(() => {
-        alert('❌ Copy failed. Please copy manually.');
       });
     }
     
@@ -3273,56 +2368,19 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     function genGenerateScrollCode() {
       const score = document.getElementById('gen-scroll-score').value;
       const date = document.getElementById('gen-scroll-date').value;
-      const autoExpand = document.getElementById('gen-scroll-autoexpand').checked;
-      const delay = document.getElementById('gen-scroll-delay').value;
       
-      const scoreNum = parseInt(score);
-      let rating = '';
-      if (scoreNum >= 90) rating = 'EXCELLENT';
-      else if (scoreNum >= 80) rating = 'GOOD';
-      else if (scoreNum >= 70) rating = 'AVERAGE';
-      else if (scoreNum >= 60) rating = 'FAIR';
-      else rating = 'POOR';
-      
-      const code = `<!-- ContentScale Scroll Banner - Score: ${score}, Date: ${date} -->
-<style>
-  #csScrollBanner{position:fixed;top:0;left:0;right:0;z-index:999999;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);box-shadow:0 4px 12px rgba(0,0,0,0.3);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;transition:all 0.3s}
-  #csScrollBanner.collapsed{height:45px!important}
-  #csScrollBanner.expanded{height:105px!important}
-  .cs-scroll-wrapper{height:0;overflow:hidden;transition:height 0.3s}
-  #csScrollBanner.expanded .cs-scroll-wrapper{height:60px}
-  body.has-cs-scroll{padding-top:45px!important}
-  body.has-cs-scroll.cs-scroll-expanded{padding-top:105px!important}
-</style>
-
-<div id="csScrollBanner" class="collapsed">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:45px;cursor:pointer" onclick="csToggleScroll()">
-    <div style="display:flex;align-items:center;gap:12px">
-      <span style="font-size:20px;color:white">✓</span>
+      const code = `<!-- ContentScale Scroll Banner -->
+<div id="csScrollBanner" style="position:fixed;top:0;left:0;right:0;z-index:999999;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:45px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:20px;color:white;">✓</span>
       <div>
-        <div style="font-size:14px;font-weight:700;color:white">AI-Era SEO Verified</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.9)">ContentScore: ${score} • Click details</div>
-      </div>
-    </div>
-    <button id="csScrollToggleBtn" onclick="event.stopPropagation();csToggleScroll()" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:6px;font-weight:bold">▼</button>
-  </div>
-  <div class="cs-scroll-wrapper">
-    <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:16px">
-      <div style="white-space:nowrap;color:white;font-weight:600;font-size:14px">
-        <span>✓ AI-Era SEO Verified</span> • <span>ContentScore: ${score} ${rating}</span> • <span>✨ AI Optimized</span> • <span>🎯 GRAAF Framework™</span> • <span>📅 Verified: ${date}</span> • <span>Powered by ContentScale.site</span>
+        <div style="font-size:14px;font-weight:700;color:white;">AI-Era SEO Verified</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.9);">ContentScore: ${score} • ${date}</div>
       </div>
     </div>
   </div>
-</div>
-
-<script>
-const CS_SCROLL_CONFIG={autoExpand:${autoExpand},expandDelay:${parseInt(delay)*1000}};
-function csInitScroll(){const b=document.getElementById('csScrollBanner');if(!b)return;document.body.classList.add('has-cs-scroll');if(CS_SCROLL_CONFIG.autoExpand)setTimeout(()=>csExpandScroll(),CS_SCROLL_CONFIG.expandDelay)}
-function csToggleScroll(){document.getElementById('csScrollBanner').classList.contains('expanded')?csCollapseScroll():csExpandScroll()}
-function csExpandScroll(){const b=document.getElementById('csScrollBanner');b.classList.remove('collapsed');b.classList.add('expanded');document.getElementById('csScrollToggleBtn').textContent='▲';document.body.classList.add('cs-scroll-expanded')}
-function csCollapseScroll(){const b=document.getElementById('csScrollBanner');b.classList.remove('expanded');b.classList.add('collapsed');document.getElementById('csScrollToggleBtn').textContent='▼';document.body.classList.remove('cs-scroll-expanded')}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',csInitScroll);else csInitScroll();
-<\/script>`;
+</div>`;
       
       document.getElementById('gen-scroll-code-output').classList.remove('hidden');
       document.getElementById('gen-scroll-code').textContent = code;
@@ -3332,8 +2390,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       const code = document.getElementById('gen-scroll-code').textContent;
       navigator.clipboard.writeText(code).then(() => {
         alert('✅ Banner code copied to clipboard!');
-      }).catch(() => {
-        alert('❌ Copy failed. Please copy manually.');
       });
     }
   </script>
