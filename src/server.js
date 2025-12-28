@@ -657,6 +657,29 @@ app.post('/api/leaderboard/submit', async (req, res) => {
       });
     }
     
+ app.post('/api/leaderboard/submit', async (req, res) => {
+  try {
+    const {
+      url,
+      score,
+      quality,
+      graaf_score,
+      craft_score,
+      technical_score,
+      word_count,
+      company_name,
+      category,
+      country,
+      language
+    } = req.body;
+    
+    if (!url || score === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: 'URL and score required'
+      });
+    }
+    
     // ✅ GENERATE url_hash
     const crypto = require('crypto');
     const url_hash = crypto.createHash('md5').update(url).digest('hex');
@@ -768,62 +791,6 @@ app.post('/api/leaderboard/submit', async (req, res) => {
     });
   }
 });
-      } else {
-        const rankResult = await pool.query(
-          'SELECT COUNT(*) + 1 as rank FROM public_leaderboard WHERE score > $1',
-          [existing.rows[0].score]
-        );
-        
-        const rank = parseInt(rankResult.rows[0].rank) || 1;
-        
-        return res.json({
-          success: true,
-          message: 'Already on leaderboard',
-          action: 'existing',
-          rank: rank
-        });
-      }
-    }
-    
-    const result = await pool.query(`
-      INSERT INTO public_leaderboard (
-        url, score, quality,
-        graaf_score, craft_score, technical_score,
-        word_count, company_name, category, country, language,
-        is_public, created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW())
-      RETURNING *
-    `, [
-      url, score, quality,
-      graaf_score, craft_score, technical_score,
-      word_count, company_name, category, country, language
-    ]);
-    
-    const rankResult = await pool.query(
-      'SELECT COUNT(*) + 1 as rank FROM public_leaderboard WHERE score > $1',
-      [score]
-    );
-    
-    const rank = parseInt(rankResult.rows[0].rank) || 1;
-    
-    console.log(`✅ Added to leaderboard: Rank #${rank}`);
-    
-    res.json({
-      success: true,
-      message: 'Added to leaderboard!',
-      action: 'created',
-      rank: rank,
-      entry: result.rows[0]
-    });
-    
-  } catch (error) {
-    console.error('[LEADERBOARD SUBMIT ERROR]', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to submit to leaderboard'
-    });
-  }
-});
 
 app.get('/api/leaderboard/stats', async (req, res) => {
   try {
@@ -848,16 +815,6 @@ app.get('/api/leaderboard/stats', async (req, res) => {
       error: 'Failed to load stats'
     });
   }
-});
-
-// ==========================================
-// ELITE PROMPT GENERATOR
-// ==========================================
-
-const Anthropic = require('@anthropic-ai/sdk');
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
 });
 
 app.post('/api/generate-content-prompt', async (req, res) => {
