@@ -657,6 +657,10 @@ app.post('/api/leaderboard/submit', async (req, res) => {
       });
     }
     
+    // ✅ GENERATE url_hash
+    const crypto = require('crypto');
+    const url_hash = crypto.createHash('md5').update(url).digest('hex');
+    
     const existing = await pool.query(
       'SELECT id, score FROM public_leaderboard WHERE url = $1',
       [url]
@@ -676,11 +680,12 @@ app.post('/api/leaderboard/submit', async (req, res) => {
               category = $8,
               country = $9,
               language = $10,
+              url_hash = $11,
               updated_at = NOW()
-          WHERE url = $11
+          WHERE url = $12
         `, [
           score, quality, graaf_score, craft_score, technical_score,
-          word_count, company_name, category, country, language, url
+          word_count, company_name, category, country, language, url_hash, url
         ]);
         
         const rankResult = await pool.query(
@@ -698,6 +703,71 @@ app.post('/api/leaderboard/submit', async (req, res) => {
           action: 'updated',
           rank: rank
         });
+      } else {
+        return res.json({
+          success: true,
+          message: 'Existing entry has higher score',
+          action: 'skipped'
+        });
+      }
+    } else {
+      // ✅ INSERT new entry with url_hash
+      await pool.query(`
+        INSERT INTO public_leaderboard (
+          url,
+          url_hash,
+          score,
+          quality,
+          graaf_score,
+          craft_score,
+          technical_score,
+          word_count,
+          company_name,
+          category,
+          country,
+          language
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      `, [
+        url,
+        url_hash,
+        score,
+        quality,
+        graaf_score,
+        craft_score,
+        technical_score,
+        word_count,
+        company_name,
+        category,
+        country,
+        language
+      ]);
+      
+      const rankResult = await pool.query(
+        'SELECT COUNT(*) + 1 as rank FROM public_leaderboard WHERE score > $1',
+        [score]
+      );
+      
+      const rank = parseInt(rankResult.rows[0].rank) || 1;
+      
+      console.log(`✅ Leaderboard entry added: ${url} - Rank #${rank}`);
+      
+      return res.json({
+        success: true,
+        message: 'Added to leaderboard!',
+        action: 'added',
+        rank: rank
+      });
+    }
+    
+  } catch (error) {
+    console.error('[LEADERBOARD SUBMIT ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to submit to leaderboard',
+      details: error.message
+    });
+  }
+});
       } else {
         const rankResult = await pool.query(
           'SELECT COUNT(*) + 1 as rank FROM public_leaderboard WHERE score > $1',
