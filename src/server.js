@@ -432,7 +432,6 @@ app.get('/api/scan-result/:shareId', async (req, res) => {
     });
   }
 });
-
 app.post('/api/scan', async (req, res) => {
   try {
     const { url } = req.body;
@@ -619,6 +618,7 @@ app.get('/api/leaderboard', async (req, res) => {
     });
   }
 });
+
 app.post('/api/leaderboard/submit', async (req, res) => {
   try {
     const {
@@ -642,7 +642,6 @@ app.post('/api/leaderboard/submit', async (req, res) => {
       });
     }
     
-    // ✅ GENERATE url_hash
     const url_hash = crypto.createHash('md5').update(url).digest('hex');
     
     const existing = await pool.query(
@@ -695,7 +694,6 @@ app.post('/api/leaderboard/submit', async (req, res) => {
         });
       }
     } else {
-      // ✅ INSERT new entry with url_hash
       await pool.query(`
         INSERT INTO public_leaderboard (
           url,
@@ -778,6 +776,134 @@ app.get('/api/leaderboard/stats', async (req, res) => {
   }
 });
 
+// ==========================================
+// SUPER ADMIN: LEADERBOARD MANAGEMENT
+// ==========================================
+
+app.get('/api/admin/leaderboard', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        id,
+        url,
+        url_hash,
+        score,
+        quality,
+        graaf_score,
+        craft_score,
+        technical_score,
+        word_count,
+        company_name,
+        category,
+        country,
+        language,
+        is_public,
+        created_at,
+        updated_at
+      FROM public_leaderboard
+      ORDER BY score DESC, created_at DESC
+    `);
+    
+    const entries = result.rows.map((entry, index) => ({
+      ...entry,
+      rank: index + 1
+    }));
+    
+    console.log(`[ADMIN LEADERBOARD] Fetched ${entries.length} entries`);
+    
+    res.json({
+      success: true,
+      total: entries.length,
+      entries: entries
+    });
+    
+  } catch (error) {
+    console.error('[ADMIN LEADERBOARD ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load admin leaderboard'
+    });
+  }
+});
+
+app.delete('/api/admin/leaderboard/:id', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await pool.query(
+      'DELETE FROM public_leaderboard WHERE id = $1 RETURNING *',
+      [id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Entry not found'
+      });
+    }
+    
+    console.log(`✅ Admin deleted leaderboard entry #${id}: ${result.rows[0].url}`);
+    
+    res.json({
+      success: true,
+      message: 'Entry deleted successfully',
+      deleted: result.rows[0]
+    });
+    
+  } catch (error) {
+    console.error('[ADMIN DELETE ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete entry',
+      details: error.message
+    });
+  }
+});
+
+app.get('/api/admin/leaderboard/search', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q) {
+      return res.status(400).json({
+        success: false,
+        error: 'Search query required'
+      });
+    }
+    
+    const result = await pool.query(`
+      SELECT 
+        id, url, score, quality, graaf_score, craft_score, technical_score,
+        word_count, company_name, category, country, language,
+        created_at, updated_at
+      FROM public_leaderboard
+      WHERE 
+        LOWER(url) LIKE LOWER($1) OR
+        LOWER(company_name) LIKE LOWER($1) OR
+        CAST(score AS TEXT) LIKE $1
+      ORDER BY score DESC
+      LIMIT 50
+    `, [`%${q}%`]);
+    
+    const entries = result.rows.map((entry, index) => ({
+      ...entry,
+      rank: index + 1
+    }));
+    
+    res.json({
+      success: true,
+      total: entries.length,
+      entries: entries
+    });
+    
+  } catch (error) {
+    console.error('[ADMIN SEARCH ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Search failed'
+    });
+  }
+});
 app.post('/api/generate-content-prompt', async (req, res) => {
   try {
     const { url, score, breakdown, wordCount } = req.body;
@@ -1141,6 +1267,7 @@ function extractCompanyName(url) {
     return 'Unknown';
   }
 }
+
 app.get('/leaderboard', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/leaderboard-scanner-page.html'));
 });
@@ -1181,6 +1308,7 @@ app.listen(PORT, '0.0.0.0', () => {
 ║ ✅ Hybrid Scoring (Parser + AI + Math)                   ║
 ║ ✅ Super Admin Dashboard                                  ║
 ║ ✅ Global Leaderboard                                     ║
+║ ✅ Admin Leaderboard Management (NEW!)                    ║
 ║ ✅ FREE AI ELITE Prompt Generator                         ║
 ║ ✅ Share Links for Scans                                  ║
 ║ ✅ Word Count Tracking                                    ║
