@@ -2060,11 +2060,42 @@
     // ===========================================
     // OVERVIEW & UTILITY
     // ===========================================
-    async function loadOverview() {
-      try {
-        const response = await fetch('/api/super-admin/agencies');
-        const data = await response.json();
-        
+  async function loadOverview() {
+  try {
+    const response = await fetch('/api/super-admin/agencies', {
+      headers: {
+        'x-admin-key': localStorage.getItem('admin_id')
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      console.error('Failed to load overview:', data.error);
+      return;
+    }
+    
+    if (data.agencies) {
+      // Calculate totals
+      const totalClients = data.agencies.reduce((sum, a) => sum + (parseInt(a.client_count) || 0), 0);
+      const totalScans = data.agencies.reduce((sum, a) => sum + (parseInt(a.total_scans) || 0), 0);
+      
+      // Update UI
+      document.getElementById('stat-total-agencies').textContent = data.agencies.length;
+      document.getElementById('stat-total-clients').textContent = totalClients;
+      document.getElementById('stat-total-scans').textContent = totalScans;
+      
+      console.log(`✅ Overview loaded: ${data.agencies.length} agencies, ${totalClients} clients, ${totalScans} scans`);
+    }
+  } catch (error) {
+    console.error('Error loading overview:', error);
+    
+    // Set default values on error
+    document.getElementById('stat-total-agencies').textContent = '0';
+    document.getElementById('stat-total-clients').textContent = '0';
+    document.getElementById('stat-total-scans').textContent = '0';
+  }
+}
         if (data.success && data.agencies) {
           const totalClients = data.agencies.reduce((sum, a) => sum + (parseInt(a.client_count) || 0), 0);
           const totalScans = data.agencies.reduce((sum, a) => sum + (parseInt(a.total_scans) || 0), 0);
