@@ -271,8 +271,7 @@
             <table class="w-full">
               <thead class="bg-gray-700">
                 <tr>
-                  <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
-                  <th class="px-4 py-3 text-left text-sm font-semibold">URL</th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold">Client URL</th>
                   <th class="px-4 py-3 text-left text-sm font-semibold">Agency</th>
                   <th class="px-4 py-3 text-left text-sm font-semibold">Scans</th>
                   <th class="px-4 py-3 text-left text-sm font-semibold">Last Scan</th>
@@ -435,100 +434,165 @@
 
       <!-- Code Generators Tab -->
       <div id="tab-code-generators" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-6">Code Generators</h2>
+        <h2 class="text-2xl font-bold mb-6">🎨 Code Generators - Professional Badges & Banners</h2>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          <!-- Badge Generator -->
-          <div class="bg-gray-800 rounded-lg p-6">
-            <h3 class="text-xl font-bold mb-4">🏆 Score Badge Generator</h3>
+          <!-- Circular Score Badge Generator -->
+          <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+              <span class="text-3xl mr-3">🏆</span>
+              Circular Score Badge Generator
+            </h3>
             
             <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium mb-2">Score</label>
-                <input type="number" id="badge-score" value="85" min="0" max="100" 
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                  oninput="generateBadgeCode()">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2 text-gray-300">Score (0-100)</label>
+                  <input type="number" id="badge-score" value="85" min="0" max="100" 
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+                    oninput="generateCircularBadge()">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium mb-2 text-gray-300">Size</label>
+                  <select id="badge-size" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+                    onchange="generateCircularBadge()">
+                    <option value="120">Small (120px)</option>
+                    <option value="180" selected>Medium (180px)</option>
+                    <option value="240">Large (240px)</option>
+                  </select>
+                </div>
               </div>
               
               <div>
-                <label class="block text-sm font-medium mb-2">Size</label>
-                <select id="badge-size" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                  onchange="generateBadgeCode()">
-                  <option value="small">Small (100px)</option>
-                  <option value="medium" selected>Medium (150px)</option>
-                  <option value="large">Large (200px)</option>
-                </select>
+                <label class="block text-sm font-medium mb-3 text-gray-300">Quality Level (Auto-detected)</label>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                  <div class="p-2 bg-green-900 bg-opacity-30 border border-green-700 rounded text-green-400">
+                    <strong>90-100:</strong> Excellent
+                  </div>
+                  <div class="p-2 bg-blue-900 bg-opacity-30 border border-blue-700 rounded text-blue-400">
+                    <strong>80-89:</strong> Good
+                  </div>
+                  <div class="p-2 bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded text-yellow-400">
+                    <strong>70-79:</strong> Average
+                  </div>
+                  <div class="p-2 bg-orange-900 bg-opacity-30 border border-orange-700 rounded text-orange-400">
+                    <strong>60-69:</strong> Below Average
+                  </div>
+                  <div class="p-2 bg-red-900 bg-opacity-30 border border-red-700 rounded text-red-400 col-span-2">
+                    <strong>0-59:</strong> Poor
+                  </div>
+                </div>
               </div>
               
               <div>
-                <label class="block text-sm font-medium mb-2">Preview</label>
-                <div id="badge-preview" class="bg-gray-700 p-6 rounded-lg text-center">
+                <label class="block text-sm font-medium mb-2 text-gray-300">Live Preview</label>
+                <div id="badge-preview" class="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-lg border border-gray-700 flex items-center justify-center min-h-[250px]">
                   <!-- Preview will be inserted here -->
                 </div>
               </div>
               
               <div>
-                <label class="block text-sm font-medium mb-2">HTML Code</label>
-                <textarea id="badge-code" readonly 
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white font-mono text-xs"
-                  rows="8"></textarea>
+                <label class="block text-sm font-medium mb-2 text-gray-300">HTML Code (Copy & Paste)</label>
+                <div class="relative">
+                  <textarea id="badge-code" readonly 
+                    class="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-green-400 font-mono text-xs leading-relaxed"
+                    rows="10"></textarea>
+                  <button onclick="copyBadgeCode()" 
+                    class="absolute top-2 right-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs font-semibold transition-all">
+                    📋 Copy
+                  </button>
+                </div>
               </div>
-              
-              <button onclick="copyBadgeCode()" 
-                class="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold">
-                📋 Copy HTML Code
-              </button>
             </div>
           </div>
           
-          <!-- Banner Generator -->
-          <div class="bg-gray-800 rounded-lg p-6">
-            <h3 class="text-xl font-bold mb-4">📢 Promotional Banner Generator</h3>
+          <!-- CTA Banner Generator -->
+          <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+              <span class="text-3xl mr-3">📢</span>
+              CTA Banner Generator
+            </h3>
             
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium mb-2">Headline</label>
-                <input type="text" id="banner-headline" value="Get Your FREE SEO Content Score!" 
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                  oninput="generateBannerCode()">
+                <label class="block text-sm font-medium mb-2 text-gray-300">Headline</label>
+                <input type="text" id="banner-headline" value="Get Your FREE SEO Content Score" 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500"
+                  oninput="generateBanner()">
               </div>
               
               <div>
-                <label class="block text-sm font-medium mb-2">Button Text</label>
-                <input type="text" id="banner-button" value="Scan Now" 
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                  oninput="generateBannerCode()">
+                <label class="block text-sm font-medium mb-2 text-gray-300">Subheadline</label>
+                <input type="text" id="banner-subheadline" value="Analyse your content with our AI-powered GRAAF Framework" 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500"
+                  oninput="generateBanner()">
               </div>
               
               <div>
-                <label class="block text-sm font-medium mb-2">Link URL</label>
-                <input type="text" id="banner-url" value="https://contentscale.com/scan" 
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
-                  oninput="generateBannerCode()">
+                <label class="block text-sm font-medium mb-2 text-gray-300">Button Text</label>
+                <input type="text" id="banner-button" value="Scan Now - Free!" 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500"
+                  oninput="generateBanner()">
               </div>
               
               <div>
-                <label class="block text-sm font-medium mb-2">Preview</label>
-                <div id="banner-preview" class="bg-gray-700 p-6 rounded-lg">
+                <label class="block text-sm font-medium mb-2 text-gray-300">Link URL</label>
+                <input type="url" id="banner-url" value="https://contentscale.com/scan" 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500"
+                  oninput="generateBanner()">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2 text-gray-300">Live Preview</label>
+                <div id="banner-preview" class="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-lg border border-gray-700 min-h-[200px]">
                   <!-- Preview will be inserted here -->
                 </div>
               </div>
               
               <div>
-                <label class="block text-sm font-medium mb-2">HTML Code</label>
-                <textarea id="banner-code" readonly 
-                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white font-mono text-xs"
-                  rows="8"></textarea>
+                <label class="block text-sm font-medium mb-2 text-gray-300">HTML Code (Copy & Paste)</label>
+                <div class="relative">
+                  <textarea id="banner-code" readonly 
+                    class="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-green-400 font-mono text-xs leading-relaxed"
+                    rows="10"></textarea>
+                  <button onclick="copyBannerCode()" 
+                    class="absolute top-2 right-2 px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-xs font-semibold transition-all">
+                    📋 Copy
+                  </button>
+                </div>
               </div>
-              
-              <button onclick="copyBannerCode()" 
-                class="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold">
-                📋 Copy HTML Code
-              </button>
             </div>
           </div>
           
+        </div>
+        
+        <!-- Usage Instructions -->
+        <div class="mt-6 bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-6">
+          <h3 class="text-lg font-bold mb-3 text-blue-300">📖 How to Use</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-300">
+            <div>
+              <p class="font-semibold mb-2">For Score Badges:</p>
+              <ol class="list-decimal list-inside space-y-1 ml-2">
+                <li>Set your desired score (0-100)</li>
+                <li>Choose size (Small/Medium/Large)</li>
+                <li>Preview updates automatically</li>
+                <li>Click "📋 Copy" button</li>
+                <li>Paste HTML into your website</li>
+              </ol>
+            </div>
+            <div>
+              <p class="font-semibold mb-2">For CTA Banners:</p>
+              <ol class="list-decimal list-inside space-y-1 ml-2">
+                <li>Customize headline and subheadline</li>
+                <li>Set button text and link URL</li>
+                <li>Preview updates in real-time</li>
+                <li>Click "📋 Copy" button</li>
+                <li>Add to your landing page or blog</li>
+              </ol>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1496,7 +1560,6 @@
           data.clients.forEach(client => {
             const row = `
               <tr>
-                <td class="px-4 py-3">${client.name || 'Unknown'}</td>
                 <td class="px-4 py-3 text-blue-400">${client.url}</td>
                 <td class="px-4 py-3">${client.agency_name || '-'}</td>
                 <td class="px-4 py-3">${client.scan_count || 0}</td>
@@ -1568,12 +1631,14 @@
               poor: 'text-red-400'
             };
             
+            const displayClient = scan.agency_name || (scan.client_url ? scan.client_url.substring(0, 30) + '...' : '-');
+            
             const row = `
               <tr>
                 <td class="px-4 py-3 text-blue-400 text-sm">${scan.url.substring(0, 50)}...</td>
                 <td class="px-4 py-3 font-bold">${scan.score}/100</td>
                 <td class="px-4 py-3 ${qualityColors[scan.quality] || 'text-gray-400'}">${scan.quality}</td>
-                <td class="px-4 py-3 text-sm">${scan.agency_name || scan.client_name || '-'}</td>
+                <td class="px-4 py-3 text-sm">${displayClient}</td>
                 <td class="px-4 py-3"><span class="px-2 py-1 bg-gray-700 rounded text-xs">${scan.scan_type}</span></td>
                 <td class="px-4 py-3 text-sm">${new Date(scan.created_at).toLocaleDateString()}</td>
                 <td class="px-4 py-3">
@@ -1862,23 +1927,70 @@
     }
 
     // ==========================================
-    // CODE GENERATORS TAB
+    // CODE GENERATORS TAB - PROFESSIONAL VERSION
     // ==========================================
-    function generateBadgeCode() {
-      const score = document.getElementById('badge-score').value;
-      const size = document.getElementById('badge-size').value;
+    function generateCircularBadge() {
+      const score = parseInt(document.getElementById('badge-score').value) || 0;
+      const size = parseInt(document.getElementById('badge-size').value) || 180;
       
-      const sizes = {
-        small: 100,
-        medium: 150,
-        large: 200
-      };
+      // Determine quality and color based on score
+      let quality, gradient, textColor, ringColor;
       
-      const px = sizes[size];
+      if (score >= 90) {
+        quality = 'EXCELLENT';
+        gradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        textColor = '#ffffff';
+        ringColor = '#10b981';
+      } else if (score >= 80) {
+        quality = 'GOOD';
+        gradient = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+        textColor = '#ffffff';
+        ringColor = '#3b82f6';
+      } else if (score >= 70) {
+        quality = 'AVERAGE';
+        gradient = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+        textColor = '#ffffff';
+        ringColor = '#f59e0b';
+      } else if (score >= 60) {
+        quality = 'BELOW AVERAGE';
+        gradient = 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)';
+        textColor = '#ffffff';
+        ringColor = '#f97316';
+      } else {
+        quality = 'POOR';
+        gradient = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        textColor = '#ffffff';
+        ringColor = '#ef4444';
+      }
       
-      const badgeHTML = `<div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; text-align: center; color: white; font-family: Arial, sans-serif; width: ${px}px;">
-  <div style="font-size: ${px/3}px; font-weight: bold;">${score}</div>
-  <div style="font-size: ${px/8}px; margin-top: 5px;">ContentScale Score</div>
+      const badgeHTML = `<div style="display: inline-flex; flex-direction: column; align-items: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <!-- Circular Badge -->
+  <div style="position: relative; width: ${size}px; height: ${size}px;">
+    <!-- Outer Ring -->
+    <div style="position: absolute; inset: 0; border-radius: 50%; background: ${gradient}; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+      <!-- Inner Circle -->
+      <div style="width: 100%; height: 100%; border-radius: 50%; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);">
+        <!-- Score -->
+        <div style="font-size: ${size * 0.35}px; font-weight: 800; background: ${gradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">
+          ${score}
+        </div>
+        <!-- /100 Text -->
+        <div style="font-size: ${size * 0.12}px; color: #6b7280; font-weight: 600; margin-top: ${size * 0.04}px;">
+          /100
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quality Label -->
+  <div style="margin-top: ${size * 0.15}px; padding: ${size * 0.04}px ${size * 0.12}px; background: ${gradient}; color: ${textColor}; font-size: ${size * 0.09}px; font-weight: 700; border-radius: ${size * 0.08}px; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+    ${quality}
+  </div>
+  
+  <!-- ContentScale Branding -->
+  <div style="margin-top: ${size * 0.08}px; font-size: ${size * 0.07}px; color: #9ca3af; font-weight: 500;">
+    ContentScale Score
+  </div>
 </div>`;
       
       document.getElementById('badge-preview').innerHTML = badgeHTML;
@@ -1888,17 +2000,55 @@
     function copyBadgeCode() {
       const code = document.getElementById('badge-code').value;
       navigator.clipboard.writeText(code);
-      alert('Badge HTML code copied to clipboard!');
+      
+      // Visual feedback
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      btn.classList.add('bg-green-600');
+      btn.classList.remove('bg-blue-600');
+      
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.remove('bg-green-600');
+        btn.classList.add('bg-blue-600');
+      }, 2000);
     }
     
-    function generateBannerCode() {
+    function generateBanner() {
       const headline = document.getElementById('banner-headline').value;
+      const subheadline = document.getElementById('banner-subheadline').value;
       const buttonText = document.getElementById('banner-button').value;
       const url = document.getElementById('banner-url').value;
       
-      const bannerHTML = `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; color: white; font-family: Arial, sans-serif; max-width: 600px;">
-  <h2 style="margin: 0 0 20px 0; font-size: 28px;">${headline}</h2>
-  <a href="${url}" style="display: inline-block; padding: 15px 40px; background: white; color: #667eea; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px;">${buttonText}</a>
+      const bannerHTML = `<div style="max-width: 700px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <!-- Content Container -->
+  <div style="text-align: center; color: white;">
+    <!-- Icon/Emoji -->
+    <div style="font-size: 48px; margin-bottom: 20px;">
+      🎯
+    </div>
+    
+    <!-- Headline -->
+    <h2 style="margin: 0 0 12px 0; font-size: 32px; font-weight: 800; line-height: 1.2; letter-spacing: -0.5px;">
+      ${headline}
+    </h2>
+    
+    <!-- Subheadline -->
+    <p style="margin: 0 0 30px 0; font-size: 18px; opacity: 0.95; line-height: 1.5; max-width: 500px; margin-left: auto; margin-right: auto;">
+      ${subheadline}
+    </p>
+    
+    <!-- CTA Button -->
+    <a href="${url}" style="display: inline-block; padding: 16px 48px; background: white; color: #667eea; text-decoration: none; border-radius: 50px; font-weight: 700; font-size: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: all 0.3s ease; border: 3px solid white;">
+      ${buttonText} →
+    </a>
+    
+    <!-- Trust Badge -->
+    <div style="margin-top: 24px; font-size: 14px; opacity: 0.8;">
+      ✓ No credit card required • ✓ Instant results • ✓ 100% free
+    </div>
+  </div>
 </div>`;
       
       document.getElementById('banner-preview').innerHTML = bannerHTML;
@@ -1908,14 +2058,28 @@
     function copyBannerCode() {
       const code = document.getElementById('banner-code').value;
       navigator.clipboard.writeText(code);
-      alert('Banner HTML code copied to clipboard!');
+      
+      // Visual feedback
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      btn.classList.add('bg-green-600');
+      btn.classList.remove('bg-purple-600');
+      
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.remove('bg-green-600');
+        btn.classList.add('bg-purple-600');
+      }, 2000);
     }
     
-    // Initialize generators on load
-    if (document.getElementById('badge-score')) {
-      generateBadgeCode();
-      generateBannerCode();
-    }
+    // Initialize generators on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (document.getElementById('badge-score')) {
+        generateCircularBadge();
+        generateBanner();
+      }
+    });
 
     // ==========================================
     // SETTINGS TAB
