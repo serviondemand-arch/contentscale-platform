@@ -1720,6 +1720,170 @@ app.get('/contact-form', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/contact-form.html'));
 });
 
+// ==========================================
+// SUPER ADMIN: SHARE LINKS MANAGEMENT
+// ==========================================
+
+// Get all share links
+app.get('/api/admin/share-links', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const { status } = req.query;
+    
+    let query = `
+      SELECT 
+        share_code,
+        client_name,
+        client_email,
+        client_company,
+        scans_limit,
+        scans_used,
+        expires_at,
+        is_active,
+        created_at,
+        CASE
+          WHEN NOT is_active THEN 'inactive'
+          WHEN scans_used >= scans_limit THEN 'limit_reached'
+          WHEN expires_at < NOW() THEN 'expired'
+          ELSE 'active'
+        END as status
+      FROM share_links
+    `;
+    
+    const params = [];
+    
+    if (status) {
+      query += ` WHERE 
+        CASE
+          WHEN NOT is_active THEN 'inactive'
+          WHEN scans_used >= scans_limit THEN 'limit_reached'
+          WHEN expires_at < NOW() THEN 'expired'
+          ELSE 'active'
+        END = $1
+      `;
+      params.push(status);
+    }
+    
+    query += ' ORDER BY created_at DESC LIMIT 100';
+    
+    const result = await pool.query(query, params);
+    
+    console.log(`[SHARE LINKS] Fetched ${result.rows.length} links`);
+    
+    res.json({
+      success: true,
+      share_links: result.rows
+    });
+    
+  } catch (error) {
+    console.error('[SHARE LINKS ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load share links'
+    });
+  }
+});
+
+// Create share link
+app.post('/api/admin/share-links/create', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const {
+      client_name,
+      client_email,
+      client_company,
+      scans_limit,
+      valid_days,
+      notes,
+      send_email
+    } = req.body;
+    
+    if (!client_email || !scans_limit || !valid_days) {
+      return res.status(400).json({
+        success: false,
+        error: 'Client email, scans limit, and valid days required'
+      });
+    }
+    
+    const shareCode = generateShareCode('SCAN');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + parseInt(valid_days));
+    
+    const result = await pool.query(`
+      INSERT INTO share_links (
+        share_code,
+        client_name,
+        client_email,
+        client_company,
+        scans_limit,
+        scans_used,
+        expires_at,
+        notes,
+        is_active,
+        created_at
+      ) VALUES ($1, $2, $3, $4, $5, 0, $6, $7, true, NOW())
+      RETURNING *
+    `, [
+      shareCode,
+      client_name || null,
+      client_email,
+      client_company || null,
+      scans_limit,
+      expiresAt,
+      notes || null
+    ]);
+    
+    const shareUrl = `${req.protocol}://${req.get('host')}/scan-with-link/${shareCode}`;
+    
+    console.log(`✅ Share link created: ${shareCode} for ${client_email}`);
+    
+    res.json({
+      success: true,
+      message: 'Share link created successfully',
+      share_link: result.rows[0],
+      share_url: shareUrl
+    });
+    
+  } catch (error) {
+    console.error('[CREATE SHARE LINK ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create share link'
+    });
+  }
+});
+
+// Delete share link
+app.delete('/api/admin/share-links/:code', authenticateSuperAdmin, async (req, res) => {
+  try {
+    const { code } = req.params;
+    
+    const result = await pool.query(
+      'DELETE FROM share_links WHERE share_code = $1 RETURNING *',
+      [code]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Share link not found'
+      });
+    }
+    
+    console.log(`✅ Share link deleted: ${code}`);
+    
+    res.json({
+      success: true,
+      message: 'Share link deleted successfully'
+    });
+    
+  } catch (error) {
+    console.error('[DELETE SHARE LINK ERROR]', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete share link'
+    });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`
 ╔═══════════════════════════════════════════════════════════╗
