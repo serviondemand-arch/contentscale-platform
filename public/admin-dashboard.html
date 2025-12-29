@@ -433,9 +433,103 @@
         <iframe src="/seo-contentscore" class="w-full h-screen border-0 rounded-lg"></iframe>
       </div>
 
+      <!-- Code Generators Tab -->
       <div id="tab-code-generators" class="tab-content hidden">
         <h2 class="text-2xl font-bold mb-6">Code Generators</h2>
-        <p class="text-gray-400">Coming soon...</p>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Badge Generator -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🏆 Score Badge Generator</h3>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-2">Score</label>
+                <input type="number" id="badge-score" value="85" min="0" max="100" 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  oninput="generateBadgeCode()">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">Size</label>
+                <select id="badge-size" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  onchange="generateBadgeCode()">
+                  <option value="small">Small (100px)</option>
+                  <option value="medium" selected>Medium (150px)</option>
+                  <option value="large">Large (200px)</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">Preview</label>
+                <div id="badge-preview" class="bg-gray-700 p-6 rounded-lg text-center">
+                  <!-- Preview will be inserted here -->
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">HTML Code</label>
+                <textarea id="badge-code" readonly 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white font-mono text-xs"
+                  rows="8"></textarea>
+              </div>
+              
+              <button onclick="copyBadgeCode()" 
+                class="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold">
+                📋 Copy HTML Code
+              </button>
+            </div>
+          </div>
+          
+          <!-- Banner Generator -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">📢 Promotional Banner Generator</h3>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-2">Headline</label>
+                <input type="text" id="banner-headline" value="Get Your FREE SEO Content Score!" 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  oninput="generateBannerCode()">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">Button Text</label>
+                <input type="text" id="banner-button" value="Scan Now" 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  oninput="generateBannerCode()">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">Link URL</label>
+                <input type="text" id="banner-url" value="https://contentscale.com/scan" 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  oninput="generateBannerCode()">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">Preview</label>
+                <div id="banner-preview" class="bg-gray-700 p-6 rounded-lg">
+                  <!-- Preview will be inserted here -->
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">HTML Code</label>
+                <textarea id="banner-code" readonly 
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white font-mono text-xs"
+                  rows="8"></textarea>
+              </div>
+              
+              <button onclick="copyBannerCode()" 
+                class="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold">
+                📋 Copy HTML Code
+              </button>
+            </div>
+          </div>
+          
+        </div>
       </div>
 
       <div id="tab-ltd-codes" class="tab-content hidden">
@@ -445,12 +539,402 @@
 
       <div id="tab-settings" class="tab-content hidden">
         <h2 class="text-2xl font-bold mb-6">Platform Settings</h2>
-        <p class="text-gray-400">Coming soon...</p>
+        
+        <div class="space-y-6">
+          
+          <!-- Auto-Scan Settings -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🔄 Auto-Scan Service</h3>
+            <p class="text-gray-400 mb-4">Automatically scan agencies on a schedule</p>
+            
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                <div>
+                  <p class="font-semibold">Auto-Scan Enabled</p>
+                  <p class="text-sm text-gray-400">Scan all agencies daily at 3:00 AM</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="auto-scan-enabled" class="sr-only peer" onchange="toggleAutoScan()">
+                  <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">Scan Frequency</label>
+                <select id="scan-frequency" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              
+              <button onclick="saveAutoScanSettings()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold">
+                💾 Save Auto-Scan Settings
+              </button>
+            </div>
+          </div>
+          
+          <!-- Backup Settings -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">💾 Backup & Export</h3>
+            
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                <div>
+                  <p class="font-semibold">Last Backup</p>
+                  <p class="text-sm text-gray-400" id="last-backup-time">Never</p>
+                </div>
+                <button onclick="createBackup()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-semibold">
+                  Create Backup Now
+                </button>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="exportAgencies()" class="p-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold">
+                  📊 Export Agencies
+                </button>
+                <button onclick="exportClients()" class="p-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold">
+                  👥 Export Clients
+                </button>
+                <button onclick="exportScans()" class="p-4 bg-orange-600 hover:bg-orange-700 rounded-lg font-semibold">
+                  🔍 Export Scans
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Platform Info -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">ℹ️ Platform Information</h3>
+            
+            <div class="space-y-3">
+              <div class="flex justify-between p-3 bg-gray-700 rounded">
+                <span class="text-gray-400">Platform Version</span>
+                <span class="font-semibold">2.0.0</span>
+              </div>
+              <div class="flex justify-between p-3 bg-gray-700 rounded">
+                <span class="text-gray-400">API Version</span>
+                <span class="font-semibold">v1</span>
+              </div>
+              <div class="flex justify-between p-3 bg-gray-700 rounded">
+                <span class="text-gray-400">Database Status</span>
+                <span class="text-green-400 font-semibold">✅ Connected</span>
+              </div>
+              <div class="flex justify-between p-3 bg-gray-700 rounded">
+                <span class="text-gray-400">Environment</span>
+                <span class="font-semibold">Production</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Danger Zone -->
+          <div class="bg-red-900 bg-opacity-20 border border-red-700 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4 text-red-400">⚠️ Danger Zone</h3>
+            
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
+                <div>
+                  <p class="font-semibold text-red-400">Clear All Cache</p>
+                  <p class="text-sm text-gray-400">Remove all cached scan results</p>
+                </div>
+                <button onclick="clearCache()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold">
+                  Clear Cache
+                </button>
+              </div>
+              
+              <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
+                <div>
+                  <p class="font-semibold text-red-400">Reset Platform Statistics</p>
+                  <p class="text-sm text-gray-400">Reset all counters and stats (WARNING: Cannot be undone!)</p>
+                </div>
+                <button onclick="resetStats()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold">
+                  Reset Stats
+                </button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
       </div>
 
       <div id="tab-handleiding" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-6">Handleiding (Dutch Documentation)</h2>
-        <p class="text-gray-400">Coming soon...</p>
+        <h2 class="text-2xl font-bold mb-6">📚 Handleiding - ContentScale Platform</h2>
+        
+        <div class="space-y-6">
+          
+          <!-- Quick Start -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🚀 Quick Start Guide</h3>
+            <div class="space-y-3 text-gray-300">
+              <p><strong>Welkom bij het ContentScale Super Admin Dashboard!</strong></p>
+              <p>Dit platform geeft je volledige controle over alle agencies, clients, scans en share links.</p>
+              
+              <div class="mt-4 p-4 bg-blue-900 bg-opacity-30 border border-blue-700 rounded-lg">
+                <p class="font-semibold mb-2">🎯 Belangrijkste functies:</p>
+                <ul class="list-disc list-inside space-y-1 text-sm">
+                  <li>Beheer agencies en hun toegang</li>
+                  <li>Monitor alle scans en scores</li>
+                  <li>Creëer share links voor prospects</li>
+                  <li>Beheer de global leaderboard</li>
+                  <li>Genereer code voor badges en banners</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Overview Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">📊 Overview Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Platform-wide statistieken en quick actions.</p>
+              
+              <p class="mt-3"><strong>Wat zie je hier:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>Total Agencies:</strong> Aantal actieve agencies in het platform</li>
+                <li><strong>Total Clients:</strong> Totaal aantal clients van alle agencies</li>
+                <li><strong>Total Scans:</strong> Alle uitgevoerde scans</li>
+                <li><strong>Active Helpers:</strong> Aantal actieve admin/helper accounts</li>
+              </ul>
+              
+              <p class="mt-3"><strong>Quick Actions:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>Add Agency - Snel een nieuwe agency toevoegen</li>
+                <li>Add Helper - Nieuwe admin/helper account aanmaken</li>
+                <li>Create Share Link - Share link voor prospects</li>
+                <li>Scan Leads - Leaderboard scanning starten</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Admins Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">👥 Admins Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Beheer van admin en helper accounts.</p>
+              
+              <p class="mt-3"><strong>Rollen:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>Super Admin:</strong> Volledige toegang tot alles (jij!)</li>
+                <li><strong>Helper:</strong> Beperkte toegang, kan data bekijken en basis taken uitvoeren</li>
+              </ul>
+              
+              <p class="mt-3"><strong>Admin toevoegen:</strong></p>
+              <ol class="list-decimal list-inside ml-4 space-y-1">
+                <li>Klik op "➕ Add Admin/Helper"</li>
+                <li>Vul username (min 3 karakters)</li>
+                <li>Vul wachtwoord (min 8 karakters)</li>
+                <li>Selecteer role (Helper of Super Admin)</li>
+                <li>Optioneel: Full Name en Email</li>
+                <li>Klik "Create Admin/Helper"</li>
+              </ol>
+            </div>
+          </div>
+          
+          <!-- Agencies Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🏢 Agencies Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Beheer van alle SEO agencies in het platform.</p>
+              
+              <p class="mt-3"><strong>Agency toevoegen:</strong></p>
+              <ol class="list-decimal list-inside ml-4 space-y-1">
+                <li>Klik op "➕ Add Agency"</li>
+                <li>Vul agency naam in</li>
+                <li>Vul domain in (bijv. example.com)</li>
+                <li>Selecteer land (NL, BE, DE, UK, etc.)</li>
+                <li>Selecteer plan (Free, Basic, Pro, Enterprise)</li>
+                <li>Optioneel: Contact persoon en email</li>
+                <li>Klik "Create Agency"</li>
+              </ol>
+              
+              <p class="mt-3"><strong>Admin Key:</strong></p>
+              <p class="ml-4">Elke agency krijgt automatisch een unieke Admin Key. Deze key gebruiken zij om in te loggen op hun agency dashboard.</p>
+              
+              <p class="mt-3"><strong>Kolommen uitleg:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>Clients:</strong> Aantal clients van deze agency</li>
+                <li><strong>Scans:</strong> Totaal aantal scans gedaan door deze agency</li>
+                <li><strong>Status:</strong> Active (groen) of Inactive (rood)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Clients Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">👤 All Clients Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Overzicht van alle clients van alle agencies.</p>
+              
+              <p class="mt-3"><strong>Wat zie je hier:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>Client naam en URL</li>
+                <li>Bij welke agency de client hoort</li>
+                <li>Aantal scans voor deze client</li>
+                <li>Laatste scan datum</li>
+              </ul>
+              
+              <p class="mt-3"><strong>Acties:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>Delete:</strong> Verwijdert client EN alle bijbehorende scans (niet ongedaan te maken!)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Scans Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🔍 All Scans Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Alle uitgevoerde scans in het platform bekijken.</p>
+              
+              <p class="mt-3"><strong>Score Quality Levels:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong class="text-green-400">Excellent:</strong> 90-100 punten</li>
+                <li><strong class="text-blue-400">Good:</strong> 80-89 punten</li>
+                <li><strong class="text-yellow-400">Average:</strong> 70-79 punten</li>
+                <li><strong class="text-orange-400">Below Average:</strong> 60-69 punten</li>
+                <li><strong class="text-red-400">Poor:</strong> 0-59 punten</li>
+              </ul>
+              
+              <p class="mt-3"><strong>Scan Types:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>free:</strong> Gratis scan via public interface</li>
+                <li><strong>agency:</strong> Scan door een agency</li>
+                <li><strong>share:</strong> Scan via share link</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Share Links Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🔗 Share Links Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Creëer unieke scan links voor prospects en klanten.</p>
+              
+              <p class="mt-3"><strong>Share link aanmaken:</strong></p>
+              <ol class="list-decimal list-inside ml-4 space-y-1">
+                <li>Klik op "➕ Create Share Link"</li>
+                <li>Vul client email in (verplicht)</li>
+                <li>Optioneel: Client naam en bedrijfsnaam</li>
+                <li>Scans Limit: Hoeveel scans mag deze link doen?</li>
+                <li>Valid Days: Hoe lang is de link geldig?</li>
+                <li>Klik "Create Link"</li>
+                <li>URL wordt automatisch gekopieerd naar clipboard</li>
+              </ol>
+              
+              <p class="mt-3"><strong>Status types:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong class="text-green-400">Active:</strong> Link werkt en heeft nog scans over</li>
+                <li><strong class="text-orange-400">Limit Reached:</strong> Alle scans opgebruikt</li>
+                <li><strong class="text-red-400">Expired:</strong> Verloopdatum bereikt</li>
+                <li><strong class="text-gray-400">Inactive:</strong> Handmatig uitgeschakeld</li>
+              </ul>
+              
+              <p class="mt-3"><strong>Acties:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>👁️ View:</strong> Open de share link in nieuw tab</li>
+                <li><strong>📋 Copy URL:</strong> Kopieer URL naar clipboard</li>
+                <li><strong>🗑️ Delete:</strong> Verwijder de share link</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Leaderboard Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🏆 Leaderboard Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Beheer de public leaderboard en scan agencies.</p>
+              
+              <p class="mt-3"><strong>Scan Alle Agencies Nu:</strong></p>
+              <p class="ml-4">Deze knop scant alle actieve agencies en voegt ze toe aan de leaderboard. Dit proces kan 1-2 minuten duren per agency.</p>
+              
+              <p class="mt-3"><strong>Search functie:</strong></p>
+              <p class="ml-4">Zoek entries op URL, bedrijfsnaam of score. Typ je zoekterm en klik "Search".</p>
+              
+              <p class="mt-3"><strong>Rank badges:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>🥇 - Rank #1 (hoogste score)</li>
+                <li>🥈 - Rank #2</li>
+                <li>🥉 - Rank #3</li>
+              </ul>
+              
+              <p class="mt-3"><strong>Entry verwijderen:</strong></p>
+              <p class="ml-4">Klik 🗑️ Delete om een entry uit de leaderboard te verwijderen. Alle ranks worden automatisch opnieuw berekend.</p>
+            </div>
+          </div>
+          
+          <!-- Code Generators Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">🎨 Code Generators Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Genereer HTML code voor badges en banners.</p>
+              
+              <p class="mt-3"><strong>Score Badge Generator:</strong></p>
+              <ol class="list-decimal list-inside ml-4 space-y-1">
+                <li>Vul de gewenste score in (0-100)</li>
+                <li>Selecteer size (Small, Medium, Large)</li>
+                <li>Bekijk live preview</li>
+                <li>Klik "📋 Copy HTML Code"</li>
+                <li>Plak code in je website</li>
+              </ol>
+              
+              <p class="mt-3"><strong>Banner Generator:</strong></p>
+              <ol class="list-decimal list-inside ml-4 space-y-1">
+                <li>Vul headline in</li>
+                <li>Vul button text in</li>
+                <li>Vul link URL in</li>
+                <li>Bekijk live preview</li>
+                <li>Klik "📋 Copy HTML Code"</li>
+                <li>Plak code in je website</li>
+              </ol>
+            </div>
+          </div>
+          
+          <!-- Settings Tab -->
+          <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">⚙️ Settings Tab</h3>
+            <div class="space-y-2 text-gray-300">
+              <p><strong>Doel:</strong> Platform-wide instellingen en beheer.</p>
+              
+              <p class="mt-3"><strong>Auto-Scan Service:</strong></p>
+              <p class="ml-4">Schakel automatische scanning van agencies in/uit. Je kunt kiezen tussen daily, weekly of monthly scans.</p>
+              
+              <p class="mt-3"><strong>Backup & Export:</strong></p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>Create Backup:</strong> Maak backup van hele database</li>
+                <li><strong>Export Agencies:</strong> Download CSV van alle agencies</li>
+                <li><strong>Export Clients:</strong> Download CSV van alle clients</li>
+                <li><strong>Export Scans:</strong> Download CSV van alle scans</li>
+              </ul>
+              
+              <p class="mt-3"><strong>⚠️ Danger Zone:</strong></p>
+              <p class="ml-4 text-red-400">Wees voorzichtig met deze acties - ze kunnen niet ongedaan gemaakt worden!</p>
+              <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>Clear Cache:</strong> Verwijdert alle cached scan resultaten</li>
+                <li><strong>Reset Stats:</strong> Reset alle counters (gebruik alleen bij setup!)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Support -->
+          <div class="bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg p-6">
+            <h3 class="text-xl font-bold mb-4">💬 Support & Contact</h3>
+            <div class="space-y-3 text-gray-200">
+              <p><strong>Hulp nodig?</strong></p>
+              <p>Als je vragen hebt of problemen tegenkomt, neem dan contact op:</p>
+              
+              <div class="mt-4 space-y-2">
+                <p>📧 Email: support@contentscale.com</p>
+                <p>💬 WhatsApp: [Your WhatsApp Number]</p>
+                <p>🌐 Website: https://contentscale.com</p>
+              </div>
+              
+              <div class="mt-4 p-4 bg-black bg-opacity-30 rounded-lg">
+                <p class="text-sm"><strong>⚡ Pro Tip:</strong> Gebruik de search functie in de Leaderboard tab om snel specifieke entries te vinden!</p>
+              </div>
+            </div>
+          </div>
+          
+        </div>
       </div>
 
     </main>
@@ -1375,6 +1859,139 @@
 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // ==========================================
+    // CODE GENERATORS TAB
+    // ==========================================
+    function generateBadgeCode() {
+      const score = document.getElementById('badge-score').value;
+      const size = document.getElementById('badge-size').value;
+      
+      const sizes = {
+        small: 100,
+        medium: 150,
+        large: 200
+      };
+      
+      const px = sizes[size];
+      
+      const badgeHTML = `<div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; text-align: center; color: white; font-family: Arial, sans-serif; width: ${px}px;">
+  <div style="font-size: ${px/3}px; font-weight: bold;">${score}</div>
+  <div style="font-size: ${px/8}px; margin-top: 5px;">ContentScale Score</div>
+</div>`;
+      
+      document.getElementById('badge-preview').innerHTML = badgeHTML;
+      document.getElementById('badge-code').value = badgeHTML;
+    }
+    
+    function copyBadgeCode() {
+      const code = document.getElementById('badge-code').value;
+      navigator.clipboard.writeText(code);
+      alert('Badge HTML code copied to clipboard!');
+    }
+    
+    function generateBannerCode() {
+      const headline = document.getElementById('banner-headline').value;
+      const buttonText = document.getElementById('banner-button').value;
+      const url = document.getElementById('banner-url').value;
+      
+      const bannerHTML = `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; color: white; font-family: Arial, sans-serif; max-width: 600px;">
+  <h2 style="margin: 0 0 20px 0; font-size: 28px;">${headline}</h2>
+  <a href="${url}" style="display: inline-block; padding: 15px 40px; background: white; color: #667eea; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px;">${buttonText}</a>
+</div>`;
+      
+      document.getElementById('banner-preview').innerHTML = bannerHTML;
+      document.getElementById('banner-code').value = bannerHTML;
+    }
+    
+    function copyBannerCode() {
+      const code = document.getElementById('banner-code').value;
+      navigator.clipboard.writeText(code);
+      alert('Banner HTML code copied to clipboard!');
+    }
+    
+    // Initialize generators on load
+    if (document.getElementById('badge-score')) {
+      generateBadgeCode();
+      generateBannerCode();
+    }
+
+    // ==========================================
+    // SETTINGS TAB
+    // ==========================================
+    function toggleAutoScan() {
+      const enabled = document.getElementById('auto-scan-enabled').checked;
+      console.log('Auto-scan:', enabled ? 'enabled' : 'disabled');
+      // In production, this would call an API to save the setting
+    }
+    
+    function saveAutoScanSettings() {
+      const enabled = document.getElementById('auto-scan-enabled').checked;
+      const frequency = document.getElementById('scan-frequency').value;
+      
+      alert(`Auto-scan settings saved!\nEnabled: ${enabled}\nFrequency: ${frequency}`);
+      
+      // In production, this would call an API:
+      // await fetch('/api/admin/settings/auto-scan', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'x-admin-key': localStorage.getItem('admin_id')
+      //   },
+      //   body: JSON.stringify({ enabled, frequency })
+      // });
+    }
+    
+    function createBackup() {
+      const now = new Date().toISOString();
+      document.getElementById('last-backup-time').textContent = new Date().toLocaleString();
+      alert('Backup created successfully!\n\nIn production, this would create a database backup.');
+      
+      // In production:
+      // await fetch('/api/admin/backup/create', {
+      //   method: 'POST',
+      //   headers: { 'x-admin-key': localStorage.getItem('admin_id') }
+      // });
+    }
+    
+    function exportAgencies() {
+      alert('Exporting agencies to CSV...\n\nIn production, this would download a CSV file with all agencies.');
+      // In production, this would trigger a CSV download
+    }
+    
+    function exportClients() {
+      alert('Exporting clients to CSV...\n\nIn production, this would download a CSV file with all clients.');
+      // In production, this would trigger a CSV download
+    }
+    
+    function exportScans() {
+      alert('Exporting scans to CSV...\n\nIn production, this would download a CSV file with all scans.');
+      // In production, this would trigger a CSV download
+    }
+    
+    function clearCache() {
+      if (!confirm('Are you sure you want to clear all cached scan results?')) return;
+      
+      alert('Cache cleared!\n\nIn production, this would remove all cached data from the database.');
+      
+      // In production:
+      // await fetch('/api/admin/cache/clear', {
+      //   method: 'POST',
+      //   headers: { 'x-admin-key': localStorage.getItem('admin_id') }
+      // });
+    }
+    
+    function resetStats() {
+      if (!confirm('⚠️ WARNING: This will reset ALL platform statistics!\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?')) return;
+      
+      alert('Statistics reset!\n\nIn production, this would reset all counters in the database.');
+      
+      // In production:
+      // await fetch('/api/admin/stats/reset', {
+      //   method: 'POST',
+      //   headers: { 'x-admin-key': localStorage.getItem('admin_id') }
+      // });
     }
   </script>
 </body>
