@@ -973,24 +973,23 @@ app.get('/api/super-admin/agencies', authenticateSuperAdmin, async (req, res) =>
   try {
     const result = await pool.query(`
       SELECT 
-        a.id,
-        a.name,
-        a.domain,
-        a.country,
-        a.plan,
-        a.admin_key,
-        a.is_active,
-        a.whitelabel_enabled,
-        a.v52_score,
-        a.last_scan_date,
-        a.created_at,
-        COUNT(DISTINCT c.id) as client_count,
-        COUNT(DISTINCT s.id) as total_scans
-      FROM agencies a
-      LEFT JOIN clients c ON c.agency_id = a.id
-      LEFT JOIN scans s ON s.agency_id = a.id
-      GROUP BY a.id
-      ORDER BY a.created_at DESC
+  a.id,
+  a.name,
+  a.domain,
+  a.country,
+  a.plan,
+  a.v52_score,
+  a.is_active,
+  a.admin_key,
+  a.created_at,
+  a.next_scan_date,  -- ✅ DIT BESTAAT WEL
+  COUNT(DISTINCT c.id)::integer as client_count,
+  COUNT(DISTINCT s.id)::integer as total_scans
+FROM agencies a
+LEFT JOIN clients c ON c.agency_id = a.id
+LEFT JOIN scans s ON s.agency_id = a.id
+GROUP BY a.id
+ORDER BY a.created_at DESC     
     `);
     
     console.log(`[SUPER ADMIN] Fetched ${result.rows.length} agencies`);
