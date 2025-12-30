@@ -234,11 +234,16 @@
     <div class="mt-16 bg-gradient-to-r from-purple-900 to-blue-900 rounded-lg p-8 text-center border border-purple-700">
       <h3 class="text-3xl font-bold mb-3">Want to Improve Your Content Score?</h3>
       <p class="text-lg text-gray-300 mb-6">
-        Get your free AI-powered content analysis and personalized improvement prompts in 30 seconds.
+        Get your free AI-powered content analysis in 30 seconds, or talk to Ot directly for expert guidance.
       </p>
-      <a href="/#scanner" class="inline-block bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-8 py-4 rounded-lg font-bold text-lg transition">
-        🚀 Scan Your Website Free
-      </a>
+      <div class="flex flex-col md:flex-row gap-4 justify-center">
+        <a href="/#scanner" class="inline-block bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-8 py-4 rounded-lg font-bold text-lg transition">
+          🚀 Scan Your Website Free
+        </a>
+        <a href="https://wa.me/31628073996?text=Hi%20Ot!%20I%20read%20your%20blog%20and%20want%20to%20improve%20my%20content%20score.%20Can%20we%20talk?" target="_blank" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-lg font-bold text-lg transition">
+          💬 WhatsApp Ot
+        </a>
+      </div>
     </div>
 
     <!-- FOOTER -->
@@ -247,13 +252,13 @@
       <p>
         <a href="https://app.contentscale.site" class="text-purple-400 hover:text-purple-300">Scanner</a> • 
         <a href="https://wa.me/31628073996" class="text-green-400 hover:text-green-300">WhatsApp</a> •
-        <a href="mailto:info@contentscale.site" class="text-blue-400 hover:text-blue-300">Email</a>
+        <a href="/cdn-cgi/l/email-protection#137a7d757c53707c7d67767d676070727f763d607a6776" class="text-blue-400 hover:text-blue-300">Email</a>
       </p>
     </div>
 
   </div>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     let currentCategory = 'all';
     
     function filterCategory(category) {
@@ -308,11 +313,3 @@
     document.querySelectorAll('.blog-card').forEach(card => {
       card.addEventListener('click', function() {
         const title = this.querySelector('h3').textContent;
-        console.log('Blog clicked:', title);
-        // gtag('event', 'blog_click', { blog_title: title });
-      });
-    });
-  </script>
-
-</body>
-</html>
